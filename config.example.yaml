@@ -1,0 +1,40 @@
+# Rules Maker Configuration
+
+## Scraping Configuration
+scraping:
+  max_depth: 3
+  max_pages: 100
+  timeout: 30
+  delay: 1.0
+  user_agent: "RulesMaker/0.1.0"
+  follow_links: true
+  respect_robots_txt: true
+  rate_limit: 1.0
+  javascript_enabled: true
+
+## Transformation Configuration
+transformation:
+  rule_format: "cursor"
+  template_name: "default"
+  max_rules: 50
+  include_examples: true
+  include_metadata: true
+  custom_instructions: ""
+
+## Output Configuration
+output:
+  format_rules: true
+  include_metadata: true
+  output_directory: "./output"
+
+## Filter Configuration
+filters:
+  min_content_length: 100
+  exclude_patterns:
+    - "404"
+    - "not found"
+    - "error"
+  include_patterns:
+    - "documentation"
+    - "api"
+    - "guide"

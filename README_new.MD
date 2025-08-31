@@ -28,7 +28,7 @@ Rules Maker automates the process of creating coding rules and guidelines by:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/rules-maker.git
+git clone https://github.com/FormFluentAI/rules-maker.git
 cd rules-maker
 
 # Install dependencies
