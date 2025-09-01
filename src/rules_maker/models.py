@@ -105,13 +105,26 @@ class DocumentationStructure(BaseModel):
     last_updated: Optional[datetime] = None
 
 
+class RuleType(str, Enum):
+    """Types of rules that can be generated."""
+    FORMATTING = "formatting"
+    BEST_PRACTICE = "best_practice"
+    CODE_PATTERN = "code_pattern"
+    CONFIGURATION = "configuration"
+    WORKFLOW = "workflow"
+    ERROR_HANDLING = "error_handling"
+
+
 class Rule(BaseModel):
     """Represents a single coding rule."""
     id: str
-    title: str
+    title: str = ""
     description: str
-    category: str
+    content: str = ""
+    type: RuleType = RuleType.BEST_PRACTICE
+    category: str = ""
     priority: int = 1
+    confidence_score: float = 0.0
     tags: List[str] = Field(default_factory=list)
     examples: List[str] = Field(default_factory=list)
     anti_patterns: List[str] = Field(default_factory=list)
@@ -175,6 +188,17 @@ class TrainingSet(BaseModel):
     description: str
     examples: List[LearningExample] = Field(default_factory=list)
     documentation_type: DocumentationType
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class PerformanceMetrics(BaseModel):
+    """Performance metrics for ML models."""
+    accuracy: float
+    precision: float
+    recall: float
+    f1_score: float
+    training_examples: int
+    training_time: float
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 

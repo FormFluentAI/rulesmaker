@@ -1,10 +1,16 @@
-[workspace]
+[project]
 authors = ["Ollie <buitelaarolivier@gmail.com>"]
 channels = ["conda-forge"]
-name = "<rm>
+name = "rules-maker"
 platforms = ["linux-64"]
 version = "0.1.0"
 
 [tasks]
 
 [dependencies]
+python = ">=3.8"
+requests = "*"
+beautifulsoup4 = "*"
+pydantic = "*"
+click = "*"
+pyyaml = "*"

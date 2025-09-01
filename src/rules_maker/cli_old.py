@@ -16,25 +16,6 @@ from .models import ScrapingConfig, TransformationConfig, RuleFormat
 from .utils import setup_logging
 
 
-def _run_async(coro):
-    """Run async coroutine safely, handling existing event loops."""
-    try:
-        # Check if there's already a running event loop
-        loop = asyncio.get_running_loop()
-        if loop.is_running():
-            # We're in an existing event loop, create a new thread
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(asyncio.run, coro)
-                return future.result()
-        else:
-            # No running loop, safe to use asyncio.run()
-            return asyncio.run(coro)
-    except RuntimeError:
-        # No event loop, safe to use asyncio.run()
-        return asyncio.run(coro)
-
-
 @click.group()
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
 @click.option('--config', '-c', type=click.Path(exists=True), help='Config file path')
@@ -71,108 +52,103 @@ def scrape(ctx, url, output, output_format, max_pages, deep, async_scrape, adapt
     """Scrape documentation from a URL and generate rules."""
     click.echo(f"Scraping documentation from: {url}")
     
-    try:
-        # Configure scraping
-        scraping_config = ScrapingConfig(max_pages=max_pages)
+    # Configure scraping
+    scraping_config = ScrapingConfig(max_pages=max_pages)
+    
+    # Choose scraper type
+    if adaptive:
+        click.echo("🔮 Using adaptive scraper with ML/LLM enhancement")
         
-        # Choose scraper type
-        if adaptive:
-            click.echo("🔮 Using adaptive scraper with ML/LLM enhancement")
-            
-            # Configure LLM if provided
-            llm_config = None
-            if llm_provider and llm_api_key:
-                llm_config = LLMConfig(
-                    provider=LLMProvider(llm_provider),
-                    api_key=llm_api_key,
-                    model_name=llm_model or "gpt-3.5-turbo"
-                )
-            
-            scraper = AdaptiveDocumentationScraper(
-                config=scraping_config,
-                use_ml=True,
-                use_llm=bool(llm_config),
-                llm_config=llm_config
+        # Configure LLM if provided
+        llm_config = None
+        if llm_provider and llm_api_key:
+            llm_config = LLMConfig(
+                provider=LLMProvider(llm_provider),
+                api_key=llm_api_key,
+                model_name=llm_model or "gpt-3.5-turbo"
             )
-            
-            # Use async interface for adaptive scraper
-            async def run_adaptive_scrape():
-                try:
-                    async with scraper:
-                        if deep:
-                            click.echo("Deep scraping enabled - following navigation links...")
-                            results = await scraper.scrape_documentation_site(url, max_pages)
-                        else:
-                            results = [await scraper.scrape_url(url)]
-                        
-                        # Show extraction statistics
-                        stats = scraper.get_extraction_stats()
-                        click.echo(f"📊 Extraction Statistics:")
-                        click.echo(f"   ML success rate: {stats['ml_success_rate']:.2%}")
-                        click.echo(f"   LLM success rate: {stats['llm_success_rate']:.2%}")
-                        
-                        return results
-                finally:
-                    await scraper.close()
-            
-            results = _run_async(run_adaptive_scrape())
-            
-        elif async_scrape:
-            click.echo("🚀 Using async scraper for high performance")
-            scraper = AsyncDocumentationScraper(scraping_config)
-            
-            async def run_async_scrape():
+        
+        scraper = AdaptiveDocumentationScraper(
+            config=scraping_config,
+            use_ml=True,
+            use_llm=bool(llm_config),
+            llm_config=llm_config
+        )
+        
+        # Use async interface for adaptive scraper
+        async def run_adaptive_scrape():
+            try:
                 async with scraper:
                     if deep:
                         click.echo("Deep scraping enabled - following navigation links...")
-                        return await scraper.scrape_documentation_site(url, max_pages)
+                        results = await scraper.scrape_documentation_site(url, max_pages)
                     else:
-                        return [await scraper.scrape_url(url)]
-            
-            results = _run_async(run_async_scrape())
-            
+                        results = [await scraper.scrape_url(url)]
+                    
+                    # Show extraction statistics
+                    stats = scraper.get_extraction_stats()
+                    click.echo(f"📊 Extraction Statistics:")
+                    click.echo(f"   ML success rate: {stats['ml_success_rate']:.2%}")
+                    click.echo(f"   LLM success rate: {stats['llm_success_rate']:.2%}")
+                    
+                    return results
+            finally:
+                await scraper.close()
+        
+        results = asyncio.run(run_adaptive_scrape())
+        
+    elif async_scrape:
+        click.echo("🚀 Using async scraper for high performance")
+        scraper = AsyncDocumentationScraper(scraping_config)
+        
+        async def run_async_scrape():
+            async with scraper:
+                if deep:
+                    click.echo("Deep scraping enabled - following navigation links...")
+                    return await scraper.scrape_documentation_site(url, max_pages)
+                else:
+                    return [await scraper.scrape_url(url)]
+        
+        results = asyncio.run(run_async_scrape())
+        
+    else:
+        click.echo("📄 Using standard synchronous scraper")
+        scraper = DocumentationScraper(scraping_config)
+        
+        if deep:
+            click.echo("Deep scraping enabled - following navigation links...")
+            results = scraper.scrape_documentation_site(url, max_pages)
         else:
-            click.echo("📄 Using standard synchronous scraper")
-            scraper = DocumentationScraper(scraping_config)
-            
-            if deep:
-                click.echo("Deep scraping enabled - following navigation links...")
-                results = scraper.scrape_documentation_site(url, max_pages)
-            else:
-                results = [scraper.scrape_url(url)]
-        
-        click.echo(f"Scraped {len(results)} pages successfully")
-        
-        # Transform results
-        transformation_config = TransformationConfig(
-            rule_format=RuleFormat(output_format)
-        )
-        
-        if output_format == 'cursor':
-            transformer = CursorRuleTransformer(transformation_config)
-        elif output_format == 'windsurf':
-            transformer = WindsurfRuleTransformer(transformation_config)
-        else:
-            # Generic transformer for JSON/YAML
-            from .transformers import RuleTransformer
-            transformer = RuleTransformer(transformation_config)
-        
-        transformed_content = transformer.transform(results)
-        
-        # Output results
-        if output:
-            output_path = Path(output)
-            output_path.write_text(transformed_content)
-            click.echo(f"Rules saved to: {output_path}")
-        else:
-            click.echo("\n" + "="*50)
-            click.echo("GENERATED RULES:")
-            click.echo("="*50)
-            click.echo(transformed_content)
-            
-    except Exception as e:
-        click.echo(f"Error: {e}", err=True)
-        raise click.Abort()
+            results = [scraper.scrape_url(url)]
+    
+    click.echo(f"Scraped {len(results)} pages successfully")
+    
+    # Transform results
+    transformation_config = TransformationConfig(
+        rule_format=RuleFormat(output_format)
+    )
+    
+    if output_format == 'cursor':
+        transformer = CursorRuleTransformer(transformation_config)
+    elif output_format == 'windsurf':
+        transformer = WindsurfRuleTransformer(transformation_config)
+    else:
+        # Generic transformer for JSON/YAML
+        from .transformers import RuleTransformer
+        transformer = RuleTransformer(transformation_config)
+    
+    transformed_content = transformer.transform(results)
+    
+    # Output results
+    if output:
+        output_path = Path(output)
+        output_path.write_text(transformed_content)
+        click.echo(f"Rules saved to: {output_path}")
+    else:
+        click.echo("\n" + "="*50)
+        click.echo("GENERATED RULES:")
+        click.echo("="*50)
+        click.echo(transformed_content)
 
 
 @main.command()
@@ -225,8 +201,7 @@ def batch(urls_file, output_dir, output_format, parallel, adaptive):
                         output_file.write_text(content)
                         click.echo(f"  ✅ Saved to: {output_file}")
                     else:
-                        error_msg = result.error_message if hasattr(result, 'error_message') else 'Unknown error'
-                        click.echo(f"  ❌ Failed: {error_msg}")
+                        click.echo(f"  ❌ Failed: {result.error_message if hasattr(result, 'error_message') else 'Unknown error'}")
                 
                 if adaptive and hasattr(scraper, 'get_extraction_stats'):
                     stats = scraper.get_extraction_stats()
@@ -234,7 +209,7 @@ def batch(urls_file, output_dir, output_format, parallel, adaptive):
                     click.echo(f"   Total processed: {stats['total_extractions']}")
                     click.echo(f"   ML success rate: {stats['ml_success_rate']:.2%}")
         
-        _run_async(run_batch())
+        asyncio.run(run_batch())
         
     else:
         # Process URLs sequentially with standard scraper
@@ -281,11 +256,11 @@ def train(training_data_dir, model_output, test_split):
     from .extractors.ml_extractor import MLContentExtractor
     from .models import TrainingSet, LearningExample, DocumentationType
     
-    # Load training data
+    # Load training data (you'd implement this based on your data format)
     training_dir = Path(training_data_dir)
     examples = []
     
-    # Load from JSON files
+    # Example: load from JSON files
     for json_file in training_dir.glob("*.json"):
         try:
             with open(json_file) as f:
@@ -362,10 +337,7 @@ def test(model_path, test_url):
         
         # Show sections
         for i, section in enumerate(result.get('sections', [])[:5], 1):
-            section_dict = section.dict() if hasattr(section, 'dict') else section
-            title = section_dict.get('title', 'Untitled')
-            section_type = section_dict.get('metadata', {}).get('section_type', 'unknown')
-            click.echo(f"  {i}. {title} (Type: {section_type})")
+            click.echo(f"  {i}. {section.get('title', 'Untitled')} (Type: {section.get('metadata', {}).get('section_type', 'unknown')})")
         
         if len(result.get('sections', [])) > 5:
             click.echo(f"  ... and {len(result.get('sections', [])) - 5} more sections")
@@ -390,76 +362,146 @@ def templates(template):
             click.echo("="*50)
             click.echo(content)
         else:
-            click.echo(f"Template '{template}' not found")
-    else:
-        # List all templates (recursive) via engine helper
-        templates_list = engine.list_templates()
-        if templates_list:
-            click.echo("Available templates:")
-            for name in templates_list:
-                click.echo(f"  - {name}")
+            click.echo("Deep scraping enabled - following navigation links...")
+            results = scraper.scrape_documentation_site(url, max_pages)
         else:
-            click.echo("No templates found")
+            results = [scraper.scrape_url(url)]
+        
+        click.echo(f"Scraped {len(results)} pages successfully")
+        
+        # Transform results
+        transformation_config = TransformationConfig(
+            rule_format=RuleFormat(output_format)
+        )
+        
+        if output_format == 'cursor':
+            transformer = CursorRuleTransformer(transformation_config)
+        elif output_format == 'windsurf':
+            transformer = WindsurfRuleTransformer(transformation_config)
+        else:
+            # Generic transformer for JSON/YAML
+            from .transformers import RuleTransformer
+            transformer = RuleTransformer(transformation_config)
+        
+        transformed_content = transformer.transform(results)
+        
+        # Output results
+        if output:
+            output_path = Path(output)
+            output_path.write_text(transformed_content)
+            click.echo(f"Rules saved to: {output_path}")
+        else:
+            click.echo("\n" + "="*50)
+            click.echo("GENERATED RULES:")
+            click.echo("="*50)
+            click.echo(transformed_content)
+            
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        raise click.Abort()
 
 
 @main.command()
-@click.option('--check-deps', is_flag=True, help='Check if all dependencies are installed')
-@click.option('--install-deps', is_flag=True, help='Install missing dependencies')
-def setup(check_deps, install_deps):
-    """Setup and configuration commands."""
-    if check_deps:
-        click.echo("🔍 Checking dependencies...")
-        
-        # Check core dependencies
-        deps_status = {}
-        
-        try:
-            import aiohttp
-            deps_status['aiohttp'] = f"✅ {aiohttp.__version__}"
-        except ImportError:
-            deps_status['aiohttp'] = "❌ Missing"
-        
-        try:
-            import sklearn
-            deps_status['scikit-learn'] = f"✅ {sklearn.__version__}"
-        except ImportError:
-            deps_status['scikit-learn'] = "❌ Missing"
-        
-        try:
-            import sentence_transformers
-            deps_status['sentence-transformers'] = "✅ Available"
-        except ImportError:
-            deps_status['sentence-transformers'] = "❌ Missing"
-        
-        try:
-            import nltk
-            deps_status['nltk'] = f"✅ {nltk.__version__}"
-        except ImportError:
-            deps_status['nltk'] = "❌ Missing"
-        
-        # Show results
-        for dep, status in deps_status.items():
-            click.echo(f"  {dep}: {status}")
-        
-        missing_deps = [dep for dep, status in deps_status.items() if "❌" in status]
-        if missing_deps:
-            click.echo(f"\n⚠️  Missing dependencies: {', '.join(missing_deps)}")
-            click.echo("Run 'pip install -r requirements.txt' to install them")
-        else:
-            click.echo("\n✅ All core dependencies are installed!")
+@click.argument('urls_file', type=click.Path(exists=True))
+@click.option('--output-dir', '-d', type=click.Path(), help='Output directory')
+@click.option('--format', 'output_format', type=click.Choice(['cursor', 'windsurf', 'json', 'yaml']), 
+              default='cursor', help='Output format')
+@click.option('--parallel', is_flag=True, help='Enable parallel scraping')
+def batch(urls_file, output_dir, output_format, parallel):
+    """Scrape multiple URLs from a file."""
+    urls_path = Path(urls_file)
+    urls = [line.strip() for line in urls_path.read_text().splitlines() if line.strip()]
     
-    if install_deps:
-        click.echo("📦 Installing dependencies...")
-        import subprocess
-        import sys
+    click.echo(f"Processing {len(urls)} URLs from {urls_file}")
+    
+    if output_dir:
+        output_path = Path(output_dir)
+        output_path.mkdir(exist_ok=True)
+    
+    # Process URLs
+    scraper = DocumentationScraper()
+    
+    for i, url in enumerate(urls, 1):
+        click.echo(f"Processing {i}/{len(urls)}: {url}")
         
         try:
-            subprocess.check_call([
-                sys.executable, "-m", "pip", "install", "-r", "requirements.txt"
-            ])
-            click.echo("✅ Dependencies installed successfully!")
-        except subprocess.CalledProcessError as e:
-            click.echo(f"❌ Failed to install dependencies: {e}")
+            result = scraper.scrape_url(url)
+            
+            if output_dir:
+                # Generate filename from URL
+                filename = url.replace('https://', '').replace('http://', '').replace('/', '_')
+                filename = f"{filename}.{output_format}"
+                
+                output_file = output_path / filename
+                
+                # Transform and save
+                transformer = CursorRuleTransformer() if output_format == 'cursor' else WindsurfRuleTransformer()
+                content = transformer.transform([result])
+                
+                output_file.write_text(content)
+                click.echo(f"  Saved to: {output_file}")
+            
+        except Exception as e:
+            click.echo(f"  Error processing {url}: {e}", err=True)
+
+
+@main.command()
+@click.option('--template', '-t', help='Template name to list')
+def templates(template):
+    """List available templates or show template content."""
+    from .templates import TemplateEngine
+    
+    engine = TemplateEngine()
+    
+    if template:
+        if engine.template_exists(template):
+            template_path = engine.template_dir / template
+            content = template_path.read_text()
+            click.echo(f"Template: {template}")
+            click.echo("="*50)
+            click.echo(content)
+        else:
+            click.echo(f"Template '{template}' not found", err=True)
+    else:
+        available_templates = engine.list_templates()
+        click.echo("Available templates:")
+        for tmpl in available_templates:
+            click.echo(f"  - {tmpl}")
+
+
+@main.command()
+@click.option('--format', 'config_format', type=click.Choice(['yaml', 'json']), 
+              default='yaml', help='Config file format')
+@click.argument('output_file', type=click.Path())
+def init_config(config_format, output_file):
+    """Initialize a configuration file."""
+    config = {
+        'scraping': {
+            'max_pages': 50,
+            'timeout': 30,
+            'delay': 1.0,
+            'rate_limit': 1.0,
+            'user_agent': 'RulesMaker/0.1.0',
+            'follow_links': True,
+            'respect_robots_txt': True
+        },
+        'transformation': {
+            'rule_format': 'cursor',
+            'max_rules': 50,
+            'include_examples': True,
+            'include_metadata': True
+        }
+    }
+    
+    output_path = Path(output_file)
+    
+    if config_format == 'yaml':
+        content = yaml.dump(config, default_flow_style=False, sort_keys=False)
+    else:
+        content = json.dumps(config, indent=2)
+    
+    output_path.write_text(content)
+    click.echo(f"Configuration file created: {output_path}")
 
 
 if __name__ == '__main__':

@@ -16,25 +16,6 @@ from .models import ScrapingConfig, TransformationConfig, RuleFormat
 from .utils import setup_logging
 
 
-def _run_async(coro):
-    """Run async coroutine safely, handling existing event loops."""
-    try:
-        # Check if there's already a running event loop
-        loop = asyncio.get_running_loop()
-        if loop.is_running():
-            # We're in an existing event loop, create a new thread
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(asyncio.run, coro)
-                return future.result()
-        else:
-            # No running loop, safe to use asyncio.run()
-            return asyncio.run(coro)
-    except RuntimeError:
-        # No event loop, safe to use asyncio.run()
-        return asyncio.run(coro)
-
-
 @click.group()
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
 @click.option('--config', '-c', type=click.Path(exists=True), help='Config file path')
@@ -115,7 +96,7 @@ def scrape(ctx, url, output, output_format, max_pages, deep, async_scrape, adapt
                 finally:
                     await scraper.close()
             
-            results = _run_async(run_adaptive_scrape())
+            results = asyncio.run(run_adaptive_scrape())
             
         elif async_scrape:
             click.echo("🚀 Using async scraper for high performance")
@@ -129,7 +110,7 @@ def scrape(ctx, url, output, output_format, max_pages, deep, async_scrape, adapt
                     else:
                         return [await scraper.scrape_url(url)]
             
-            results = _run_async(run_async_scrape())
+            results = asyncio.run(run_async_scrape())
             
         else:
             click.echo("📄 Using standard synchronous scraper")
@@ -234,7 +215,7 @@ def batch(urls_file, output_dir, output_format, parallel, adaptive):
                     click.echo(f"   Total processed: {stats['total_extractions']}")
                     click.echo(f"   ML success rate: {stats['ml_success_rate']:.2%}")
         
-        _run_async(run_batch())
+        asyncio.run(run_batch())
         
     else:
         # Process URLs sequentially with standard scraper
@@ -392,12 +373,12 @@ def templates(template):
         else:
             click.echo(f"Template '{template}' not found")
     else:
-        # List all templates (recursive) via engine helper
-        templates_list = engine.list_templates()
+        # List all templates
+        templates_list = list(engine.template_dir.glob("*.j2"))
         if templates_list:
             click.echo("Available templates:")
-            for name in templates_list:
-                click.echo(f"  - {name}")
+            for template_path in templates_list:
+                click.echo(f"  - {template_path.stem}")
         else:
             click.echo("No templates found")
 

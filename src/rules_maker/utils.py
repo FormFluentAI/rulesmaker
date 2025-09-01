@@ -303,3 +303,39 @@ def calculate_text_similarity(text1: str, text2: str) -> float:
         return 0.0
     
     return len(intersection) / len(union)
+
+
+def extract_main_content(soup: BeautifulSoup) -> str:
+    """Extract main content from a BeautifulSoup object."""
+    # Remove script and style elements
+    for script in soup(["script", "style"]):
+        script.decompose()
+    
+    # Try to find main content areas
+    main_selectors = [
+        'main',
+        '[role="main"]',
+        '.main-content',
+        '.content',
+        '.article',
+        '.post',
+        '#content',
+        '#main'
+    ]
+    
+    for selector in main_selectors:
+        main_element = soup.select_one(selector)
+        if main_element:
+            return main_element.get_text(strip=True, separator=' ')
+    
+    # Fallback: try to get body content excluding navigation, sidebars, etc.
+    body = soup.find('body')
+    if body:
+        # Remove common non-content elements
+        for element in body.select('nav, .nav, .navigation, .sidebar, .menu, header, footer'):
+            element.decompose()
+        
+        return body.get_text(strip=True, separator=' ')
+    
+    # Final fallback: get all text
+    return soup.get_text(strip=True, separator=' ')

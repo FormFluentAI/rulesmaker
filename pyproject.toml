@@ -6,9 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "rules-maker"
 dynamic = ["version"]
 description = "🤖📋 Transform web documentation into AI coding assistant rules and workflows"
-readme = "README.md"
+readme = "README.MD"
 requires-python = ">=3.9"
-license = "MIT"
+license = {text = "MIT"}
 authors = [
     {name = "FormFluentAI", email = "support@formfluentai.com"}
 ]
@@ -16,7 +16,6 @@ keywords = ["scraping", "documentation", "ai", "cursor", "windsurf", "rules", "a
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -71,9 +70,15 @@ dev = [
     "mypy>=1.5.0",
     "pre-commit>=3.4.0",
 ]
+bedrock = ["boto3>=1.34.0"]
+openai = ["openai>=1.0.0"]
+anthropic = ["anthropic>=0.18.0"]
 selenium = ["selenium>=4.15.0"]
 docker = ["docker>=6.1.0"]
 all = [
+    "boto3>=1.34.0",
+    "openai>=1.0.0", 
+    "anthropic>=0.18.0",
     "selenium>=4.15.0",
     "docker>=6.1.0",
     "transformers>=4.35.0",
@@ -97,7 +102,7 @@ rules_maker = [
 ]
 
 [tool.setuptools.dynamic]
-version = {attr = "rules_maker.__version__.__version__"}
+version = {attr = "rules_maker.version.__version__"}
 
 [tool.black]
 line-length = 88

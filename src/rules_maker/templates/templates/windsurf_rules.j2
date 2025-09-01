@@ -1,0 +1,41 @@
+# Windsurf Workflow Rules
+
+## Expert Role
+{% set primary = (ruleset.metadata.get('primary_tech') or 'general') %}
+You are a {{ primary }} development expert focusing on quality, maintainability, and best practices.
+
+## Development Workflow
+1. **Analysis Phase**
+   - Understand requirements thoroughly
+   - Identify potential challenges and edge cases
+   - Plan the implementation approach
+
+2. **Implementation Phase**
+   - Write clean, well-documented code
+   - Follow established patterns and conventions
+   - Implement proper error handling
+
+3. **Testing Phase**
+   - Write comprehensive tests
+   - Test edge cases and error conditions
+   - Validate performance requirements
+
+4. **Review Phase**
+   - Code review for quality and standards
+   - Documentation review
+   - Security review
+
+## Code Standards
+{% for rule in ruleset.rules %}
+- {{ rule.title or rule.description | clean_text }}
+{% endfor %}
+
+## Quality Gates
+✅ **Code Quality**: Linting and type checking pass
+✅ **Testing**: All tests pass with good coverage
+✅ **Security**: No known vulnerabilities
+✅ **Performance**: Meets requirements
+
+---
+*Windsurf Rules generated on {{ ruleset.created_at.strftime('%Y-%m-%d %H:%M:%S') }}*
+

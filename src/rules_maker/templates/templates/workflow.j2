@@ -1,0 +1,17 @@
+workflow:
+  name: "{{ workflow.name }}"
+  description: "{{ workflow.description | clean_text }}"
+  created_at: "{{ workflow.created_at.strftime('%Y-%m-%d %H:%M:%S') }}"
+  metadata: {{ workflow.metadata | tojson }}
+
+  steps:
+{% for step in workflow.steps %}
+    - id: "{{ step.id }}"
+      name: "{{ step.name | clean_text }}"
+      description: "{{ step.description | clean_text }}"
+      action: "{{ step.action }}"
+      parameters: {{ step.parameters | tojson }}
+      conditions: {{ step.conditions | tojson }}
+      next_steps: {{ step.next_steps | tojson }}
+{% endfor %}
+
