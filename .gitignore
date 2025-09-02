@@ -35,6 +35,10 @@ coverage.xml
 .ruff_cache/
 .cache/
 
+# Large embedded projects (keep local but untracked)
+c4ai/
+mlscraper/
+
 # OS
 .DS_Store
 Thumbs.db
