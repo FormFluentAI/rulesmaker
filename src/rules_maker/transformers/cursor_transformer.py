@@ -23,12 +23,16 @@ class CursorRuleTransformer(RuleTransformer):
         if not results:
             return self._create_empty_rules()
         
+        # Add a conventional header for compatibility
+        header_lines = ["# Cursor Rules", ""]
+        
         # Analyze the content to determine the technology stack and domain
         tech_stack = self._identify_technology_stack(results)
         domain_info = self._analyze_domain(results)
         
         # Generate comprehensive rules
         text = self._generate_comprehensive_rules(results, tech_stack, domain_info)
+        text = "\n".join(header_lines) + text
         # If a category hint is provided, add a focused header and suggestions
         cat = getattr(self.config, 'category_hint', None)
         if cat:

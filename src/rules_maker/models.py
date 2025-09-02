@@ -4,7 +4,6 @@ Core data models for Rules Maker.
 Defines the main data structures used throughout the application.
 """
 
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Union, Literal
 from enum import Enum
 from datetime import datetime
@@ -56,7 +55,7 @@ class ScrapingConfig(BaseModel):
     """Configuration for scraping operations."""
     max_depth: int = 3
     max_pages: int = 100
-    timeout: int = 30
+    timeout: int = 60
     delay: float = 1.0
     user_agent: str = "RulesMaker/0.1.0"
     headers: Dict[str, str] = Field(default_factory=dict)
@@ -178,19 +177,22 @@ class ExtractionPattern(BaseModel):
 class LearningExample(BaseModel):
     """Example for training ML extractors."""
     input_html: str
-    expected_output: Dict[str, Any]
+    expected_output: Union[str, Dict[str, Any]]
     url: HttpUrl
     documentation_type: DocumentationType
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    feedback_score: Optional[float] = None
 
 
 class TrainingSet(BaseModel):
     """Collection of learning examples."""
-    name: str
-    description: str
+    name: str = "TrainingSet"
+    description: str = ""
     examples: List[LearningExample] = Field(default_factory=list)
-    documentation_type: DocumentationType
+    documentation_type: DocumentationType = DocumentationType.UNKNOWN
     metadata: Dict[str, Any] = Field(default_factory=dict)
+    version: Optional[str] = None
+    created_at: Optional[datetime] = None
 
 
 class PerformanceMetrics(BaseModel):

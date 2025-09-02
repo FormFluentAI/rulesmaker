@@ -1,0 +1,47 @@
+{
+  "predictions": [
+    {
+      "timestamp": "2025-09-02T13:07:45.478880",
+      "predictions": [
+        {
+          "rule_type": "testing-setup-basic",
+          "confidence": 0.91,
+          "priority": "high",
+          "reason": "No testing framework detected - basic testing setup recommended"
+        },
+        {
+          "rule_type": "basic-security-patterns",
+          "confidence": 0.8,
+          "priority": "high",
+          "reason": "All applications need basic security measures"
+        },
+        {
+          "rule_type": "environment-configuration",
+          "confidence": 0.75,
+          "priority": "medium",
+          "reason": "Applications require proper environment configuration"
+        },
+        {
+          "rule_type": "deployment-best-practices",
+          "confidence": 0.68,
+          "priority": "medium",
+          "reason": "All applications eventually need deployment strategies"
+        },
+        {
+          "rule_type": "performance-optimization",
+          "confidence": 0.62,
+          "priority": "medium",
+          "reason": "All applications benefit from performance optimization patterns"
+        }
+      ],
+      "context": {
+        "project_complexity": 0.0,
+        "has_auth": false,
+        "has_api": false,
+        "user_sessions": 0
+      }
+    }
+  ],
+  "outcomes": [],
+  "accuracy_stats": {}
+}

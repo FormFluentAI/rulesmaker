@@ -1,0 +1,69 @@
+{
+  "insights": {
+    "by_rule": {},
+    "total_events": 0,
+    "global_success_rate": 0.0,
+    "underperforming_rules": [],
+    "top_rules": []
+  },
+  "optimized": {
+    "rules": [],
+    "changes": [],
+    "quality_score": 0.0
+  },
+  "validations": {},
+  "content_analysis": {
+    "content_summary": "You are an expert in Angular, TypeScript, and enterprise web development.  ## Key Principles  - Follow the framework's established patterns and conventions",
+    "languages": [],
+    "frameworks": [
+      "react",
+      "nextjs",
+      "vue",
+      "angular",
+      "svelte",
+      "django",
+      "fastapi",
+      "pytorch",
+      "tensorflow",
+      "nodejs"
+    ],
+    "key_topics": [
+      "testing",
+      "security",
+      "performance",
+      "api",
+      "configuration",
+      "logging",
+      "error-handling",
+      "async"
+    ],
+    "patterns": {
+      "patterns": [],
+      "languages": [],
+      "categories": [],
+      "metadata": {}
+    },
+    "best_practices": {
+      "items": [
+        {
+          "name": "Establish testing baseline",
+          "description": "Add unit tests for core modules and critical paths.",
+          "rationale": "Prevents regressions and documents expected behaviors.",
+          "references": [],
+          "confidence": 0.7,
+          "tags": [
+            "testing",
+            "quality"
+          ]
+        }
+      ]
+    },
+    "anti_patterns": {
+      "items": []
+    },
+    "metadata": {
+      "length": 60556
+    }
+  },
+  "recommendations": []
+}

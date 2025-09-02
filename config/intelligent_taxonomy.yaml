@@ -1,0 +1,254 @@
+# Intelligent Framework Taxonomy Configuration
+# Enhanced categorization system for Rules Maker
+
+frameworks:
+  nextjs:
+    categories:
+      routing:
+        patterns: ["app router", "page router", "dynamic routes", "api routes", "middleware"]
+        subcategories:
+          app-router: ["layout", "page", "loading", "error", "not-found", "route groups", "parallel routes"]
+          page-router: ["pages", "api", "dynamic", "_app", "_document", "getServerSideProps"]
+          advanced-routing: ["intercepting routes", "route handlers", "middleware", "rewrites"]
+        difficulty_markers:
+          beginner: ["basic routing", "static routes", "pages directory"]
+          intermediate: ["dynamic routes", "api routes", "nested layouts"]
+          advanced: ["parallel routes", "intercepting routes", "middleware", "route groups"]
+          expert: ["custom route handlers", "advanced middleware", "route rewrites"]
+        context_clues:
+          - "app/"
+          - "pages/"
+          - "route.ts"
+          - "layout.tsx"
+          - "page.tsx"
+          - "middleware.ts"
+
+      data-fetching:
+        patterns: ["server components", "client components", "data fetching", "SSR", "SSG", "ISR"]
+        subcategories:
+          server-side: ["generateStaticParams", "revalidation", "streaming", "server components"]
+          client-side: ["useEffect", "SWR", "React Query", "client components"]
+          hybrid: ["ISR", "on-demand revalidation", "streaming SSR"]
+        difficulty_markers:
+          beginner: ["basic fetch", "static generation", "getStaticProps"]
+          intermediate: ["server components", "revalidation", "SWR"]
+          advanced: ["streaming", "parallel data fetching", "suspense boundaries"]
+          expert: ["custom revalidation", "advanced streaming patterns"]
+        context_clues:
+          - "use server"
+          - "use client"
+          - "fetch()"
+          - "getServerSideProps"
+          - "generateStaticParams"
+          - "revalidate"
+
+      styling:
+        patterns: ["CSS modules", "Tailwind CSS", "styled-components", "Sass", "global styles"]
+        subcategories:
+          css-in-js: ["styled-components", "emotion", "styled-jsx"]
+          utility-first: ["Tailwind CSS", "Tachyons"]
+          traditional: ["CSS modules", "Sass", "global CSS"]
+        context_clues:
+          - "tailwind"
+          - "styled-components"
+          - "css modules"
+          - "global.css"
+          - "@emotion"
+
+      deployment:
+        patterns: ["Vercel", "Netlify", "Docker", "static export", "serverless"]
+        subcategories:
+          platforms: ["Vercel", "Netlify", "AWS", "Azure", "Google Cloud"]
+          methods: ["static export", "serverless functions", "Docker containers"]
+        context_clues:
+          - "vercel"
+          - "netlify"
+          - "next export"
+          - "serverless"
+          - "docker"
+
+  react:
+    categories:
+      hooks:
+        patterns: ["useState", "useEffect", "useContext", "custom hooks", "useReducer"]
+        subcategories:
+          basic-hooks: ["useState", "useEffect", "useContext"]
+          advanced-hooks: ["useReducer", "useCallback", "useMemo", "useRef"]
+          custom-hooks: ["custom hook patterns", "hook composition"]
+        difficulty_markers:
+          beginner: ["useState", "useEffect basics"]
+          intermediate: ["useContext", "useRef", "basic custom hooks"]
+          advanced: ["useReducer", "useCallback", "useMemo", "complex custom hooks"]
+          expert: ["hook composition", "advanced patterns", "performance optimization"]
+        context_clues:
+          - "useState"
+          - "useEffect"
+          - "useContext"
+          - "useReducer"
+          - "custom hook"
+
+      components:
+        patterns: ["functional components", "class components", "JSX", "props", "composition"]
+        subcategories:
+          functional: ["arrow functions", "function declarations", "hooks"]
+          class: ["extends React.Component", "render method", "lifecycle methods"]
+          patterns: ["higher-order components", "render props", "compound components"]
+        difficulty_markers:
+          beginner: ["functional components", "basic JSX", "props"]
+          intermediate: ["component composition", "conditional rendering"]
+          advanced: ["HOCs", "render props", "compound components"]
+          expert: ["advanced patterns", "performance optimization"]
+
+      state-management:
+        patterns: ["Redux", "Zustand", "Context API", "local state", "Recoil"]
+        subcategories:
+          local: ["useState", "useReducer", "component state"]
+          global: ["Redux", "Zustand", "Context API", "Recoil"]
+          server-state: ["React Query", "SWR", "Apollo Client"]
+        context_clues:
+          - "redux"
+          - "zustand"
+          - "context"
+          - "useContext"
+          - "react-query"
+
+      testing:
+        patterns: ["Jest", "React Testing Library", "Enzyme", "unit tests", "integration tests"]
+        subcategories:
+          unit: ["component testing", "hook testing", "utility testing"]
+          integration: ["user interaction testing", "API integration testing"]
+          e2e: ["Cypress", "Playwright", "end-to-end testing"]
+        context_clues:
+          - "jest"
+          - "testing-library"
+          - "cypress"
+          - "test"
+          - "spec"
+
+  vue:
+    categories:
+      composition-api:
+        patterns: ["setup", "ref", "reactive", "computed", "watch"]
+        subcategories:
+          reactivity: ["ref", "reactive", "computed", "watch"]
+          lifecycle: ["onMounted", "onUpdated", "onUnmounted"]
+          advanced: ["custom composables", "provide/inject"]
+        context_clues:
+          - "setup()"
+          - "ref()"
+          - "reactive()"
+          - "computed()"
+          - "composable"
+
+      options-api:
+        patterns: ["data", "methods", "computed", "watch", "lifecycle hooks"]
+        subcategories:
+          basic: ["data", "methods", "computed"]
+          lifecycle: ["created", "mounted", "updated", "destroyed"]
+        context_clues:
+          - "data()"
+          - "methods:"
+          - "computed:"
+          - "mounted()"
+
+  python:
+    categories:
+      web-frameworks:
+        patterns: ["FastAPI", "Flask", "Django", "Starlette", "Tornado"]
+        subcategories:
+          async: ["FastAPI", "Starlette", "async/await"]
+          traditional: ["Flask", "Django", "WSGI"]
+          micro: ["Flask", "FastAPI"]
+          full-stack: ["Django", "full-featured frameworks"]
+        difficulty_markers:
+          beginner: ["Flask basics", "simple APIs"]
+          intermediate: ["FastAPI", "Django models", "authentication"]
+          advanced: ["async programming", "custom middleware", "performance optimization"]
+        context_clues:
+          - "fastapi"
+          - "flask"
+          - "django"
+          - "@app.get"
+          - "pydantic"
+
+      data-science:
+        patterns: ["pandas", "numpy", "matplotlib", "scikit-learn", "jupyter"]
+        subcategories:
+          analysis: ["pandas", "numpy", "data manipulation"]
+          visualization: ["matplotlib", "seaborn", "plotly"]
+          machine-learning: ["scikit-learn", "tensorflow", "pytorch"]
+        context_clues:
+          - "pandas"
+          - "numpy"
+          - "matplotlib"
+          - "sklearn"
+          - "jupyter"
+
+      async-programming:
+        patterns: ["asyncio", "async/await", "coroutines", "event loop"]
+        subcategories:
+          basics: ["async/await", "coroutines"]
+          advanced: ["event loop", "async context managers", "async generators"]
+        context_clues:
+          - "async def"
+          - "await"
+          - "asyncio"
+          - "coroutine"
+
+  aws:
+    categories:
+      compute:
+        patterns: ["EC2", "Lambda", "ECS", "EKS", "Batch"]
+        subcategories:
+          serverless: ["Lambda", "serverless functions"]
+          containers: ["ECS", "EKS", "Fargate"]
+          virtual-machines: ["EC2", "instance types"]
+        context_clues:
+          - "lambda"
+          - "ec2"
+          - "ecs"
+          - "eks"
+          - "serverless"
+
+      storage:
+        patterns: ["S3", "EBS", "EFS", "FSx", "Storage Gateway"]
+        subcategories:
+          object: ["S3", "object storage"]
+          block: ["EBS", "block storage"]
+          file: ["EFS", "file systems"]
+        context_clues:
+          - "s3"
+          - "bucket"
+          - "ebs"
+          - "efs"
+
+      database:
+        patterns: ["RDS", "DynamoDB", "Aurora", "Redshift", "DocumentDB"]
+        subcategories:
+          relational: ["RDS", "Aurora", "PostgreSQL", "MySQL"]
+          nosql: ["DynamoDB", "DocumentDB"]
+          analytics: ["Redshift", "data warehousing"]
+        context_clues:
+          - "dynamodb"
+          - "rds"
+          - "aurora"
+          - "redshift"
+
+# Global patterns that apply across frameworks
+global_patterns:
+  complexity_indicators:
+    beginner: ["getting started", "introduction", "basic", "tutorial", "hello world"]
+    intermediate: ["guide", "how to", "examples", "common patterns"]
+    advanced: ["advanced", "optimization", "best practices", "architecture"]
+    expert: ["internals", "deep dive", "custom implementation", "expert guide"]
+
+  content_types:
+    tutorial: ["tutorial", "walkthrough", "step by step", "getting started"]
+    reference: ["reference", "api", "documentation", "docs"]
+    guide: ["guide", "how to", "best practices", "examples"]
+    troubleshooting: ["troubleshooting", "common issues", "debugging", "faq"]
+
+  quality_indicators:
+    high: ["code examples", "best practices", "comprehensive", "detailed"]
+    medium: ["examples", "guide", "explanation"]
+    low: ["brief", "overview", "summary"]

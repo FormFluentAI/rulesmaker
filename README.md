@@ -33,6 +33,27 @@ make setup-cu129  # installs deps and torch/torchvision from cu129 channel
 #   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu129
 ```
 
+### Make Targets (one-liners)
+```bash
+# Create venv and upgrade build tools
+make venv
+
+# Install runtime + dev requirements into .venv
+make install
+
+# Setup with PyTorch CUDA 12.9 wheels (recommended for NVIDIA GPUs)
+make setup-cu129
+
+# Verify Torch/CUDA availability
+make torch-info
+
+# Run the test suite
+make test
+
+# Remove local virtualenv
+make clean-venv
+```
+
 ### 2. Generate Cursor Rules (Verified Working)
 ```bash
 PYTHONPATH=src python -c "
@@ -157,6 +178,10 @@ pip install lxml httpx aiofiles more-itertools python-dotenv rich jsonschema
 
 Note: Recent torch wheels may report `+cu128` while still being compatible with CUDA 12.9 drivers (minor-version compatibility). This is expected; `torchvision` shows `+cu129`.
 
+## 🖥️ CLI Commands
+
+See docs/cli-commands.md for full usage. Entrypoints: `rules-maker`, `rm-setup`, `rm-doctor`.
+
 ## 📁 Project Structure
 
 ```
@@ -198,6 +223,47 @@ make test                  # or: pytest -q
 
 🎉 Core rule generation functionality VERIFIED and WORKING!
 ```
+
+## 🧭 Interactive & Intelligent CLI
+
+Use the interactive command group for guided analysis, Q&A, and predictions.
+
+- Analyze content (save JSON):
+  - `PYTHONPATH=src python -m rules_maker.cli interactive analyze --file README.md -o tmp/analysis.json`
+- Ask a question (NLP):
+  - `PYTHONPATH=src python -m rules_maker.cli interactive query "What are best practices for React hooks?" --technologies react`
+- Predict rule needs from a report:
+  - `PYTHONPATH=src python -m rules_maker.cli interactive predict --project-analysis pipeline_report.json -o tmp/predictions.json`
+- View insights (requires prior sessions or a saved profile):
+  - `PYTHONPATH=src python -m rules_maker.cli interactive insights --user-id default`
+
+Tip: Add `--bedrock` (and/or global `--provider bedrock --model-id amazon.nova-lite-v1:0 --region us-east-1`) for enhanced responses.
+
+## 🧠 ML Batch Processing (Dry‑Run Friendly)
+
+Batch commands live under `ml-batch`. Dry‑run works even if ML deps are not installed.
+
+- Popular frameworks (dry run):
+  - `PYTHONPATH=src python -m rules_maker.cli ml-batch frameworks --dry-run`
+- Cloud platforms (dry run):
+  - `PYTHONPATH=src python -m rules_maker.cli ml-batch cloud --dry-run`
+- Custom sources (dry run):
+  - `PYTHONPATH=src python -m rules_maker.cli ml-batch custom sources.json --dry-run`
+
+Install ML extras for full processing: `pip install -r requirements-dev.txt` (scikit-learn, numpy, etc.).
+
+## 📈 Learning & Quality Tools
+
+- Provide feedback (0.0–1.0):
+  - `PYTHONPATH=src python -m rules_maker.cli learning feedback --rule-id R1 --signal-type user_rating --value 0.8`
+- Analyze a rules directory (empty dirs supported):
+  - `PYTHONPATH=src python -m rules_maker.cli learning analyze rules_out --format json -o tmp/learning_report.json`
+- Assess quality of generated rules:
+  - `PYTHONPATH=src python -m rules_maker.cli quality assess rules_out --format all -o tmp/quality_report.json`
+
+## 🔗 More Examples
+
+See examples/README.md for copy‑pasteable commands and expected outputs.
 
 ## 🎊 What's Next
 

@@ -1,0 +1,41 @@
+{
+  "primary_technology": "python",
+  "secondary_technologies": [],
+  "content_categories": {
+    "web-frameworks": {
+      "confidence": 0.8999999999999999,
+      "topics": [
+        "fastapi",
+        "pydantic",
+        "async: FastAPI",
+        "micro: FastAPI"
+      ],
+      "patterns": [
+        "FastAPI"
+      ]
+    },
+    "data-science": {
+      "confidence": 0.5,
+      "topics": [
+        "machine-learning: scikit-learn",
+        "machine-learning: pytorch"
+      ],
+      "patterns": [
+        "scikit-learn"
+      ]
+    }
+  },
+  "complexity_level": "advanced",
+  "content_type": "reference",
+  "framework_version": null,
+  "prerequisites": [],
+  "language_detected": "python",
+  "code_examples_count": 15,
+  "external_links_count": 4,
+  "quality_score": 1.0,
+  "metadata": {
+    "url": "user-provided-content",
+    "content_length": 10196,
+    "analysis_timestamp": 6494.058681314
+  }
+}

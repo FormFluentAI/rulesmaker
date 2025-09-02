@@ -1,0 +1,104 @@
+{
+  "queries": [
+    {
+      "timestamp": "posix.times_result(user=2.36, system=0.23, children_user=0.0, children_system=0.0, elapsed=4301217.8)",
+      "query": "What are best practices for React hooks?",
+      "intent": {
+        "query_type": "what_is",
+        "intent_category": "learning",
+        "technologies": [
+          "react"
+        ],
+        "topics": [],
+        "complexity_level": "advanced",
+        "specificity": 0.44999999999999996
+      }
+    },
+    {
+      "timestamp": "posix.times_result(user=2.32, system=0.21, children_user=0.0, children_system=0.0, elapsed=4301280.76)",
+      "query": "What are best practices for React hooks?",
+      "intent": {
+        "query_type": "what_is",
+        "intent_category": "learning",
+        "technologies": [
+          "react"
+        ],
+        "topics": [],
+        "complexity_level": "advanced",
+        "specificity": 0.44999999999999996
+      }
+    },
+    {
+      "timestamp": "posix.times_result(user=3.57, system=0.38, children_user=0.0, children_system=0.0, elapsed=4301425.0)",
+      "query": "What are best practices for React hooks?",
+      "intent": {
+        "query_type": "what_is",
+        "intent_category": "learning",
+        "technologies": [
+          "react"
+        ],
+        "topics": [],
+        "complexity_level": "advanced",
+        "specificity": 0.44999999999999996
+      }
+    },
+    {
+      "timestamp": "posix.times_result(user=3.81, system=0.36, children_user=0.0, children_system=0.0, elapsed=4301538.61)",
+      "query": "What are best practices for React hooks?",
+      "intent": {
+        "query_type": "what_is",
+        "intent_category": "learning",
+        "technologies": [
+          "react"
+        ],
+        "topics": [],
+        "complexity_level": "advanced",
+        "specificity": 0.44999999999999996
+      }
+    },
+    {
+      "timestamp": "posix.times_result(user=3.66, system=0.29, children_user=0.0, children_system=0.0, elapsed=4301773.85)",
+      "query": "What are best practices for React hooks?",
+      "intent": {
+        "query_type": "what_is",
+        "intent_category": "learning",
+        "technologies": [
+          "react"
+        ],
+        "topics": [],
+        "complexity_level": "advanced",
+        "specificity": 0.44999999999999996
+      }
+    },
+    {
+      "timestamp": "posix.times_result(user=3.7, system=0.32, children_user=0.0, children_system=0.0, elapsed=4301893.6)",
+      "query": "What are best practices for React hooks?",
+      "intent": {
+        "query_type": "what_is",
+        "intent_category": "learning",
+        "technologies": [
+          "react"
+        ],
+        "topics": [],
+        "complexity_level": "advanced",
+        "specificity": 0.44999999999999996
+      }
+    },
+    {
+      "timestamp": "posix.times_result(user=3.61, system=0.22, children_user=0.0, children_system=0.0, elapsed=4302007.13)",
+      "query": "What are best practices for React hooks?",
+      "intent": {
+        "query_type": "what_is",
+        "intent_category": "learning",
+        "technologies": [
+          "react"
+        ],
+        "topics": [],
+        "complexity_level": "advanced",
+        "specificity": 0.44999999999999996
+      }
+    }
+  ],
+  "successful_responses": [],
+  "user_feedback": []
+}

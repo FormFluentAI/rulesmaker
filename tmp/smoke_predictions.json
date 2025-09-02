@@ -1,0 +1,57 @@
+[
+  {
+    "rule_type": "testing-setup-basic",
+    "confidence": 0.91,
+    "reason": "No testing framework detected - basic testing setup recommended",
+    "priority": "high",
+    "estimated_impact": "High - Enables quality assurance and prevents regressions",
+    "suggested_timing": "immediate",
+    "dependencies": [
+      "testing framework"
+    ]
+  },
+  {
+    "rule_type": "basic-security-patterns",
+    "confidence": 0.8,
+    "reason": "All applications need basic security measures",
+    "priority": "high",
+    "estimated_impact": "High - Prevents common security vulnerabilities",
+    "suggested_timing": "immediate",
+    "dependencies": [
+      "security framework"
+    ]
+  },
+  {
+    "rule_type": "environment-configuration",
+    "confidence": 0.75,
+    "reason": "Applications require proper environment configuration",
+    "priority": "medium",
+    "estimated_impact": "High - Enables different deployment environments",
+    "suggested_timing": "early in development",
+    "dependencies": [
+      "configuration management"
+    ]
+  },
+  {
+    "rule_type": "deployment-best-practices",
+    "confidence": 0.68,
+    "reason": "All applications eventually need deployment strategies",
+    "priority": "medium",
+    "estimated_impact": "High - Enables reliable production deployment",
+    "suggested_timing": "before production deployment",
+    "dependencies": [
+      "deployment platform"
+    ]
+  },
+  {
+    "rule_type": "performance-optimization",
+    "confidence": 0.62,
+    "reason": "All applications benefit from performance optimization patterns",
+    "priority": "medium",
+    "estimated_impact": "Medium - Improves user experience and resource usage",
+    "suggested_timing": "during development",
+    "dependencies": [
+      "application framework"
+    ]
+  }
+]

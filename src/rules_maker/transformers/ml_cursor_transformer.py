@@ -113,11 +113,14 @@ class MLCursorTransformer(CursorRuleTransformer):
         ml_section = self._create_ml_quality_section(quality_assessments, clusters)
         
         # Insert ML section before the final closing
-        enhanced_rules = base_rules.replace(
-            "Remember: These rules are continuously updated based on official documentation and community feedback.",
-            f"{ml_section}\n\nRemember: These rules are continuously updated based on official documentation and community feedback."
-        )
-        
+        anchor = "Remember: These rules are continuously updated based on official documentation and community feedback."
+        if anchor in base_rules:
+            enhanced_rules = base_rules.replace(
+                anchor,
+                f"{ml_section}\n\n{anchor}"
+            )
+        else:
+            enhanced_rules = base_rules + "\n\n" + ml_section
         return enhanced_rules
     
     async def _generate_quality_assessments(self, scraping_results: List[ScrapingResult]) -> List[Dict[str, Any]]:
@@ -361,11 +364,14 @@ class MLCursorTransformer(CursorRuleTransformer):
 """
         
         # Insert enhancement before final closing
-        enhanced_rules = base_rules.replace(
-            "Remember: These rules are continuously updated based on official documentation and community feedback.",
-            f"{enhancement}\nRemember: These rules are continuously updated based on official documentation and community feedback."
-        )
-        
+        anchor = "Remember: These rules are continuously updated based on official documentation and community feedback."
+        if anchor in base_rules:
+            enhanced_rules = base_rules.replace(
+                anchor,
+                f"{enhancement}\n{anchor}"
+            )
+        else:
+            enhanced_rules = base_rules + "\n\n" + enhancement
         return enhanced_rules
     
     async def get_quality_insights(self, scraping_results: List[ScrapingResult]) -> Dict[str, Any]:

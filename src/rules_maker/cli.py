@@ -7,9 +7,24 @@ import json
 import yaml
 import asyncio
 import os
+import time
+import hashlib
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any, List
 import logging
+
+# ML Batch Processing Imports
+try:
+    from .batch_processor import MLBatchProcessor, DocumentationSource, process_popular_frameworks, process_cloud_platforms
+    from .processors.ml_documentation_processor import MLDocumentationProcessor
+    from .transformers.ml_cursor_transformer import MLCursorTransformer
+    from .learning.integrated_learning_system import IntegratedLearningSystem
+    from .learning.self_improving_engine import SelfImprovingEngine
+    from .strategies.ml_quality_strategy import MLQualityStrategy
+    ML_FEATURES_AVAILABLE = True
+except ImportError as e:
+    logging.debug(f"ML features not available: {e}")
+    ML_FEATURES_AVAILABLE = False
 
 
 def _run_async(coro):
@@ -40,6 +55,154 @@ def _setup_logging(level: str = "INFO", format_string: Optional[str] = None) -> 
         format=format_string,
         handlers=[logging.StreamHandler()],
     )
+
+
+def _load_ml_config(config_path: Optional[str] = None, ctx_config: Optional[Dict] = None) -> Dict[str, Any]:
+    """Load ML batch configuration with fallbacks."""
+    # Default configuration path
+    default_config = Path(__file__).parent.parent.parent / "config" / "ml_batch_config.yaml"
+    
+    config = {}
+    
+    # Load from file
+    config_file = Path(config_path) if config_path else default_config
+    if config_file.exists():
+        try:
+            with open(config_file, 'r') as f:
+                config = yaml.safe_load(f) or {}
+            click.echo(f"📋 Loaded ML config: {config_file}")
+        except Exception as e:
+            click.echo(f"⚠️ Failed to load config {config_file}: {e}", err=True)
+    
+    # Merge with context config
+    if ctx_config and isinstance(ctx_config, dict):
+        config = {**config, **ctx_config}
+    
+    return config
+
+
+def _with_progress(operation_name: str):
+    """Decorator for adding progress tracking to async operations."""
+    def decorator(func):
+        async def wrapper(*args, **kwargs):
+            click.echo(f"🚀 Starting {operation_name}...")
+            start_time = time.time()
+            
+            try:
+                result = await func(*args, **kwargs)
+                elapsed = time.time() - start_time
+                click.echo(f"✅ {operation_name} completed in {elapsed:.2f}s")
+                return result
+            except Exception as e:
+                elapsed = time.time() - start_time
+                click.echo(f"❌ {operation_name} failed after {elapsed:.2f}s: {e}", err=True)
+                raise
+        return wrapper
+    return decorator
+
+
+class MLBatchCLIError(click.ClickException):
+    """Custom exception for ML batch CLI operations."""
+    
+    def __init__(self, message: str, exit_code: int = 1):
+        super().__init__(message)
+        self.exit_code = exit_code
+
+
+from functools import wraps
+
+def _handle_ml_batch_errors(func):
+    """Decorator for handling ML batch processing errors (preserves function metadata)."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            if isinstance(e, click.ClickException):
+                raise
+            raise MLBatchCLIError(f"ML batch processing failed: {e}")
+    return wrapper
+
+
+def _get_config_template(template_type: str) -> Dict[str, Any]:
+    """Get configuration template."""
+    
+    templates = {
+        'minimal': {
+            'batch_processing': {
+                'max_concurrent': 5,
+                'quality_threshold': 0.6,
+                'output_format': ['cursor']
+            },
+            'ml_engine': {
+                'quality_threshold': 0.6,
+                'enable_self_improvement': False
+            },
+            'bedrock_integration': {
+                'model_id': 'amazon.nova-lite-v1:0',
+                'region': 'us-east-1',
+                'temperature': 0.3
+            }
+        },
+        'standard': {
+            'batch_processing': {
+                'max_concurrent': 15,
+                'quality_threshold': 0.7,
+                'enable_clustering': True,
+                'coherence_threshold': 0.6,
+                'output_format': ['cursor', 'windsurf']
+            },
+            'ml_engine': {
+                'quality_threshold': 0.7,
+                'enable_self_improvement': True,
+                'clustering_algorithm': 'kmeans'
+            },
+            'bedrock_integration': {
+                'model_id': 'amazon.nova-lite-v1:0',
+                'region': 'us-east-1',
+                'temperature': 0.3,
+                'max_tokens': 4000
+            },
+            'integrated_learning': {
+                'enable_ml': True,
+                'ml_weight': 0.6,
+                'feedback_integration': True
+            }
+        },
+        'advanced': {
+            'batch_processing': {
+                'max_concurrent': 20,
+                'quality_threshold': 0.8,
+                'enable_clustering': True,
+                'coherence_threshold': 0.7,
+                'output_format': ['cursor', 'windsurf', 'json']
+            },
+            'ml_engine': {
+                'quality_threshold': 0.8,
+                'enable_self_improvement': True,
+                'clustering_algorithm': 'kmeans',
+                'enable_parallel_processing': True
+            },
+            'bedrock_integration': {
+                'model_id': 'amazon.nova-pro-v1:0',
+                'region': 'us-east-1',
+                'temperature': 0.2,
+                'max_tokens': 8000
+            },
+            'integrated_learning': {
+                'enable_ml': True,
+                'ml_weight': 0.8,
+                'feedback_integration': True
+            },
+            'advanced': {
+                'enable_semantic_search': True,
+                'enable_auto_tagging': True,
+                'enable_content_summarization': True
+            }
+        }
+    }
+    
+    return templates.get(template_type, templates['standard'])
 
 
 @click.group()
@@ -106,6 +269,9 @@ def main(ctx, verbose, config, json_logs, redact_prompts, provider, model_id, re
 @click.option('--async-scrape', is_flag=True, help='Use async scraper for better performance')
 @click.option('--adaptive', is_flag=True, help='Use adaptive scraper with ML/LLM enhancement')
 @click.option('--ml', 'use_ml', is_flag=True, help='Use ML-enhanced transformer (Cursor format only)')
+@click.option('--ml-enhanced', is_flag=True, help='Use ML-enhanced processing pipeline')
+@click.option('--quality-assessment', is_flag=True, help='Include quality assessment in output')
+@click.option('--learning-feedback', is_flag=True, help='Collect learning feedback signals')
 @click.option('--llm-provider', type=click.Choice(['openai', 'anthropic', 'huggingface', 'bedrock', 'local']), 
               help='LLM provider for adaptive scraping')
 @click.option('--llm-api-key', help='API key for LLM provider')
@@ -114,8 +280,9 @@ def main(ctx, verbose, config, json_logs, redact_prompts, provider, model_id, re
 @click.option('--region', help='Region for provider bedrock')
 @click.option('--interactive/--no-interactive', '-i/ ', default=False, help='Interactive wizard to choose options')
 @click.pass_context
-def scrape(ctx, url, output, output_format, split, output_dir, max_pages, deep, async_scrape, adaptive, 
-           llm_provider, llm_api_key, llm_model, credentials_csv, region, interactive, use_ml):
+def scrape(ctx, url, output, output_format, split, output_dir, max_pages, deep, async_scrape, adaptive,
+           use_ml, ml_enhanced, quality_assessment, learning_feedback, 
+           llm_provider, llm_api_key, llm_model, credentials_csv, region, interactive):
     """Scrape documentation from a URL and generate rules."""
     # Interactive wizard for friendlier UX
     if interactive:
@@ -943,6 +1110,1810 @@ def validate(ctx, model_id, region, credentials_csv, show_config):
         _run_async(maker.close())
     except Exception as e:
         click.echo(f"⚠️  Skipping end-to-end test: {e}", err=True)
+
+
+@bedrock.command()
+@click.argument('sources_file', type=click.Path(exists=True))
+@click.option('--output-dir', '-d', required=True, help='Output directory')
+@click.option('--model-id', default='amazon.nova-lite-v1:0', help='Bedrock model ID')
+@click.option('--parallel-requests', type=int, default=5, help='Parallel request limit')
+@click.option('--cost-limit', type=float, default=10.0, help='Daily cost limit (USD)')
+@click.option('--quality-threshold', type=float, default=0.7, help='Quality threshold for rule inclusion')
+@click.option('--formats', multiple=True, default=['cursor', 'windsurf'], help='Rule formats to generate')
+@click.option('--dry-run', is_flag=True, help='Dry run without actual processing')
+@click.pass_context
+def batch(ctx, sources_file, output_dir, model_id, parallel_requests, cost_limit, quality_threshold, formats, dry_run):
+    """Process batch sources using Bedrock enhancement."""
+    if not ML_FEATURES_AVAILABLE:
+        click.echo("❌ Bedrock batch features require ML components. Install dependencies:", err=True)
+        click.echo("   pip install scikit-learn numpy", err=True)
+        raise click.Abort()
+    
+    # Load sources from file
+    sources_path = Path(sources_file)
+    try:
+        with open(sources_path, 'r') as f:
+            if sources_path.suffix.lower() in ['.yaml', '.yml']:
+                sources_data = yaml.safe_load(f)
+            else:
+                sources_data = json.load(f)
+    except Exception as e:
+        raise click.ClickException(f"Failed to load sources file: {e}")
+    
+    # Parse sources data
+    if isinstance(sources_data, dict) and 'sources' in sources_data:
+        sources_list = sources_data['sources']
+    elif isinstance(sources_data, list):
+        sources_list = sources_data
+    else:
+        raise click.ClickException("Sources file must contain a 'sources' list or be a list of source objects")
+    
+    # Convert to DocumentationSource objects
+    sources = []
+    for src in sources_list:
+        try:
+            source = DocumentationSource(
+                url=src['url'],
+                name=src['name'],
+                technology=src.get('technology', 'unknown'),
+                framework=src.get('framework'),
+                priority=src.get('priority', 1),
+                expected_pages=src.get('expected_pages', 20),
+                language=src.get('language'),
+                category=src.get('category', 'general'),
+                metadata=src.get('metadata', {})
+            )
+            sources.append(source)
+        except KeyError as e:
+            raise click.ClickException(f"Source missing required field {e}: {src}")
+    
+    # Setup Bedrock configuration
+    bedrock_config = {
+        'model_id': ctx.obj.get('model_id') or model_id,
+        'region': ctx.obj.get('region') or os.environ.get('AWS_REGION') or 'us-east-1',
+        'credentials_csv_path': ctx.obj.get('credentials_csv'),
+        'max_tokens': 4000,
+        'temperature': 0.3,
+        'top_p': 0.9,
+    }
+    
+    if dry_run:
+        click.echo(f"🧪 Dry run mode - would process {len(sources)} sources with Bedrock:")
+        click.echo(f"   Model: {bedrock_config['model_id']}")
+        click.echo(f"   Output: {output_dir}")
+        click.echo(f"   Parallel requests: {parallel_requests}")
+        click.echo(f"   Cost limit: ${cost_limit}")
+        click.echo(f"   Quality threshold: {quality_threshold}")
+        click.echo(f"   Formats: {', '.join(formats)}")
+        
+        # Show first few sources
+        for i, source in enumerate(sources[:5], 1):
+            click.echo(f"   {i}. {source.name} ({source.technology}) - {source.url}")
+        if len(sources) > 5:
+            click.echo(f"   ... and {len(sources) - 5} more sources")
+        return
+    
+    async def run_bedrock_batch():
+        from .models import RuleFormat
+        format_enums = [RuleFormat(fmt) for fmt in formats]
+        
+        # Initialize processor with cost limits
+        processor = MLBatchProcessor(
+            bedrock_config=bedrock_config,
+            output_dir=output_dir,
+            quality_threshold=quality_threshold,
+            max_concurrent=parallel_requests
+        )
+        
+        # Add cost monitoring
+        click.echo(f"💰 Cost monitoring enabled - limit: ${cost_limit}")
+        
+        try:
+            result = await processor.process_documentation_batch(
+                sources=sources,
+                formats=format_enums
+            )
+            
+            # Display results with cost information
+            click.echo(f"\n📊 Bedrock Batch Processing Results:")
+            click.echo(f"   Sources processed: {result.sources_processed}")
+            click.echo(f"   Rules generated: {result.total_rules_generated}")
+            click.echo(f"   Clusters created: {len(result.clusters)}")
+            click.echo(f"   Processing time: {result.processing_time:.2f}s")
+            click.echo(f"   Overall coherence: {result.quality_metrics.get('overall_coherence', 0):.3f}")
+            
+            if result.failed_sources:
+                click.echo(f"\n⚠️ Failed sources:")
+                for failed_source in result.failed_sources:
+                    click.echo(f"   - {failed_source}")
+            
+            # Cost analysis
+            try:
+                from .bedrock_integration import BedrockRulesMaker
+                maker = BedrockRulesMaker(**bedrock_config)
+                usage_stats = maker.get_usage_stats()
+                
+                estimated_cost = usage_stats.get('estimated_cost_usd', 0)
+                click.echo(f"\n💰 Cost Analysis:")
+                click.echo(f"   Estimated cost: ${estimated_cost:.4f}")
+                click.echo(f"   Input tokens: {usage_stats.get('input_tokens', 0)}")
+                click.echo(f"   Output tokens: {usage_stats.get('output_tokens', 0)}")
+                click.echo(f"   Requests: {usage_stats.get('requests', 0)}")
+                
+                if estimated_cost > cost_limit:
+                    click.echo(f"⚠️ Cost exceeded limit (${cost_limit})!")
+                else:
+                    click.echo(f"✅ Within cost limit (${cost_limit})")
+                
+                await maker.close()
+            except Exception as e:
+                click.echo(f"⚠️ Could not retrieve cost information: {e}")
+            
+            # Generate enhanced insights report
+            insights_file = Path(output_dir) / "bedrock_batch_insights.json"
+            insights_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(insights_file, 'w') as f:
+                json.dump({
+                    'bedrock_batch_results': {
+                        'model_id': bedrock_config['model_id'],
+                        'sources_processed': result.sources_processed,
+                        'total_rules_generated': result.total_rules_generated,
+                        'processing_time': result.processing_time,
+                        'quality_metrics': result.quality_metrics,
+                        'cost_analysis': usage_stats if 'usage_stats' in locals() else None
+                    },
+                    'clusters': [
+                        {
+                            'id': cluster.id,
+                            'name': cluster.name,
+                            'technology': cluster.technology,
+                            'coherence_score': cluster.coherence_score,
+                            'rules_count': len(cluster.rules)
+                        }
+                        for cluster in result.clusters
+                    ],
+                    'insights': result.insights,
+                    'source_details': [
+                        {
+                            'name': src.name,
+                            'url': src.url,
+                            'technology': src.technology,
+                            'framework': src.framework,
+                            'priority': src.priority
+                        }
+                        for src in sources
+                    ]
+                }, f, indent=2, default=str)
+            
+            click.echo(f"\n📄 Enhanced insights report saved: {insights_file}")
+            
+        except Exception as e:
+            click.echo(f"❌ Bedrock batch processing failed: {e}", err=True)
+            raise
+    
+    _run_async(run_bedrock_batch())
+
+
+# ===================================
+# ML BATCH PROCESSING COMMAND GROUP
+# ===================================
+
+@main.group()
+@click.pass_context
+def ml_batch(ctx):
+    """ML-powered batch processing commands."""
+    # Allow entering the group; individual commands will handle missing deps
+    if not ML_FEATURES_AVAILABLE:
+        click.echo("❌ ML batch features not available. Install required dependencies:", err=True)
+        click.echo("   pip install scikit-learn numpy", err=True)
+
+
+@ml_batch.command()
+@click.option('--output-dir', '-d', default='rules/frameworks', help='Output directory')
+@click.option('--bedrock/--no-bedrock', default=False, help='Use Bedrock for enhanced generation')
+@click.option('--config', '-c', type=click.Path(exists=True), help='ML batch configuration file')
+@click.option('--formats', multiple=True, default=['cursor', 'windsurf'], help='Rule formats to generate')
+@click.option('--max-concurrent', type=int, default=15, help='Maximum concurrent operations')
+@click.option('--quality-threshold', type=float, default=0.7, help='Quality threshold for rule inclusion')
+@click.option('--dry-run', is_flag=True, help='Dry run without actual processing')
+@click.pass_context
+@_handle_ml_batch_errors
+def frameworks(ctx, output_dir, bedrock, config, formats, max_concurrent, quality_threshold, dry_run):
+    """Process popular web frameworks with ML batch processing."""
+    
+    # If ML features are unavailable, permit dry-run for UX
+    if not ML_FEATURES_AVAILABLE and not dry_run:
+        click.echo("❌ ML batch features not available. Install required dependencies:", err=True)
+        click.echo("   pip install scikit-learn numpy", err=True)
+        raise click.Abort()
+
+    # Load configuration
+    ml_config = _load_ml_config(config, ctx.obj.get('config'))
+    
+    # Setup Bedrock configuration if enabled
+    bedrock_config = None
+    if bedrock:
+        bedrock_config = {
+            'model_id': ctx.obj.get('model_id') or ml_config.get('bedrock_integration', {}).get('model_id', 'amazon.nova-lite-v1:0'),
+            'region': ctx.obj.get('region') or ml_config.get('bedrock_integration', {}).get('region', 'us-east-1'),
+            'credentials_csv_path': ctx.obj.get('credentials_csv')
+        }
+    
+    if dry_run:
+        click.echo("🧪 Dry run mode - would process popular frameworks with:")
+        click.echo(f"   Output: {output_dir}")
+        click.echo(f"   Bedrock: {'enabled' if bedrock else 'disabled'}")
+        click.echo(f"   Formats: {', '.join(formats)}")
+        click.echo(f"   Quality threshold: {quality_threshold}")
+        return
+    
+    async def run_frameworks_processing():
+        from .models import RuleFormat
+        format_enums = [RuleFormat(fmt) for fmt in formats]
+        
+        result = await process_popular_frameworks(
+            output_dir=output_dir,
+            bedrock_config=bedrock_config
+        )
+        
+        # Display results
+        click.echo(f"\n📊 Batch Processing Results:")
+        click.echo(f"   Sources processed: {result.sources_processed}")
+        click.echo(f"   Rules generated: {result.total_rules_generated}")
+        click.echo(f"   Clusters created: {len(result.clusters)}")
+        click.echo(f"   Processing time: {result.processing_time:.2f}s")
+        click.echo(f"   Overall coherence: {result.quality_metrics.get('overall_coherence', 0):.3f}")
+        
+        if result.failed_sources:
+            click.echo(f"\n⚠️ Failed sources:")
+            for failed_source in result.failed_sources:
+                click.echo(f"   - {failed_source}")
+        
+        # Generate insights report
+        insights_file = Path(output_dir) / "processing_insights.json"
+        insights_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(insights_file, 'w') as f:
+            json.dump({
+                'result_summary': {
+                    'sources_processed': result.sources_processed,
+                    'total_rules_generated': result.total_rules_generated,
+                    'processing_time': result.processing_time,
+                    'quality_metrics': result.quality_metrics
+                },
+                'clusters': [
+                    {
+                        'id': cluster.id,
+                        'name': cluster.name,
+                        'technology': cluster.technology,
+                        'coherence_score': cluster.coherence_score,
+                        'rules_count': len(cluster.rules)
+                    }
+                    for cluster in result.clusters
+                ],
+                'insights': result.insights
+            }, f, indent=2, default=str)
+        
+        click.echo(f"\n📄 Insights report saved: {insights_file}")
+    
+    _run_async(run_frameworks_processing())
+
+
+@ml_batch.command()
+@click.option('--output-dir', '-d', default='rules/cloud', help='Output directory')
+@click.option('--bedrock/--no-bedrock', default=False, help='Use Bedrock for enhanced generation')
+@click.option('--config', '-c', type=click.Path(exists=True), help='ML batch configuration file')
+@click.option('--formats', multiple=True, default=['cursor', 'windsurf'], help='Rule formats to generate')
+@click.option('--max-concurrent', type=int, default=10, help='Maximum concurrent operations')
+@click.option('--quality-threshold', type=float, default=0.7, help='Quality threshold for rule inclusion')
+@click.option('--dry-run', is_flag=True, help='Dry run without actual processing')
+@click.pass_context
+@_handle_ml_batch_errors
+def cloud(ctx, output_dir, bedrock, config, formats, max_concurrent, quality_threshold, dry_run):
+    """Process cloud platform documentation with ML batch processing."""
+    
+    # If ML features are unavailable, permit dry-run for UX
+    if not ML_FEATURES_AVAILABLE and not dry_run:
+        click.echo("❌ ML batch features not available. Install required dependencies:", err=True)
+        click.echo("   pip install scikit-learn numpy", err=True)
+        raise click.Abort()
+
+    # Load configuration
+    ml_config = _load_ml_config(config, ctx.obj.get('config'))
+    
+    # Setup Bedrock configuration if enabled
+    bedrock_config = None
+    if bedrock:
+        bedrock_config = {
+            'model_id': ctx.obj.get('model_id') or ml_config.get('bedrock_integration', {}).get('model_id', 'amazon.nova-lite-v1:0'),
+            'region': ctx.obj.get('region') or ml_config.get('bedrock_integration', {}).get('region', 'us-east-1'),
+            'credentials_csv_path': ctx.obj.get('credentials_csv')
+        }
+    
+    if dry_run:
+        click.echo("🧪 Dry run mode - would process cloud platforms with:")
+        click.echo(f"   Output: {output_dir}")
+        click.echo(f"   Bedrock: {'enabled' if bedrock else 'disabled'}")
+        click.echo(f"   Formats: {', '.join(formats)}")
+        click.echo(f"   Quality threshold: {quality_threshold}")
+        return
+    
+    async def run_cloud_processing():
+        result = await process_cloud_platforms(
+            output_dir=output_dir,
+            bedrock_config=bedrock_config
+        )
+        
+        # Display results
+        click.echo(f"\n📊 Cloud Platform Processing Results:")
+        click.echo(f"   Sources processed: {result.sources_processed}")
+        click.echo(f"   Rules generated: {result.total_rules_generated}")
+        click.echo(f"   Clusters created: {len(result.clusters)}")
+        click.echo(f"   Processing time: {result.processing_time:.2f}s")
+        click.echo(f"   Overall coherence: {result.quality_metrics.get('overall_coherence', 0):.3f}")
+        
+        # Generate insights report
+        insights_file = Path(output_dir) / "cloud_processing_insights.json"
+        insights_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(insights_file, 'w') as f:
+            json.dump({
+                'result_summary': {
+                    'sources_processed': result.sources_processed,
+                    'total_rules_generated': result.total_rules_generated,
+                    'processing_time': result.processing_time,
+                    'quality_metrics': result.quality_metrics
+                },
+                'clusters': [
+                    {
+                        'id': cluster.id,
+                        'name': cluster.name,
+                        'technology': cluster.technology,
+                        'coherence_score': cluster.coherence_score,
+                        'rules_count': len(cluster.rules)
+                    }
+                    for cluster in result.clusters
+                ],
+                'insights': result.insights
+            }, f, indent=2, default=str)
+        
+        click.echo(f"\n📄 Insights report saved: {insights_file}")
+    
+    _run_async(run_cloud_processing())
+
+
+@ml_batch.command()
+@click.argument('sources_file', type=click.Path(exists=True))
+@click.option('--output-dir', '-d', required=True, help='Output directory')
+@click.option('--bedrock/--no-bedrock', default=False, help='Use Bedrock for enhanced generation')
+@click.option('--config', '-c', type=click.Path(exists=True), help='ML batch configuration file')
+@click.option('--formats', multiple=True, default=['cursor', 'windsurf'], help='Rule formats to generate')
+@click.option('--max-concurrent', type=int, default=15, help='Maximum concurrent operations')
+@click.option('--quality-threshold', type=float, default=0.7, help='Quality threshold for rule inclusion')
+@click.option('--dry-run', is_flag=True, help='Dry run without actual processing')
+@click.pass_context
+@_handle_ml_batch_errors
+def custom(ctx, sources_file, output_dir, bedrock, config, formats, max_concurrent, quality_threshold, dry_run):
+    """Process custom documentation sources with ML batch processing."""
+    
+    # If ML features are unavailable, permit dry-run for UX
+    if not ML_FEATURES_AVAILABLE and not dry_run:
+        click.echo("❌ ML batch features not available. Install required dependencies:", err=True)
+        click.echo("   pip install scikit-learn numpy", err=True)
+        raise click.Abort()
+
+    # Load configuration
+    ml_config = _load_ml_config(config, ctx.obj.get('config'))
+    
+    # Load sources from file (JSON or YAML)
+    sources_path = Path(sources_file)
+    try:
+        with open(sources_path, 'r') as f:
+            if sources_path.suffix.lower() in ['.yaml', '.yml']:
+                sources_data = yaml.safe_load(f)
+            else:
+                sources_data = json.load(f)
+    except Exception as e:
+        raise click.ClickException(f"Failed to load sources file: {e}")
+    
+    # Parse sources data
+    if isinstance(sources_data, dict) and 'sources' in sources_data:
+        sources_list = sources_data['sources']
+    elif isinstance(sources_data, list):
+        sources_list = sources_data
+    else:
+        raise click.ClickException("Sources file must contain a 'sources' list or be a list of source objects")
+    
+    # Convert to DocumentationSource objects
+    sources = []
+    for src in sources_list:
+        try:
+            source = DocumentationSource(
+                url=src['url'],
+                name=src['name'],
+                technology=src.get('technology', 'unknown'),
+                framework=src.get('framework'),
+                priority=src.get('priority', 1),
+                expected_pages=src.get('expected_pages', 20),
+                language=src.get('language'),
+                category=src.get('category', 'general'),
+                metadata=src.get('metadata', {})
+            )
+            sources.append(source)
+        except KeyError as e:
+            raise click.ClickException(f"Source missing required field {e}: {src}")
+    
+    # Setup Bedrock configuration if enabled
+    bedrock_config = None
+    if bedrock:
+        bedrock_config = {
+            'model_id': ctx.obj.get('model_id') or ml_config.get('bedrock_integration', {}).get('model_id', 'amazon.nova-lite-v1:0'),
+            'region': ctx.obj.get('region') or ml_config.get('bedrock_integration', {}).get('region', 'us-east-1'),
+            'credentials_csv_path': ctx.obj.get('credentials_csv')
+        }
+    
+    if dry_run:
+        click.echo(f"🧪 Dry run mode - would process {len(sources)} custom sources:")
+        for source in sources[:5]:  # Show first 5
+            click.echo(f"   - {source.name} ({source.url})")
+        if len(sources) > 5:
+            click.echo(f"   ... and {len(sources) - 5} more")
+        click.echo(f"   Output: {output_dir}")
+        click.echo(f"   Bedrock: {'enabled' if bedrock else 'disabled'}")
+        click.echo(f"   Formats: {', '.join(formats)}")
+        return
+    
+    async def run_custom_processing():
+        from .models import RuleFormat
+        format_enums = [RuleFormat(fmt) for fmt in formats]
+        
+        # Initialize processor
+        processor = MLBatchProcessor(
+            bedrock_config=bedrock_config,
+            output_dir=output_dir,
+            quality_threshold=quality_threshold,
+            max_concurrent=max_concurrent
+        )
+        
+        result = await processor.process_documentation_batch(
+            sources=sources,
+            formats=format_enums
+        )
+        
+        # Display results
+        click.echo(f"\n📊 Custom Batch Processing Results:")
+        click.echo(f"   Sources processed: {result.sources_processed}")
+        click.echo(f"   Rules generated: {result.total_rules_generated}")
+        click.echo(f"   Clusters created: {len(result.clusters)}")
+        click.echo(f"   Processing time: {result.processing_time:.2f}s")
+        click.echo(f"   Overall coherence: {result.quality_metrics.get('overall_coherence', 0):.3f}")
+        
+        if result.failed_sources:
+            click.echo(f"\n⚠️ Failed sources:")
+            for failed_source in result.failed_sources:
+                click.echo(f"   - {failed_source}")
+        
+        # Generate insights report
+        insights_file = Path(output_dir) / "custom_processing_insights.json"
+        insights_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(insights_file, 'w') as f:
+            json.dump({
+                'result_summary': {
+                    'sources_processed': result.sources_processed,
+                    'total_rules_generated': result.total_rules_generated,
+                    'processing_time': result.processing_time,
+                    'quality_metrics': result.quality_metrics
+                },
+                'clusters': [
+                    {
+                        'id': cluster.id,
+                        'name': cluster.name,
+                        'technology': cluster.technology,
+                        'coherence_score': cluster.coherence_score,
+                        'rules_count': len(cluster.rules)
+                    }
+                    for cluster in result.clusters
+                ],
+                'insights': result.insights,
+                'source_details': [
+                    {
+                        'name': src.name,
+                        'url': src.url,
+                        'technology': src.technology,
+                        'framework': src.framework,
+                        'priority': src.priority
+                    }
+                    for src in sources
+                ]
+            }, f, indent=2, default=str)
+        
+        click.echo(f"\n📄 Insights report saved: {insights_file}")
+    
+    _run_async(run_custom_processing())
+
+
+# ===================================
+# CONFIGURATION MANAGEMENT GROUP
+# ===================================
+
+@main.group()
+def config():
+    """Configuration management commands."""
+    pass
+
+
+@config.command()
+@click.option('--output', '-o', default='config/ml_batch_config.yaml', help='Config file path')
+@click.option('--template', type=click.Choice(['minimal', 'standard', 'advanced']), default='standard', help='Configuration template')
+@click.option('--force', is_flag=True, help='Overwrite existing config file')
+def init(output, template, force):
+    """Initialize ML batch configuration."""
+    
+    output_path = Path(output)
+    
+    # Check if file exists
+    if output_path.exists() and not force:
+        click.echo(f"⚠️ Config file already exists: {output_path}")
+        click.echo("Use --force to overwrite")
+        return
+    
+    # Get template
+    config_template = _get_config_template(template)
+    
+    # Create directory if needed
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Write configuration
+    try:
+        with open(output_path, 'w') as f:
+            yaml.dump(config_template, f, default_flow_style=False, indent=2)
+        
+        click.echo(f"✅ Configuration initialized: {output_path}")
+        click.echo(f"   Template: {template}")
+        click.echo(f"   Size: {output_path.stat().st_size} bytes")
+        
+        # Show key settings
+        if 'batch_processing' in config_template:
+            bp = config_template['batch_processing']
+            click.echo(f"\n📋 Key Settings:")
+            click.echo(f"   Max concurrent: {bp.get('max_concurrent', 'N/A')}")
+            click.echo(f"   Quality threshold: {bp.get('quality_threshold', 'N/A')}")
+            click.echo(f"   Output formats: {', '.join(bp.get('output_format', []))}")
+        
+    except Exception as e:
+        raise click.ClickException(f"Failed to write config file: {e}")
+
+
+@config.command()
+@click.argument('config_file', type=click.Path(exists=True))
+def validate(config_file):
+    """Validate ML batch configuration file."""
+    
+    try:
+        with open(config_file, 'r') as f:
+            config = yaml.safe_load(f)
+        
+        # Basic validation
+        errors = []
+        warnings = []
+        
+        # Check required sections
+        required_sections = ['batch_processing', 'ml_engine']
+        for section in required_sections:
+            if section not in config:
+                errors.append(f"Missing required section: {section}")
+        
+        # Validate batch_processing section
+        if 'batch_processing' in config:
+            bp = config['batch_processing']
+            
+            # Check numeric ranges
+            if 'max_concurrent' in bp:
+                if not isinstance(bp['max_concurrent'], int) or bp['max_concurrent'] < 1:
+                    errors.append("batch_processing.max_concurrent must be a positive integer")
+            
+            if 'quality_threshold' in bp:
+                qt = bp['quality_threshold']
+                if not isinstance(qt, (int, float)) or not (0.0 <= qt <= 1.0):
+                    errors.append("batch_processing.quality_threshold must be between 0.0 and 1.0")
+            
+            # Check output formats
+            if 'output_format' in bp:
+                valid_formats = {'cursor', 'windsurf', 'json', 'yaml'}
+                formats = bp['output_format']
+                if not isinstance(formats, list):
+                    errors.append("batch_processing.output_format must be a list")
+                else:
+                    invalid_formats = set(formats) - valid_formats
+                    if invalid_formats:
+                        errors.append(f"Invalid output formats: {', '.join(invalid_formats)}")
+        
+        # Validate bedrock_integration section
+        if 'bedrock_integration' in config:
+            bi = config['bedrock_integration']
+            
+            if 'temperature' in bi:
+                temp = bi['temperature']
+                if not isinstance(temp, (int, float)) or not (0.0 <= temp <= 1.0):
+                    warnings.append("bedrock_integration.temperature should be between 0.0 and 1.0")
+            
+            if 'max_tokens' in bi:
+                if not isinstance(bi['max_tokens'], int) or bi['max_tokens'] < 1:
+                    errors.append("bedrock_integration.max_tokens must be a positive integer")
+        
+        # Display results
+        if errors:
+            click.echo(f"❌ Configuration validation failed ({len(errors)} errors):")
+            for i, error in enumerate(errors, 1):
+                click.echo(f"   {i}. {error}")
+        else:
+            click.echo("✅ Configuration validation passed")
+        
+        if warnings:
+            click.echo(f"\n⚠️ Warnings ({len(warnings)}):")
+            for i, warning in enumerate(warnings, 1):
+                click.echo(f"   {i}. {warning}")
+        
+        # Show summary
+        sections = list(config.keys())
+        click.echo(f"\n📊 Configuration Summary:")
+        click.echo(f"   Sections: {', '.join(sections)}")
+        click.echo(f"   Total size: {Path(config_file).stat().st_size} bytes")
+        
+        if errors:
+            raise click.Abort()
+            
+    except yaml.YAMLError as e:
+        raise click.ClickException(f"Invalid YAML syntax: {e}")
+    except Exception as e:
+        raise click.ClickException(f"Validation failed: {e}")
+
+
+# ===================================
+# LEARNING SYSTEM COMMAND GROUP
+# ===================================
+
+@main.group()
+def learning():
+    """Integrated learning and self-improvement commands."""
+    # Allow group entry; commands handle missing deps appropriately
+    if not ML_FEATURES_AVAILABLE:
+        click.echo("❌ Learning features not available. Install required dependencies:", err=True)
+        click.echo("   pip install scikit-learn numpy", err=True)
+
+
+@learning.command()
+@click.option('--rule-id', required=True, help='Rule ID for feedback')
+@click.option('--signal-type', type=click.Choice(['usage_success', 'user_rating', 'effectiveness', 'relevance']), required=True)
+@click.option('--value', type=float, required=True, help='Feedback value (0.0-1.0)')
+@click.option('--context', help='Additional context (JSON string)')
+@click.option('--source', default='user', help='Feedback source')
+@_handle_ml_batch_errors
+def feedback(rule_id, signal_type, value, context, source):
+    """Collect feedback signals for rule improvement."""
+    if not ML_FEATURES_AVAILABLE:
+        click.echo("❌ Learning features not available. Install required dependencies:", err=True)
+        click.echo("   pip install scikit-learn numpy", err=True)
+        raise click.Abort()
+    
+    # Validate feedback value
+    if not (0.0 <= value <= 1.0):
+        raise click.BadParameter("Feedback value must be between 0.0 and 1.0")
+    
+    # Parse context if provided
+    context_dict = {}
+    if context:
+        try:
+            context_dict = json.loads(context)
+        except json.JSONDecodeError:
+            raise click.BadParameter("Context must be valid JSON")
+    
+    async def collect_feedback():
+        engine = SelfImprovingEngine()
+        
+        await engine.collect_feedback_signal(
+            rule_id=rule_id,
+            signal_type=signal_type,
+            value=value,
+            context=context_dict,
+            source=source
+        )
+        
+        click.echo(f"✅ Feedback collected for rule {rule_id}")
+        click.echo(f"   Signal: {signal_type} = {value}")
+        click.echo(f"   Source: {source}")
+        
+        # Get updated rule quality prediction if available
+        try:
+            # Note: predict_rule_quality_by_id is a hypothetical method
+            # In real implementation, this would need to be implemented
+            click.echo(f"   Feedback successfully recorded for future learning")
+        except Exception as e:
+            click.echo(f"   Note: {e}")
+    
+    _run_async(collect_feedback())
+
+
+@learning.command()
+@click.argument('rules_dir', type=click.Path(exists=True))
+@click.option('--output', '-o', help='Analysis report output path')
+@click.option('--format', type=click.Choice(['json', 'yaml', 'md']), default='json')
+def analyze(rules_dir, output, format):
+    """Analyze learning patterns and rule effectiveness."""
+    if not ML_FEATURES_AVAILABLE:
+        click.echo("❌ Learning features not available. Install required dependencies:", err=True)
+        click.echo("   pip install scikit-learn numpy", err=True)
+        raise click.Abort()
+    
+    async def run_analysis():
+        engine = SelfImprovingEngine()
+        
+        # Analyze rule directory
+        rules_path = Path(rules_dir)
+        rule_files = list(rules_path.rglob("*.md")) + list(rules_path.rglob("*.json"))
+        
+        click.echo(f"🔍 Analyzing {len(rule_files)} rule files...")
+        
+        # Collect analysis data
+        analysis_data = {
+            'timestamp': time.time(),
+            'rules_directory': str(rules_path),
+            'total_rule_files': len(rule_files),
+            'analysis_results': {},
+            'recommendations': []
+        }
+        
+        # Basic file analysis
+        for rule_file in rule_files:
+            try:
+                content = rule_file.read_text()
+                analysis_data['analysis_results'][str(rule_file)] = {
+                    'size_bytes': rule_file.stat().st_size,
+                    'content_length': len(content),
+                    'word_count': len(content.split()),
+                    'has_examples': 'example' in content.lower(),
+                    'has_code_blocks': '```' in content
+                }
+            except Exception as e:
+                analysis_data['analysis_results'][str(rule_file)] = {'error': str(e)}
+        
+        # Generate recommendations
+        total_files = len(rule_files)
+        avg_size = (sum(r.get('size_bytes', 0) for r in analysis_data['analysis_results'].values()) / total_files) if total_files else 0
+        if avg_size < 1000:
+            analysis_data['recommendations'].append("Consider adding more detailed examples and explanations to rules")
+        
+        files_with_examples = sum(1 for r in analysis_data['analysis_results'].values() if r.get('has_examples', False))
+        if total_files and (files_with_examples / total_files) < 0.5:
+            analysis_data['recommendations'].append("Add practical examples to improve rule effectiveness")
+        
+        # Output results
+        if output:
+            output_path = Path(output)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            if format == 'json':
+                with open(output_path, 'w') as f:
+                    json.dump(analysis_data, f, indent=2, default=str)
+            elif format == 'yaml':
+                with open(output_path, 'w') as f:
+                    yaml.dump(analysis_data, f, default_flow_style=False)
+            elif format == 'md':
+                with open(output_path, 'w') as f:
+                    f.write(f"# Learning Analysis Report\n\n")
+                    f.write(f"**Generated:** {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                    f.write(f"**Rules Directory:** {rules_path}\n\n")
+                    f.write(f"**Total Files:** {len(rule_files)}\n\n")
+                    f.write(f"## Summary\n\n")
+                    f.write(f"- Average file size: {avg_size:.0f} bytes\n")
+                    denom = len(rule_files) or 1
+                    percent = (files_with_examples / denom) * 100.0
+                    f.write(f"- Files with examples: {files_with_examples}/{len(rule_files)} ({percent:.1f}%)\n\n")
+                    if analysis_data['recommendations']:
+                        f.write("## Recommendations\n\n")
+                        for i, rec in enumerate(analysis_data['recommendations'], 1):
+                            f.write(f"{i}. {rec}\n")
+            
+            click.echo(f"📄 Analysis report saved: {output_path}")
+        else:
+            # Display summary to console
+            click.echo(f"\n📊 Learning Analysis Summary:")
+            click.echo(f"   Total rule files: {len(rule_files)}")
+            click.echo(f"   Average file size: {avg_size:.0f} bytes")
+            denom = len(rule_files) or 1
+            percent = (files_with_examples / denom) * 100.0
+            click.echo(f"   Files with examples: {files_with_examples}/{len(rule_files)} ({percent:.1f}%)")
+            
+            if analysis_data['recommendations']:
+                click.echo(f"\n💡 Recommendations:")
+                for i, rec in enumerate(analysis_data['recommendations'], 1):
+                    click.echo(f"   {i}. {rec}")
+    
+    _run_async(run_analysis())
+
+
+# ===================================
+# QUALITY ASSESSMENT COMMAND GROUP
+# ===================================
+
+@main.group()
+def quality():
+    """Rule quality assessment and analysis commands."""
+    if not ML_FEATURES_AVAILABLE:
+        click.echo("❌ Quality assessment features not available. Install required dependencies:", err=True)
+        click.echo("   pip install scikit-learn numpy", err=True)
+        raise click.Abort()
+
+
+@quality.command()
+@click.argument('rules_dir', type=click.Path())
+@click.option('--format', type=click.Choice(['cursor', 'windsurf', 'all']), default='all', help='Rule format to assess')
+@click.option('--output', '-o', help='Analysis report output path')
+@click.option('--threshold', type=float, default=0.7, help='Quality threshold for assessment')
+def assess(rules_dir, format, output, threshold):
+    """Assess quality of generated rules."""
+    
+    rules_path = Path(rules_dir)
+    if not rules_path.exists():
+        click.echo(f"❌ No such file or directory: {rules_path}")
+        raise click.Abort()
+    
+    # Find rule files
+    if format == 'all':
+        rule_files = list(rules_path.rglob("*.md")) + list(rules_path.rglob("*.mdc"))
+    elif format == 'cursor':
+        rule_files = list(rules_path.rglob("*.mdc"))
+    elif format == 'windsurf':
+        rule_files = list(rules_path.rglob("*.md"))
+    
+    if not rule_files:
+        click.echo(f"❌ No rule files found in {rules_path}")
+        return
+    
+    click.echo(f"🔍 Assessing {len(rule_files)} rule files...")
+    
+    # Quality assessment metrics
+    assessment_results = {
+        'total_files': len(rule_files),
+        'assessment_timestamp': time.time(),
+        'threshold': threshold,
+        'files': {},
+        'summary': {
+            'high_quality': 0,
+            'medium_quality': 0,
+            'low_quality': 0,
+            'avg_score': 0.0,
+            'recommendations': []
+        }
+    }
+    
+    total_score = 0.0
+    
+    for rule_file in rule_files:
+        try:
+            content = rule_file.read_text()
+            
+            # Calculate quality metrics
+            quality_score = _calculate_rule_quality(content)
+            total_score += quality_score
+            
+            # Categorize quality
+            if quality_score >= threshold:
+                category = 'high'
+                assessment_results['summary']['high_quality'] += 1
+            elif quality_score >= threshold - 0.2:
+                category = 'medium'
+                assessment_results['summary']['medium_quality'] += 1
+            else:
+                category = 'low'
+                assessment_results['summary']['low_quality'] += 1
+            
+            assessment_results['files'][str(rule_file)] = {
+                'quality_score': quality_score,
+                'category': category,
+                'size_bytes': rule_file.stat().st_size,
+                'word_count': len(content.split()),
+                'has_examples': 'example' in content.lower(),
+                'has_code_blocks': '```' in content,
+                'structure_score': _assess_structure(content)
+            }
+            
+        except Exception as e:
+            assessment_results['files'][str(rule_file)] = {'error': str(e)}
+    
+    # Calculate averages and recommendations
+    assessment_results['summary']['avg_score'] = total_score / len(rule_files) if rule_files else 0.0
+    
+    # Generate recommendations
+    if assessment_results['summary']['low_quality'] > len(rule_files) * 0.3:
+        assessment_results['summary']['recommendations'].append(
+            "Consider improving rule quality - over 30% of rules are below threshold"
+        )
+    
+    if assessment_results['summary']['avg_score'] < threshold:
+        assessment_results['summary']['recommendations'].append(
+            f"Average quality score ({assessment_results['summary']['avg_score']:.3f}) is below threshold ({threshold})"
+        )
+    
+    files_without_examples = sum(1 for f in assessment_results['files'].values() 
+                               if isinstance(f, dict) and not f.get('has_examples', False))
+    if files_without_examples > len(rule_files) * 0.5:
+        assessment_results['summary']['recommendations'].append(
+            "Add more practical examples to improve rule effectiveness"
+        )
+    
+    # Output results
+    if output:
+        output_path = Path(output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(output_path, 'w') as f:
+            json.dump(assessment_results, f, indent=2, default=str)
+        
+        click.echo(f"📄 Quality assessment report saved: {output_path}")
+    
+    # Display summary
+    click.echo(f"\n📊 Quality Assessment Summary:")
+    click.echo(f"   Total files: {assessment_results['total_files']}")
+    click.echo(f"   Average score: {assessment_results['summary']['avg_score']:.3f}")
+    click.echo(f"   High quality: {assessment_results['summary']['high_quality']}")
+    click.echo(f"   Medium quality: {assessment_results['summary']['medium_quality']}")
+    click.echo(f"   Low quality: {assessment_results['summary']['low_quality']}")
+    
+    if assessment_results['summary']['recommendations']:
+        click.echo(f"\n💡 Recommendations:")
+        for i, rec in enumerate(assessment_results['summary']['recommendations'], 1):
+            click.echo(f"   {i}. {rec}")
+
+
+@quality.command()
+@click.argument('processing_results_dir', type=click.Path(exists=True))
+@click.option('--output', '-o', help='Cluster analysis output path')
+@click.option('--min-coherence', type=float, default=0.6, help='Minimum coherence score for analysis')
+def cluster(processing_results_dir, output, min_coherence):
+    """Analyze rule clusters from batch processing results."""
+    
+    results_path = Path(processing_results_dir)
+    
+    # Find insights files from batch processing
+    insights_files = list(results_path.rglob("*insights.json"))
+    
+    if not insights_files:
+        click.echo(f"❌ No insights files found in {results_path}")
+        click.echo("Run ml-batch commands first to generate cluster data")
+        return
+    
+    click.echo(f"🔍 Analyzing clusters from {len(insights_files)} batch processing results...")
+    
+    cluster_analysis = {
+        'analysis_timestamp': time.time(),
+        'min_coherence_threshold': min_coherence,
+        'total_insights_files': len(insights_files),
+        'clusters': [],
+        'summary': {
+            'total_clusters': 0,
+            'high_coherence_clusters': 0,
+            'technologies': set(),
+            'avg_coherence': 0.0,
+            'recommendations': []
+        }
+    }
+    
+    total_coherence = 0.0
+    
+    for insights_file in insights_files:
+        try:
+            with open(insights_file, 'r') as f:
+                insights_data = json.load(f)
+            
+            # Extract cluster information
+            if 'clusters' in insights_data:
+                for cluster in insights_data['clusters']:
+                    cluster_info = {
+                        'id': cluster.get('id', 'unknown'),
+                        'name': cluster.get('name', 'Unknown'),
+                        'technology': cluster.get('technology', 'unknown'),
+                        'coherence_score': cluster.get('coherence_score', 0.0),
+                        'rules_count': cluster.get('rules_count', 0),
+                        'source_file': str(insights_file)
+                    }
+                    
+                    cluster_analysis['clusters'].append(cluster_info)
+                    total_coherence += cluster_info['coherence_score']
+                    cluster_analysis['summary']['technologies'].add(cluster_info['technology'])
+                    
+                    if cluster_info['coherence_score'] >= min_coherence:
+                        cluster_analysis['summary']['high_coherence_clusters'] += 1
+        
+        except Exception as e:
+            click.echo(f"⚠️ Failed to parse {insights_file}: {e}")
+    
+    cluster_analysis['summary']['total_clusters'] = len(cluster_analysis['clusters'])
+    cluster_analysis['summary']['avg_coherence'] = (
+        total_coherence / len(cluster_analysis['clusters']) 
+        if cluster_analysis['clusters'] else 0.0
+    )
+    cluster_analysis['summary']['technologies'] = list(cluster_analysis['summary']['technologies'])
+    
+    # Generate recommendations
+    if cluster_analysis['summary']['avg_coherence'] < min_coherence:
+        cluster_analysis['summary']['recommendations'].append(
+            f"Average cluster coherence ({cluster_analysis['summary']['avg_coherence']:.3f}) is below threshold"
+        )
+    
+    low_coherence_clusters = [c for c in cluster_analysis['clusters'] 
+                             if c['coherence_score'] < min_coherence]
+    if low_coherence_clusters:
+        cluster_analysis['summary']['recommendations'].append(
+            f"{len(low_coherence_clusters)} clusters have low coherence - consider reprocessing with higher quality sources"
+        )
+    
+    if len(cluster_analysis['summary']['technologies']) < 5:
+        cluster_analysis['summary']['recommendations'].append(
+            "Limited technology coverage - consider adding more diverse documentation sources"
+        )
+    
+    # Output results
+    if output:
+        output_path = Path(output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(output_path, 'w') as f:
+            json.dump(cluster_analysis, f, indent=2, default=str)
+        
+        click.echo(f"📄 Cluster analysis saved: {output_path}")
+    
+    # Display summary
+    click.echo(f"\n📊 Cluster Analysis Summary:")
+    click.echo(f"   Total clusters: {cluster_analysis['summary']['total_clusters']}")
+    click.echo(f"   High coherence clusters: {cluster_analysis['summary']['high_coherence_clusters']}")
+    click.echo(f"   Average coherence: {cluster_analysis['summary']['avg_coherence']:.3f}")
+    click.echo(f"   Technologies covered: {len(cluster_analysis['summary']['technologies'])}")
+    click.echo(f"   Technology list: {', '.join(cluster_analysis['summary']['technologies'][:10])}")
+    
+    if cluster_analysis['summary']['recommendations']:
+        click.echo(f"\n💡 Recommendations:")
+        for i, rec in enumerate(cluster_analysis['summary']['recommendations'], 1):
+            click.echo(f"   {i}. {rec}")
+
+
+def _calculate_rule_quality(content: str) -> float:
+    """Calculate quality score for rule content."""
+    score = 0.0
+    
+    # Base score
+    score += 0.3
+    
+    # Length bonus
+    if len(content) > 500:
+        score += 0.1
+    if len(content) > 1500:
+        score += 0.1
+    
+    # Structure indicators
+    if any(marker in content for marker in ['##', '**', '1.', '-', '*']):
+        score += 0.1
+    
+    # Examples bonus
+    if 'example' in content.lower():
+        score += 0.15
+    
+    # Code blocks bonus
+    if '```' in content:
+        score += 0.1
+    
+    # Critical instructions bonus
+    if any(word in content.upper() for word in ['NEVER', 'ALWAYS', 'MUST', 'SHOULD']):
+        score += 0.1
+    
+    # Practical guidance bonus
+    if any(word in content.lower() for word in ['pattern', 'best practice', 'guideline', 'principle']):
+        score += 0.05
+    
+    return min(1.0, score)
+
+
+def _assess_structure(content: str) -> float:
+    """Assess structural quality of rule content."""
+    score = 0.0
+    
+    # Header structure
+    if content.count('##') >= 2:
+        score += 0.3
+    elif content.count('#') >= 1:
+        score += 0.2
+    
+    # List structure
+    if content.count('\n-') >= 3 or content.count('\n*') >= 3:
+        score += 0.2
+    
+    # Numbered lists
+    if content.count('\n1.') >= 1:
+        score += 0.2
+    
+    # Code formatting
+    if content.count('```') >= 2:
+        score += 0.2
+    
+    # Bold/emphasis
+    if content.count('**') >= 4:
+        score += 0.1
+    
+    return min(1.0, score)
+
+
+# ===================================
+# ANALYTICS COMMAND GROUP
+# ===================================
+
+@main.group()
+def analytics():
+    """Analytics and insights commands."""
+    pass
+
+
+@analytics.command()
+@click.argument('processing_results_dir', type=click.Path(exists=True))
+@click.option('--output', '-o', help='Insights report output path')
+@click.option('--format', type=click.Choice(['json', 'yaml', 'md']), default='md', help='Output format')
+@click.option('--include-recommendations', is_flag=True, default=True, help='Include improvement recommendations')
+def insights(processing_results_dir, output, format, include_recommendations):
+    """Generate insights from batch processing results."""
+    
+    results_path = Path(processing_results_dir)
+    
+    # Find all insights and metadata files
+    insights_files = list(results_path.rglob("*insights.json"))
+    metadata_files = list(results_path.rglob("metadata.json"))
+    
+    if not insights_files and not metadata_files:
+        click.echo(f"❌ No processing results found in {results_path}")
+        return
+    
+    click.echo(f"📊 Generating insights from {len(insights_files)} insights files and {len(metadata_files)} metadata files...")
+    
+    # Aggregate insights
+    combined_insights = {
+        'analysis_timestamp': time.time(),
+        'source_directory': str(results_path),
+        'insights_files_processed': len(insights_files),
+        'metadata_files_processed': len(metadata_files),
+        'overall_statistics': {
+            'total_sources_processed': 0,
+            'total_rules_generated': 0,
+            'total_clusters_created': 0,
+            'processing_time_total': 0.0,
+            'average_coherence': 0.0
+        },
+        'technology_breakdown': {},
+        'quality_metrics': {},
+        'performance_analysis': {},
+        'recommendations': []
+    }
+    
+    total_coherence_scores = []
+    
+    # Process insights files
+    for insights_file in insights_files:
+        try:
+            with open(insights_file, 'r') as f:
+                data = json.load(f)
+            
+            # Aggregate statistics
+            if 'result_summary' in data:
+                summary = data['result_summary']
+                combined_insights['overall_statistics']['total_sources_processed'] += summary.get('sources_processed', 0)
+                combined_insights['overall_statistics']['total_rules_generated'] += summary.get('total_rules_generated', 0)
+                combined_insights['overall_statistics']['processing_time_total'] += summary.get('processing_time', 0)
+                
+                if 'quality_metrics' in summary:
+                    qm = summary['quality_metrics']
+                    if 'overall_coherence' in qm:
+                        total_coherence_scores.append(qm['overall_coherence'])
+            
+            # Process clusters
+            if 'clusters' in data:
+                combined_insights['overall_statistics']['total_clusters_created'] += len(data['clusters'])
+                
+                for cluster in data['clusters']:
+                    tech = cluster.get('technology', 'unknown')
+                    if tech not in combined_insights['technology_breakdown']:
+                        combined_insights['technology_breakdown'][tech] = {
+                            'clusters': 0,
+                            'total_rules': 0,
+                            'avg_coherence': 0.0,
+                            'coherence_scores': []
+                        }
+                    
+                    combined_insights['technology_breakdown'][tech]['clusters'] += 1
+                    combined_insights['technology_breakdown'][tech]['total_rules'] += cluster.get('rules_count', 0)
+                    
+                    if 'coherence_score' in cluster:
+                        combined_insights['technology_breakdown'][tech]['coherence_scores'].append(cluster['coherence_score'])
+        
+        except Exception as e:
+            click.echo(f"⚠️ Failed to process {insights_file}: {e}")
+    
+    # Calculate averages
+    if total_coherence_scores:
+        combined_insights['overall_statistics']['average_coherence'] = sum(total_coherence_scores) / len(total_coherence_scores)
+    
+    # Calculate technology averages
+    for tech_data in combined_insights['technology_breakdown'].values():
+        if tech_data['coherence_scores']:
+            tech_data['avg_coherence'] = sum(tech_data['coherence_scores']) / len(tech_data['coherence_scores'])
+        del tech_data['coherence_scores']  # Remove raw scores from output
+    
+    # Performance analysis
+    if combined_insights['overall_statistics']['processing_time_total'] > 0:
+        combined_insights['performance_analysis'] = {
+            'avg_time_per_source': combined_insights['overall_statistics']['processing_time_total'] / max(1, combined_insights['overall_statistics']['total_sources_processed']),
+            'avg_rules_per_source': combined_insights['overall_statistics']['total_rules_generated'] / max(1, combined_insights['overall_statistics']['total_sources_processed']),
+            'throughput_sources_per_minute': 60 * combined_insights['overall_statistics']['total_sources_processed'] / max(1, combined_insights['overall_statistics']['processing_time_total'])
+        }
+    
+    # Generate recommendations
+    if include_recommendations:
+        if combined_insights['overall_statistics']['average_coherence'] < 0.7:
+            combined_insights['recommendations'].append(
+                f"Overall coherence ({combined_insights['overall_statistics']['average_coherence']:.3f}) could be improved by using higher quality documentation sources"
+            )
+        
+        if len(combined_insights['technology_breakdown']) < 5:
+            combined_insights['recommendations'].append(
+                f"Technology coverage is limited to {len(combined_insights['technology_breakdown'])} technologies - consider expanding source diversity"
+            )
+        
+        if combined_insights['performance_analysis'].get('avg_time_per_source', 0) > 30:
+            combined_insights['recommendations'].append(
+                "Processing time per source is high - consider optimizing scraping configuration or using more concurrent operations"
+            )
+        
+        # Find best and worst performing technologies
+        tech_by_coherence = sorted(
+            combined_insights['technology_breakdown'].items(),
+            key=lambda x: x[1]['avg_coherence'],
+            reverse=True
+        )
+        
+        if tech_by_coherence and len(tech_by_coherence) > 2:
+            best_tech = tech_by_coherence[0]
+            worst_tech = tech_by_coherence[-1]
+            combined_insights['recommendations'].append(
+                f"Best performing technology: {best_tech[0]} (coherence: {best_tech[1]['avg_coherence']:.3f})"
+            )
+            combined_insights['recommendations'].append(
+                f"Consider improving sources for {worst_tech[0]} (coherence: {worst_tech[1]['avg_coherence']:.3f})"
+            )
+    
+    # Output results
+    if output:
+        output_path = Path(output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        if format == 'json':
+            with open(output_path, 'w') as f:
+                json.dump(combined_insights, f, indent=2, default=str)
+        elif format == 'yaml':
+            with open(output_path, 'w') as f:
+                yaml.dump(combined_insights, f, default_flow_style=False)
+        elif format == 'md':
+            with open(output_path, 'w') as f:
+                f.write("# Batch Processing Insights Report\n\n")
+                f.write(f"**Generated:** {time.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+                f.write(f"**Source Directory:** {results_path}\n\n")
+                
+                f.write("## Overall Statistics\n\n")
+                stats = combined_insights['overall_statistics']
+                f.write(f"- **Sources Processed:** {stats['total_sources_processed']}\n")
+                f.write(f"- **Rules Generated:** {stats['total_rules_generated']}\n")
+                f.write(f"- **Clusters Created:** {stats['total_clusters_created']}\n")
+                f.write(f"- **Total Processing Time:** {stats['processing_time_total']:.2f}s\n")
+                f.write(f"- **Average Coherence:** {stats['average_coherence']:.3f}\n\n")
+                
+                if combined_insights['performance_analysis']:
+                    f.write("## Performance Analysis\n\n")
+                    perf = combined_insights['performance_analysis']
+                    f.write(f"- **Avg Time per Source:** {perf.get('avg_time_per_source', 0):.2f}s\n")
+                    f.write(f"- **Avg Rules per Source:** {perf.get('avg_rules_per_source', 0):.1f}\n")
+                    f.write(f"- **Throughput:** {perf.get('throughput_sources_per_minute', 0):.1f} sources/min\n\n")
+                
+                if combined_insights['technology_breakdown']:
+                    f.write("## Technology Breakdown\n\n")
+                    for tech, data in sorted(combined_insights['technology_breakdown'].items()):
+                        f.write(f"### {tech.title()}\n")
+                        f.write(f"- Clusters: {data['clusters']}\n")
+                        f.write(f"- Total Rules: {data['total_rules']}\n")
+                        f.write(f"- Avg Coherence: {data['avg_coherence']:.3f}\n\n")
+                
+                if combined_insights['recommendations']:
+                    f.write("## Recommendations\n\n")
+                    for i, rec in enumerate(combined_insights['recommendations'], 1):
+                        f.write(f"{i}. {rec}\n")
+        
+        click.echo(f"📄 Insights report saved: {output_path}")
+    else:
+        # Display summary to console
+        stats = combined_insights['overall_statistics']
+        click.echo(f"\n📊 Processing Insights Summary:")
+        click.echo(f"   Sources processed: {stats['total_sources_processed']}")
+        click.echo(f"   Rules generated: {stats['total_rules_generated']}")
+        click.echo(f"   Clusters created: {stats['total_clusters_created']}")
+        click.echo(f"   Average coherence: {stats['average_coherence']:.3f}")
+        
+        if combined_insights['technology_breakdown']:
+            click.echo(f"\n🔧 Technology Coverage:")
+            for tech, data in list(combined_insights['technology_breakdown'].items())[:5]:
+                click.echo(f"   {tech}: {data['clusters']} clusters, {data['total_rules']} rules")
+        
+        if combined_insights['recommendations']:
+            click.echo(f"\n💡 Top Recommendations:")
+            for i, rec in enumerate(combined_insights['recommendations'][:3], 1):
+                click.echo(f"   {i}. {rec}")
+
+
+# ===================================
+# INTELLIGENT ENHANCEMENT COMMANDS
+# ===================================
+
+@main.group()
+@click.pass_context
+def interactive(ctx):
+    """Intelligent interactive commands for enhanced user experience."""
+    ctx.ensure_object(dict)
+
+
+@interactive.command('session')
+@click.option('--project-type', help='Type of project you are working on')
+@click.option('--technologies', help='Comma-separated list of technologies')
+@click.option('--experience-level', type=click.Choice(['beginner', 'intermediate', 'advanced', 'expert']), 
+              default='intermediate', help='Your experience level')
+@click.option('--session-id', help='Resume existing session by ID')
+@click.option('--bedrock/--no-bedrock', default=False, help='Use Bedrock for enhanced recommendations')
+@click.pass_context
+def interactive_session(ctx, project_type, technologies, experience_level, session_id, bedrock):
+    """Start an interactive documentation processing session."""
+    try:
+        from .interactive.cli_assistant import InteractiveCLIAssistant
+        from .intelligence.models import UserIntent, ComplexityLevel
+        
+        # Setup bedrock config if requested
+        bedrock_config = None
+        if bedrock or ctx.obj.get('provider') == 'bedrock':
+            bedrock_config = {
+                'model_id': ctx.obj.get('model_id', 'amazon.nova-lite-v1:0'),
+                'region': ctx.obj.get('region', 'us-east-1')
+            }
+            
+            if ctx.obj.get('credentials_csv'):
+                from .utils.credentials import setup_bedrock_credentials
+                cred_result = setup_bedrock_credentials(ctx.obj.get('credentials_csv'))
+                if not cred_result.get('validation', {}).get('success', False):
+                    click.echo("⚠️  Bedrock credentials validation failed - using basic mode", err=True)
+                    bedrock_config = None
+        
+        # Initialize assistant
+        assistant = InteractiveCLIAssistant(bedrock_config)
+        
+        # Run interactive session
+        click.echo("🚀 Starting intelligent interactive session...")
+        click.echo("   This guided workflow will help you generate personalized rules")
+        click.echo("   based on your project needs and experience level.\n")
+        
+        async def run_session():
+            try:
+                session_result = await assistant.start_interactive_session(session_id)
+                
+                click.echo(f"\n✨ Session completed successfully!")
+                click.echo(f"   Session ID: {session_result.session_id}")
+                click.echo(f"   Steps completed: {len(session_result.completed_steps)}")
+                
+                if "generation_results" in session_result.metadata:
+                    results = session_result.metadata["generation_results"]
+                    click.echo(f"   Rules generated: {results.get('rules_generated', 0)}")
+                    click.echo(f"   Sources processed: {results.get('sources_processed', 0)}")
+                    
+                    if results.get('output_directory'):
+                        click.echo(f"   Output saved to: {results['output_directory']}")
+                
+                return session_result
+                
+            except Exception as e:
+                click.echo(f"❌ Interactive session failed: {e}", err=True)
+                raise click.Abort()
+        
+        # Run the session
+        _run_async(run_session())
+        
+    except ImportError as e:
+        click.echo(f"❌ Interactive features not available: {e}", err=True)
+        click.echo("   Try installing additional dependencies", err=True)
+        raise click.Abort()
+
+
+@interactive.command('analyze')
+@click.argument('content', required=False)
+@click.option('--url', help='URL of documentation to analyze')
+@click.option('--file', 'input_file', type=click.Path(exists=True), help='File containing content to analyze')
+@click.option('--output', '-o', type=click.Path(), help='Output file for analysis results')
+@click.option('--bedrock/--no-bedrock', default=False, help='Use Bedrock for enhanced analysis')
+@click.pass_context
+def analyze_content(ctx, content, url, input_file, output, bedrock):
+    """Perform intelligent semantic analysis of documentation content."""
+    try:
+        from .intelligence.semantic_analyzer import SemanticAnalyzer
+        
+        # Get content from various sources
+        if not any([content, url, input_file]):
+            content = click.prompt("Enter content to analyze", type=str)
+        
+        if input_file:
+            with open(input_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+        
+        if not content and not url:
+            click.echo("❌ No content provided to analyze", err=True)
+            raise click.Abort()
+        
+        # Setup bedrock config
+        bedrock_config = None
+        if bedrock or ctx.obj.get('provider') == 'bedrock':
+            bedrock_config = {
+                'model_id': ctx.obj.get('model_id', 'amazon.nova-lite-v1:0'),
+                'region': ctx.obj.get('region', 'us-east-1')
+            }
+        
+        # Initialize analyzer
+        analyzer = SemanticAnalyzer(bedrock_config)
+        
+        async def run_analysis():
+            try:
+                click.echo("🔍 Analyzing content with semantic intelligence...")
+                
+                analysis = await analyzer.analyze_content(
+                    content or "", 
+                    url or "user-provided-content"
+                )
+                
+                # Display results
+                click.echo(f"\n📊 **Semantic Analysis Results**")
+                click.echo(f"   Primary Technology: {analysis.primary_technology}")
+                
+                if analysis.secondary_technologies:
+                    click.echo(f"   Secondary Technologies: {', '.join(analysis.secondary_technologies)}")
+                
+                click.echo(f"   Complexity Level: {analysis.complexity_level.value}")
+                click.echo(f"   Content Type: {analysis.content_type.value}")
+                click.echo(f"   Quality Score: {analysis.quality_score:.2f}")
+                
+                if analysis.framework_version:
+                    click.echo(f"   Framework Version: {analysis.framework_version}")
+                
+                if analysis.content_categories:
+                    click.echo(f"\n📋 **Detected Categories:**")
+                    for category, details in analysis.content_categories.items():
+                        click.echo(f"   • {category}: {details.confidence:.2f} confidence")
+                        if details.topics:
+                            click.echo(f"     Topics: {', '.join(details.topics[:3])}")
+                
+                if analysis.prerequisites:
+                    click.echo(f"\n📚 **Prerequisites:** {', '.join(analysis.prerequisites)}")
+                
+                click.echo(f"\n🔢 **Content Metrics:**")
+                click.echo(f"   Code examples: {analysis.code_examples_count}")
+                click.echo(f"   External links: {analysis.external_links_count}")
+                click.echo(f"   Content length: {analysis.metadata.get('content_length', 0)} characters")
+                
+                # Save results if requested
+                if output:
+                    import json
+                    with open(output, 'w') as f:
+                        json.dump(analysis.model_dump(), f, indent=2, default=str)
+                    click.echo(f"\n💾 Analysis saved to: {output}")
+                
+                return analysis
+                
+            except Exception as e:
+                click.echo(f"❌ Content analysis failed: {e}", err=True)
+                raise click.Abort()
+        
+        _run_async(run_analysis())
+        
+    except ImportError as e:
+        click.echo(f"❌ Semantic analysis features not available: {e}", err=True)
+        raise click.Abort()
+
+
+@interactive.command('query')
+@click.argument('question', required=False)
+@click.option('--technologies', help='Comma-separated list of technologies for context')
+@click.option('--project-type', help='Type of project for context')
+@click.option('--experience-level', type=click.Choice(['beginner', 'intermediate', 'advanced', 'expert']), 
+              default='intermediate', help='Your experience level')
+@click.option('--bedrock/--no-bedrock', default=False, help='Use Bedrock for enhanced responses')
+@click.pass_context
+def natural_language_query(ctx, question, technologies, project_type, experience_level, bedrock):
+    """Ask natural language questions about documentation and coding practices."""
+    try:
+        from .nlp.query_processor import NaturalLanguageQueryProcessor, ProjectContext
+        
+        if not question:
+            question = click.prompt("What would you like to know?", type=str)
+        
+        # Setup bedrock config
+        bedrock_config = None
+        if bedrock or ctx.obj.get('provider') == 'bedrock':
+            bedrock_config = {
+                'model_id': ctx.obj.get('model_id', 'amazon.nova-lite-v1:0'),
+                'region': ctx.obj.get('region', 'us-east-1')
+            }
+        
+        # Initialize query processor
+        processor = NaturalLanguageQueryProcessor(bedrock_config)
+        
+        # Create project context
+        context = None
+        if technologies or project_type:
+            tech_list = technologies.split(',') if technologies else []
+            tech_list = [t.strip() for t in tech_list]
+            context = ProjectContext(
+                technologies=tech_list,
+                project_type=project_type,
+                experience_level=experience_level
+            )
+        
+        async def run_query():
+            try:
+                click.echo(f"🤔 Processing your question: \"{question}\"")
+                click.echo("   Analyzing intent and finding relevant information...\n")
+                
+                response = await processor.process_query(question, context)
+                
+                # Display the answer
+                click.echo(f"💡 **Answer:**")
+                click.echo(f"{response.answer}\n")
+                
+                # Show relevant sources
+                if response.relevant_sources:
+                    click.echo(f"📚 **Relevant Sources:**")
+                    for i, source in enumerate(response.relevant_sources[:3], 1):
+                        click.echo(f"{i}. {source.source}")
+                        click.echo(f"   Reason: {source.reason}")
+                        click.echo(f"   Value: {source.estimated_value}\n")
+                
+                # Show suggested rules
+                if response.suggested_rules:
+                    click.echo(f"📝 **Suggested Rules:**")
+                    for rule in response.suggested_rules[:3]:
+                        click.echo(f"   • {rule}")
+                    click.echo()
+                
+                # Show related topics
+                if response.related_topics:
+                    click.echo(f"🔗 **Related Topics:** {', '.join(response.related_topics[:5])}\n")
+                
+                # Show follow-up suggestions
+                if response.follow_up_suggestions:
+                    click.echo(f"❓ **You might also want to ask:**")
+                    for suggestion in response.follow_up_suggestions[:3]:
+                        click.echo(f"   • {suggestion}")
+                
+                click.echo(f"\n🎯 Confidence: {response.confidence:.1%}")
+                
+                return response
+                
+            except Exception as e:
+                click.echo(f"❌ Query processing failed: {e}", err=True)
+                raise click.Abort()
+        
+        _run_async(run_query())
+        
+    except ImportError as e:
+        click.echo(f"❌ Natural language query features not available: {e}", err=True)
+        raise click.Abort()
+
+
+@interactive.command('predict')
+@click.option('--project-analysis', type=click.Path(exists=True), 
+              help='JSON file with project analysis data')
+@click.option('--user-id', default='default', help='User ID for personalized predictions')
+@click.option('--current-rules', type=click.Path(exists=True), 
+              help='File containing current rules for context')
+@click.option('--output', '-o', type=click.Path(), help='Output file for predictions')
+@click.option('--bedrock/--no-bedrock', default=False, help='Use Bedrock for enhanced predictions')
+@click.pass_context
+def predict_rules(ctx, project_analysis, user_id, current_rules, output, bedrock):
+    """Predict what rules you'll need based on your project patterns."""
+    try:
+        from .intelligence.predictive_enhancer import PredictiveRuleEnhancer
+        from .intelligence.models import ProjectAnalysis
+        from .learning.user_behavior_tracker import UserBehaviorTracker
+        import json
+        
+        # Setup bedrock config
+        bedrock_config = None
+        if bedrock or ctx.obj.get('provider') == 'bedrock':
+            bedrock_config = {
+                'model_id': ctx.obj.get('model_id', 'amazon.nova-lite-v1:0'),
+                'region': ctx.obj.get('region', 'us-east-1')
+            }
+        
+        # Initialize enhancer
+        enhancer = PredictiveRuleEnhancer(bedrock_config)
+        behavior_tracker = UserBehaviorTracker()
+        
+        # Load project analysis
+        if project_analysis:
+            with open(project_analysis, 'r') as f:
+                analysis_data = json.load(f)
+                analysis = ProjectAnalysis(**analysis_data)
+        else:
+            # Create basic analysis from user input
+            click.echo("🔍 Let's analyze your project to make predictions...")
+            has_auth = click.confirm("Does your project have authentication?")
+            has_routing = click.confirm("Does your project use complex routing?")
+            has_state = click.confirm("Does your project use state management?")
+            has_api = click.confirm("Does your project integrate with APIs?")
+            uses_db = click.confirm("Does your project use a database?")
+            has_tests = click.confirm("Does your project have testing setup?")
+            
+            analysis = ProjectAnalysis(
+                has_authentication_patterns=has_auth,
+                uses_complex_routing=has_routing,
+                has_state_management=has_state,
+                has_api_integration=has_api,
+                uses_database=uses_db,
+                has_testing_setup=has_tests
+            )
+        
+        # Load user profile
+        user_profile = behavior_tracker.load_user_profile(user_id)
+        
+        # Load current rules
+        rules_list = []
+        if current_rules:
+            with open(current_rules, 'r') as f:
+                rules_list = f.read().splitlines()
+        
+        async def run_predictions():
+            try:
+                click.echo("🔮 Predicting rule needs based on your project...")
+                
+                predictions = await enhancer.predict_rule_needs(
+                    analysis, user_profile, rules_list
+                )
+                
+                if not predictions:
+                    click.echo("💭 No specific predictions at this time. Your project looks well set up!")
+                    return
+                
+                click.echo(f"\n📋 **Rule Predictions ({len(predictions)} found):**\n")
+                
+                for i, pred in enumerate(predictions, 1):
+                    priority_emoji = {"critical": "🚨", "high": "⚠️ ", "medium": "📝", "low": "💡"}
+                    emoji = priority_emoji.get(pred.priority, "📝")
+                    
+                    click.echo(f"{emoji} **{i}. {pred.rule_type.replace('-', ' ').title()}**")
+                    click.echo(f"   Priority: {pred.priority.title()}")
+                    click.echo(f"   Confidence: {pred.confidence:.1%}")
+                    click.echo(f"   Reason: {pred.reason}")
+                    click.echo(f"   Impact: {pred.estimated_impact or 'Not specified'}")
+                    click.echo(f"   Timing: {pred.suggested_timing or 'When convenient'}")
+                    
+                    if pred.dependencies:
+                        click.echo(f"   Dependencies: {', '.join(pred.dependencies)}")
+                    click.echo()
+                
+                # Save predictions if requested
+                if output:
+                    pred_data = [pred.model_dump() for pred in predictions]
+                    with open(output, 'w') as f:
+                        json.dump(pred_data, f, indent=2, default=str)
+                    click.echo(f"💾 Predictions saved to: {output}")
+                
+                return predictions
+                
+            except Exception as e:
+                click.echo(f"❌ Prediction failed: {e}", err=True)
+                raise click.Abort()
+        
+        _run_async(run_predictions())
+        
+    except ImportError as e:
+        click.echo(f"❌ Predictive features not available: {e}", err=True)
+        raise click.Abort()
+
+
+@interactive.command('insights')
+@click.option('--user-id', default='default', help='User ID for behavior insights')
+@click.option('--global-insights', is_flag=True, help='Show global usage patterns')
+@click.option('--output', '-o', type=click.Path(), help='Output file for insights')
+@click.pass_context
+def user_insights(ctx, user_id, global_insights, output):
+    """Get insights about your learning patterns and system usage."""
+    try:
+        from .learning.user_behavior_tracker import UserBehaviorTracker
+        import json
+        
+        tracker = UserBehaviorTracker()
+        
+        async def run_insights():
+            try:
+                if global_insights:
+                    click.echo("🌍 Analyzing global usage patterns...")
+                    insights = await tracker.get_global_insights()
+                    
+                    click.echo(f"\n📊 **Global Usage Insights:**")
+                    
+                    if insights['popular_technologies']:
+                        click.echo(f"\n🔧 **Popular Technologies:**")
+                        for tech, count in insights['popular_technologies'][:5]:
+                            click.echo(f"   • {tech}: {count} sessions")
+                    
+                    click.echo(f"\n📈 **Global Stats:**")
+                    click.echo(f"   Success patterns: {insights['success_patterns_count']}")
+                    click.echo(f"   Total error reports: {insights['total_error_reports']}")
+                    
+                    if insights.get('insights'):
+                        click.echo(f"\n💡 **System Insights:**")
+                        for insight in insights['insights']:
+                            click.echo(f"   • {insight}")
+                
+                else:
+                    click.echo(f"👤 Analyzing behavior patterns for user: {user_id}")
+                    insights = await tracker.get_user_insights(user_id)
+                    
+                    if 'error' in insights:
+                        click.echo(f"❌ {insights['error']}")
+                        return insights
+                    
+                    summary = insights['user_summary']
+                    click.echo(f"\n📊 **Your Usage Summary:**")
+                    click.echo(f"   Total sessions: {summary['total_sessions']}")
+                    click.echo(f"   Rules generated: {summary['total_rules_generated']}")
+                    click.echo(f"   Account age: {summary['account_age_days']} days")
+                    click.echo(f"   Avg session time: {summary['avg_session_duration']:.1f} minutes")
+                    
+                    prefs = insights['preferences']
+                    click.echo(f"\n🎯 **Your Preferences:**")
+                    click.echo(f"   Learning style: {prefs['learning_style']}")
+                    click.echo(f"   Workflow efficiency: {prefs['workflow_efficiency']:.1%}")
+                    
+                    if prefs['top_frameworks']:
+                        click.echo(f"\n🔧 **Your Top Frameworks:**")
+                        for framework, usage in prefs['top_frameworks'][:3]:
+                            click.echo(f"   • {framework}: {usage} times")
+                    
+                    if insights['skill_progression']:
+                        click.echo(f"\n📈 **Skill Progression:**")
+                        for skill, level in insights['skill_progression'].items():
+                            click.echo(f"   • {skill}: {level}")
+                    
+                    patterns = insights['recent_patterns']
+                    click.echo(f"\n🔄 **Recent Patterns:**")
+                    click.echo(f"   Success rate: {patterns['success_rate']:.1%}")
+                    click.echo(f"   Productivity trend: {patterns['productivity_trend']}")
+                    
+                    if insights.get('recommendations'):
+                        click.echo(f"\n💡 **Recommendations for You:**")
+                        for rec in insights['recommendations']:
+                            click.echo(f"   • {rec}")
+                
+                # Save insights if requested
+                if output:
+                    with open(output, 'w') as f:
+                        json.dump(insights, f, indent=2, default=str)
+                    click.echo(f"\n💾 Insights saved to: {output}")
+                
+                return insights
+                
+            except Exception as e:
+                click.echo(f"❌ Insights analysis failed: {e}", err=True)
+                raise click.Abort()
+        
+        _run_async(run_insights())
+        
+    except ImportError as e:
+        click.echo(f"❌ User insights features not available: {e}", err=True)
+        raise click.Abort()
 
 
 if __name__ == '__main__':

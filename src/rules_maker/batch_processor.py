@@ -632,7 +632,7 @@ class MLBatchProcessor:
         content_analysis: Any
     ) -> float:
         """Estimate initial quality score for generated rules."""
-        score = 0.5  # Base score
+        score = 0.4  # Base score (allows truly low-quality to be < 0.5)
         
         # Content length bonus
         if len(rules_content) > 500:
@@ -640,12 +640,19 @@ class MLBatchProcessor:
         if len(rules_content) > 1000:
             score += 0.1
         
-        # Semantic analysis bonus
-        if hasattr(content_analysis, 'best_practices') and content_analysis.best_practices.items:
-            score += min(0.2, len(content_analysis.best_practices.items) * 0.05)
-        
-        if hasattr(content_analysis, 'patterns') and content_analysis.patterns.patterns:
-            score += min(0.2, len(content_analysis.patterns.patterns) * 0.02)
+        # Semantic analysis bonus (defensive for mocks/missing attrs)
+        try:
+            items = getattr(getattr(content_analysis, 'best_practices', object()), 'items', [])
+            items_len = len(items) if hasattr(items, '__len__') else 0
+            score += min(0.2, items_len * 0.05)
+        except Exception:
+            pass
+        try:
+            pats = getattr(getattr(content_analysis, 'patterns', object()), 'patterns', [])
+            pats_len = len(pats) if hasattr(pats, '__len__') else 0
+            score += min(0.2, pats_len * 0.02)
+        except Exception:
+            pass
         
         return min(1.0, score)
     

@@ -10,20 +10,24 @@ import time
 from typing import List, Optional, Dict, Any, Set
 from urllib.parse import urljoin, urlparse
 import logging
+import warnings
 
 import aiohttp
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 from fake_useragent import UserAgent
 
 from .base import BaseScraper
 from ..models import (
     ScrapingResult, ScrapingConfig, ScrapingStatus, 
-    DocumentationType, ContentSection
+    ContentSection
 )
 from ..utils import detect_documentation_type, extract_main_content
 
 
 logger = logging.getLogger(__name__)
+
+# Suppress XMLParsedAsHTMLWarning
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
 
 class AsyncDocumentationScraper(BaseScraper):
@@ -99,7 +103,9 @@ class AsyncDocumentationScraper(BaseScraper):
                 # Make the request
                 async with self.session.get(url) as response:
                     if response.status == 200:
-                        html_content = await response.text()
+                        # Handle encoding properly
+                        encoding = response.charset or 'utf-8'
+                        html_content = await response.text(encoding=encoding, errors='replace')
                         return await self._process_content(url, html_content)
                     else:
                         logger.warning(f"Failed to fetch {url}: HTTP {response.status}")

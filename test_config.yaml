@@ -1,0 +1,12 @@
+batch_processing:
+  max_concurrent: 5
+  output_format:
+  - cursor
+  quality_threshold: 0.6
+bedrock_integration:
+  model_id: amazon.nova-lite-v1:0
+  region: us-east-1
+  temperature: 0.3
+ml_engine:
+  enable_self_improvement: false
+  quality_threshold: 0.6
