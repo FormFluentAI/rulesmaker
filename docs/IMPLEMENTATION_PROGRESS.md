@@ -1,6 +1,6 @@
 # Implementation Progress
 
-## Completed Features 
+## Completed Features
 
 ### AWS Bedrock Integration (Phase 1 - COMPLETE)
 **Status**: Production-ready and fully tested
@@ -25,10 +25,13 @@
   - Cost tracking for Bedrock API calls
   - Error recovery and retry mechanisms
 
-#### Working Models:
--  **Claude 3.5 Sonnet** (`anthropic.claude-3-5-sonnet-20240620-v1:0`) - Primary production model
--  **Claude 3 Haiku** (`anthropic.claude-3-haiku-20240307-v1:0`) - Cost-efficient alternative
-- L **Nova Models** - Cross-inference limitations prevent direct access
+#### Working Models (Clarified):
+- Amazon Nova Lite (`amazon.nova-lite-v1:0`) — Verified working via Bedrock (tested in `us-east-1`; also usable via inference profile ARNs where enabled, e.g., `eu-central-1`).
+- Claude 3.5 Sonnet (`anthropic.claude-3-5-sonnet-20240620-v1:0`) — Supported via Bedrock when model access is enabled in your AWS account.
+- Claude 3 Haiku (`anthropic.claude-3-haiku-20240307-v1:0`) — Supported via Bedrock when model access is enabled.
+
+
+Note: Cross-region access and inference profile requirements vary by tenant. If cross-inference is not enabled for your account/region, Bedrock calls may fail with access errors; use a region where the model is enabled or an appropriate inference profile ARN.
 
 #### Testing Results:
 - **Rule Generation**: Successfully generates 2000+ character professional rules
@@ -39,14 +42,14 @@
 #### Usage Examples Verified:
 ```python
 # Quick rule generation
-from rules_maker.bedrock_integration import generate_cursor_rules_quick
-rules = generate_cursor_rules_quick("FastAPI documentation content...")
+from rules_maker.bedrock_integration import quick_cursor_rules
+rules = quick_cursor_rules("FastAPI documentation content...")
 
 # Advanced usage with cost tracking
 from rules_maker.bedrock_integration import BedrockRulesMaker
 bedrock = BedrockRulesMaker()
-rules = bedrock.generate_cursor_rules(content, track_usage=True)
-print(f"Cost: ${bedrock.get_usage_stats()['estimated_cost']:.4f}")
+rules = bedrock.generate_cursor_rules(content)
+print(f"Cost: ${bedrock.get_usage_stats()['estimated_cost_usd']:.4f}")
 ```
 
 ### Technical Issues Resolved:
@@ -56,10 +59,10 @@ print(f"Cost: ${bedrock.get_usage_stats()['estimated_cost']:.4f}")
 4. **Rate Limiting**: Confirmed proper throttling behavior for production usage
 
 ### Documentation Updated:
--  **CLAUDE.md**: Comprehensive Bedrock integration guide added
--  **Development Commands**: Bedrock testing and validation commands
--  **API Usage Examples**: Production-ready code snippets
--  **Architecture Documentation**: Updated with credential management system
+-  **CLAUDE.md**: Comprehensive Bedrock integration guide added
+-  **Development Commands**: Bedrock testing and validation commands
+-  **API Usage Examples**: Production-ready code snippets
+-  **Architecture Documentation**: Updated with credential management system
 
 ## Next Phase Candidates
 
@@ -83,19 +86,20 @@ print(f"Cost: ${bedrock.get_usage_stats()['estimated_cost']:.4f}")
 
 ## Production Readiness Status
 
-###  Ready for Production Use:
+###  Ready for Production Use:
+
 - **Core Rule Generation**: Cursor and Windsurf transformers
 - **AWS Bedrock Integration**: Complete credential and model management
 - **Technology Detection**: Automatic framework identification
 - **Error Handling**: Comprehensive exception management
 - **Type Safety**: Full Pydantic model coverage
 
-### =� Needs Enhancement (Non-blocking):
+### = Needs Enhancement (Non-blocking):
 - **CLI Robustness**: Python API recommended over CLI commands
 - **Documentation Coverage**: Advanced usage patterns
 - **Performance Testing**: Large-scale documentation processing
 
-### =4 Known Limitations:
+### Known Limitations:
 - **Nova Model Access**: Cross-inference restrictions
 - **Rate Limiting**: AWS throttling during intensive usage (expected behavior)
 - **Cost Monitoring**: Manual tracking required for budget management
@@ -118,14 +122,14 @@ conda activate rulescraper
 PYTHONPATH=src python -c "
 from rules_maker.utils.credentials import setup_bedrock_credentials
 result = setup_bedrock_credentials()
-print(' Bedrock integration ready!')
+print(' Bedrock integration ready!')
 print(f'Validation: {result[\"validation\"][\"success\"]}')
 "
 
 # Generate rules
 PYTHONPATH=src python -c "
-from rules_maker.bedrock_integration import generate_cursor_rules_quick
-rules = generate_cursor_rules_quick('FastAPI documentation content')
+from rules_maker.bedrock_integration import quick_cursor_rules
+rules = quick_cursor_rules('FastAPI documentation content')
 print(f'Generated {len(rules)} characters of professional rules')
 "
 ```

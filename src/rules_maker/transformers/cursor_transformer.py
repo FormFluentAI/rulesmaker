@@ -406,7 +406,9 @@ class CursorRuleTransformer(RuleTransformer):
         for result in results:
             if result.sections:
                 for section in result.sections:
-                    section_dict = section.dict() if hasattr(section, 'dict') else section
+                    section_dict = (
+                        section.model_dump() if hasattr(section, 'model_dump') else section.dict() if hasattr(section, 'dict') else section
+                    )
                     title = section_dict.get('title', '')
                     if title:
                         # Extract meaningful concepts from titles

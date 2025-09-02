@@ -262,7 +262,7 @@ config = botocore.config.Config(
 )
 
 client = boto3.client(
-    "bedrock-runtime", 
+    "bedrock-runtime",
     region_name="us-east-1",
     config=config
 )

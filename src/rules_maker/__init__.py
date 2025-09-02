@@ -1,121 +1,168 @@
 """
 🤖📋 Rules Maker: Transform web documentation into AI coding assistant rules
 
-A powerful Python library that scrapes documentation from the web and transforms it 
+A powerful Python library that scrapes documentation from the web and transforms it
 into structured rules and workflows for AI coding assistants like Cursor and Windsurf.
 """
 
 from .version import __version__
 
-# Core components
-from .scrapers import (
-    DocumentationScraper,
-    AsyncDocumentationScraper,
-    AdaptiveDocumentationScraper,
-)
+__all__ = ["__version__"]
 
-from .extractors import (
-    ContentExtractor,
-    MLContentExtractor, 
-    LLMContentExtractor,
-    StructuredContentExtractor,
-)
+# Import optional submodules lazily/safely to avoid heavy deps at import time.
+# Each block is wrapped so that missing optional dependencies do not break basic usage.
 
-from .transformers import (
-    RuleTransformer,
-    CursorRuleTransformer,
-    WindsurfRuleTransformer,
-    WorkflowTransformer,
-)
+try:
+    from .scrapers import (
+        DocumentationScraper,
+        AsyncDocumentationScraper,
+        AdaptiveDocumentationScraper,
+    )
+    __all__ += [
+        "DocumentationScraper",
+        "AsyncDocumentationScraper",
+        "AdaptiveDocumentationScraper",
+    ]
+except Exception:
+    pass
 
-from .templates import (
-    TemplateEngine,
-    RuleTemplate,
-    WorkflowTemplate,
-)
+try:
+    from .extractors import (
+        ContentExtractor,
+        MLContentExtractor,
+        LLMContentExtractor,
+        StructuredContentExtractor,
+    )
+    __all__ += [
+        "ContentExtractor",
+        "MLContentExtractor",
+        "LLMContentExtractor",
+        "StructuredContentExtractor",
+    ]
+except Exception:
+    pass
 
-from .processors import (
-    ContentProcessor,
-    DocumentationProcessor,
-    APIDocumentationProcessor,
-    CodeDocumentationProcessor,
-)
+try:
+    from .transformers import (
+        RuleTransformer,
+        CursorRuleTransformer,
+        WindsurfRuleTransformer,
+        WorkflowTransformer,
+    )
+    __all__ += [
+        "RuleTransformer",
+        "CursorRuleTransformer",
+        "WindsurfRuleTransformer",
+        "WorkflowTransformer",
+    ]
+except Exception:
+    pass
 
-from .models import (
-    ScrapingResult,
-    DocumentationStructure,
-    RuleSet,
-    Workflow,
-    ScrapingConfig,
-    TransformationConfig,
-)
+try:
+    from .templates import (
+        TemplateEngine,
+        RuleTemplate,
+        WorkflowTemplate,
+    )
+    __all__ += [
+        "TemplateEngine",
+        "RuleTemplate",
+        "WorkflowTemplate",
+    ]
+except Exception:
+    pass
 
-from .strategies import (
-    ScrapingStrategy,
-    ContentExtractionStrategy,
-    RuleGenerationStrategy,
-    LearningStrategy,
-)
+try:
+    from .processors import (
+        ContentProcessor,
+        DocumentationProcessor,
+        APIDocumentationProcessor,
+        CodeDocumentationProcessor,
+    )
+    __all__ += [
+        "ContentProcessor",
+        "DocumentationProcessor",
+        "APIDocumentationProcessor",
+        "CodeDocumentationProcessor",
+    ]
+except Exception:
+    pass
 
-from .filters import (
-    ContentFilter,
-    RelevanceFilter,
-    QualityFilter,
-    DuplicateFilter,
-)
+try:
+    from .models import (
+        ScrapingResult,
+        DocumentationStructure,
+        RuleSet,
+        Workflow,
+        ScrapingConfig,
+        TransformationConfig,
+    )
+    __all__ += [
+        "ScrapingResult",
+        "DocumentationStructure",
+        "RuleSet",
+        "Workflow",
+        "ScrapingConfig",
+        "TransformationConfig",
+    ]
+except Exception:
+    pass
 
-from .utils import (
-    validate_url,
-    clean_content,
-    detect_documentation_type,
-    setup_logging,
-)
+try:
+    from .strategies import (
+        ScrapingStrategy,
+        ContentExtractionStrategy,
+        RuleGenerationStrategy,
+        LearningStrategy,
+    )
+    __all__ += [
+        "ScrapingStrategy",
+        "ContentExtractionStrategy",
+        "RuleGenerationStrategy",
+        "LearningStrategy",
+    ]
+except Exception:
+    pass
 
-__all__ = [
-    "__version__",
-    # Scrapers
-    "DocumentationScraper",
-    "AsyncDocumentationScraper", 
-    "AdaptiveDocumentationScraper",
-    # Extractors
-    "ContentExtractor",
-    "MLContentExtractor",
-    "LLMContentExtractor", 
-    "StructuredContentExtractor",
-    # Transformers
-    "RuleTransformer",
-    "CursorRuleTransformer",
-    "WindsurfRuleTransformer",
-    "WorkflowTransformer",
-    # Templates
-    "TemplateEngine",
-    "RuleTemplate",
-    "WorkflowTemplate",
-    # Processors
-    "ContentProcessor",
-    "DocumentationProcessor",
-    "APIDocumentationProcessor",
-    "CodeDocumentationProcessor",
-    # Models
-    "ScrapingResult",
-    "DocumentationStructure",
-    "RuleSet",
-    "Workflow",
-    "ScrapingConfig",
-    "TransformationConfig",
-    # Strategies
-    "ScrapingStrategy",
-    "ContentExtractionStrategy",
-    "RuleGenerationStrategy",
-    "LearningStrategy",
-    # Filters
-    "ContentFilter",
-    "RelevanceFilter",
-    "QualityFilter",
-    "DuplicateFilter",
-    # Utils
-    "validate_url",
-    "clean_content",
-    "detect_documentation_type",
-    "setup_logging",
-]
+try:
+    from .filters import (
+        ContentFilter,
+        RelevanceFilter,
+        QualityFilter,
+        DuplicateFilter,
+    )
+    __all__ += [
+        "ContentFilter",
+        "RelevanceFilter",
+        "QualityFilter",
+        "DuplicateFilter",
+    ]
+except Exception:
+    pass
+
+try:
+    from .utils import (
+        validate_url,
+        clean_content,
+        detect_documentation_type,
+        setup_logging,
+    )
+    __all__ += [
+        "validate_url",
+        "clean_content",
+        "detect_documentation_type",
+        "setup_logging",
+    ]
+except Exception:
+    pass
+
+# Learning engine (Phase 2)
+try:
+    from .learning import (
+        LearningEngine,
+    )
+    __all__ += [
+        "LearningEngine",
+    ]
+except Exception:
+    pass

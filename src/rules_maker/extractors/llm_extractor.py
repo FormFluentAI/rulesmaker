@@ -11,9 +11,13 @@ import logging
 from typing import Dict, List, Any, Optional, Union
 from dataclasses import dataclass, field
 from enum import Enum
+import asyncio
 
 from bs4 import BeautifulSoup
 import httpx
+import time
+import uuid
+import hashlib
 
 from .base import ContentExtractor
 from ..models import ContentSection, Rule, RuleSet
@@ -45,15 +49,22 @@ class LLMConfig:
     aws_access_key_id: Optional[str] = None  # For AWS Bedrock
     aws_secret_access_key: Optional[str] = None  # For AWS Bedrock
     aws_session_token: Optional[str] = None  # For AWS Bedrock
+    # Retry/backoff configuration (for Bedrock/transient errors)
+    retry_max_attempts: int = 3
+    retry_base_ms: int = 250
+    retry_max_ms: int = 2000
+    # Concurrency control for LLM calls
+    max_concurrency: int = 4
 
 
 class LLMContentExtractor(ContentExtractor):
     """LLM-powered content extraction and rule generation."""
     
     def __init__(
-        self, 
+        self,
         patterns: Optional[List] = None,
-        llm_config: Optional[LLMConfig] = None
+        llm_config: Optional[LLMConfig] = None,
+        config: Optional[Dict[str, Any]] = None,
     ):
         """Initialize the LLM extractor."""
         super().__init__(patterns)
@@ -62,9 +73,128 @@ class LLMContentExtractor(ContentExtractor):
             provider=LLMProvider.OPENAI,
             model_name="gpt-3.5-turbo"
         )
+
+        # Optional config dict override (env fallback already handled below for specific knobs)
+        if isinstance(config, dict):
+            bed = (config or {}).get('bedrock') if config else None
+            if bed:
+                self.config.provider = LLMProvider.BEDROCK
+                self.config.model_name = str(bed.get('model_id') or self.config.model_name)
+                self.config.region = str(bed.get('region') or self.config.region or 'us-east-1')
+                if 'timeout' in bed:
+                    self.config.timeout = int(bed['timeout'])
+                if 'concurrency' in bed:
+                    self.config.max_concurrency = int(bed['concurrency'])
+                retry = bed.get('retry') or {}
+                if retry:
+                    if 'max_attempts' in retry:
+                        self.config.retry_max_attempts = int(retry['max_attempts'])
+                    if 'base_ms' in retry:
+                        self.config.retry_base_ms = int(retry['base_ms'])
+                    if 'max_ms' in retry:
+                        self.config.retry_max_ms = int(retry['max_ms'])
+        # Multi-provider fallback and credentials config
+        self._fallback_enabled = False
+        self._fallback_providers: List[str] = []
+        self._provider_settings: Dict[str, Dict[str, Any]] = {}
+        if isinstance(config, dict):
+            # Providers API keys / settings
+            providers = config.get('providers') or {}
+            if isinstance(providers, dict):
+                self._provider_settings = providers
+            # Fallback chain
+            fb = (config.get('bedrock') or {}).get('fallback') or config.get('fallback') or {}
+            if isinstance(fb, dict):
+                self._fallback_enabled = bool(fb.get('enabled', False))
+                prov = fb.get('providers') or []
+                if isinstance(prov, list):
+                    self._fallback_providers = [str(p).lower() for p in prov]
+        # Env overrides for fallback flags
+        import os
+        env_fb = (os.environ.get('FALLBACK_ENABLED') or '').lower()
+        if env_fb in {'1', 'true', 'yes', 'on'}:
+            self._fallback_enabled = True
+        env_list = os.environ.get('FALLBACK_PROVIDERS')
+        if env_list:
+            self._fallback_providers = [p.strip().lower() for p in env_list.split(',') if p.strip()]
         
         # Initialize HTTP client
         self.client = httpx.AsyncClient(timeout=self.config.timeout)
+
+        # Concurrency limiting (semaphore)
+        # Allow env override to quickly tune without code changes
+        try:
+            env_conc = int((__import__('os').environ.get('BEDROCK_MAX_CONCURRENCY') or '').strip() or 0)
+        except Exception:
+            env_conc = 0
+        max_concurrency = env_conc or getattr(self.config, 'max_concurrency', 4) or 4
+        self._semaphore = asyncio.Semaphore(max_concurrency)
+        logger.info(f"LLMContentExtractor concurrency cap set to {max_concurrency}")
+
+        # Telemetry settings (JSON logs, prompt redaction)
+        self._telemetry_json = False
+        self._telemetry_redact = True
+        if isinstance(config, dict):
+            tel = (config.get('telemetry') if config else None) or {}
+            if isinstance(tel, dict):
+                self._telemetry_json = bool(tel.get('json', False))
+                self._telemetry_redact = bool(tel.get('redact_prompts', True))
+        try:
+            import os as _os
+            env_json = (_os.environ.get('RULES_MAKER_LOG_JSON') or '').lower()
+            if env_json in {'1','true','yes','on'}:
+                self._telemetry_json = True
+            env_redact = (_os.environ.get('RULES_MAKER_REDACT_PROMPTS') or '').lower()
+            if env_redact in {'0','false','no','off'}:
+                self._telemetry_redact = False
+        except Exception:
+            pass
+
+        # Caching settings
+        self._cache_enabled = False
+        self._cache_dir: Optional[str] = None
+        self._memory_cache: Dict[str, Any] = {}
+        if isinstance(config, dict):
+            cache = (config.get('cache') if config else None) or {}
+            if isinstance(cache, dict):
+                self._cache_enabled = bool(cache.get('enabled', False))
+                self._cache_dir = str(cache.get('dir') or '') or None
+        try:
+            _os = __import__('os')
+            env_cache = (_os.environ.get('RULES_MAKER_CACHE_ENABLED') or '').lower()
+            if env_cache in {'1','true','yes','on'}:
+                self._cache_enabled = True
+            if _os.environ.get('RULES_MAKER_CACHE_DIR'):
+                self._cache_dir = _os.environ.get('RULES_MAKER_CACHE_DIR')
+        except Exception:
+            pass
+        if self._cache_enabled and not self._cache_dir:
+            # Default cache dir under user cache
+            from pathlib import Path as _Path
+            self._cache_dir = str(_Path.home() / '.cache' / 'rules_maker' / 'llm')
+
+        # Budget guardrails
+        self._budget_hourly_usd: Optional[float] = None
+        self._budget_daily_usd: Optional[float] = None
+        self._hourly_cost_accum = 0.0
+        self._daily_cost_accum = 0.0
+        self._hourly_started_at = time.time()
+        self._daily_started_at = time.time()
+        if isinstance(config, dict):
+            budget = (config.get('budget') if config else None) or {}
+            if isinstance(budget, dict):
+                if budget.get('hourly_usd') is not None:
+                    self._budget_hourly_usd = float(budget.get('hourly_usd'))
+                if budget.get('daily_usd') is not None:
+                    self._budget_daily_usd = float(budget.get('daily_usd'))
+        try:
+            _os = __import__('os')
+            if _os.environ.get('RULES_MAKER_BUDGET_HOURLY_USD'):
+                self._budget_hourly_usd = float(_os.environ.get('RULES_MAKER_BUDGET_HOURLY_USD'))
+            if _os.environ.get('RULES_MAKER_BUDGET_DAILY_USD'):
+                self._budget_daily_usd = float(_os.environ.get('RULES_MAKER_BUDGET_DAILY_USD'))
+        except Exception:
+            pass
         
         # Token usage/cost tracking
         self._usage: Dict[str, Dict[str, float]] = {
@@ -75,6 +205,15 @@ class LLMContentExtractor(ContentExtractor):
             'output_tokens': 0.0,  # Anthropic naming
             'estimated_cost_usd': 0.0,
             'requests': 0.0
+        }
+        # Per-provider usage breakdown
+        self._usage_by_provider: Dict[str, Dict[str, float]] = {}
+        # Basic rate-limit and retry metrics
+        self._limits: Dict[str, Any] = {
+            'retries': 0,
+            'throttle_events': 0,
+            'last_error_code': None,
+            'last_retry_delay_ms': 0
         }
         # Simple price map (USD per 1K tokens). These are placeholders; adjust as needed.
         self._price_map: Dict[str, Dict[str, float]] = {
@@ -91,10 +230,13 @@ class LLMContentExtractor(ContentExtractor):
             },
             'bedrock': {
                 'amazon.nova-lite-v1:0':     {'input': 0.00006, 'output': 0.00024},
+                'eu.amazon.nova-lite-v1:0':  {'input': 0.00006, 'output': 0.00024},
                 'amazon.nova-micro-v1:0':    {'input': 0.000035, 'output': 0.00014},
                 'amazon.nova-pro-v1:0':      {'input': 0.0008, 'output': 0.0032},
                 'anthropic.claude-3-sonnet-20240229-v1:0': {'input': 0.003, 'output': 0.015},
                 'anthropic.claude-3-haiku-20240307-v1:0':  {'input': 0.00025, 'output': 0.00125},
+                'anthropic.claude-3-5-sonnet-20240620-v1:0': {'input': 0.003, 'output': 0.015},
+                'anthropic.claude-3-5-haiku-20241022-v1:0':  {'input': 0.00025, 'output': 0.00125},
             }
         }
         
@@ -117,7 +259,10 @@ class LLMContentExtractor(ContentExtractor):
             return {
                 'title': structured_content.get('title', ''),
                 'content': content_text,
-                'sections': [section.dict() for section in sections],
+                'sections': [
+                    (section.model_dump() if hasattr(section, 'model_dump') else section.dict() if hasattr(section, 'dict') else section)
+                    for section in sections
+                ],
                 'document_type': structured_content.get('document_type', 'unknown'),
                 'key_concepts': structured_content.get('key_concepts', []),
                 'technologies': structured_content.get('technologies', []),
@@ -223,18 +368,271 @@ class LLMContentExtractor(ContentExtractor):
         system_prompt: Optional[str] = None
     ) -> Dict[str, Any]:
         """Make a request to the configured LLM provider."""
-        if self.config.provider == LLMProvider.OPENAI:
-            return await self._openai_request(prompt, system_prompt)
-        elif self.config.provider == LLMProvider.ANTHROPIC:
-            return await self._anthropic_request(prompt, system_prompt)
-        elif self.config.provider == LLMProvider.HUGGINGFACE:
-            return await self._huggingface_request(prompt, system_prompt)
-        elif self.config.provider == LLMProvider.BEDROCK:
-            return await self._bedrock_request(prompt, system_prompt)
-        elif self.config.provider == LLMProvider.LOCAL:
-            return await self._local_request(prompt, system_prompt)
-        else:
-            raise ValueError(f"Unsupported LLM provider: {self.config.provider}")
+        async with self._semaphore:
+            trace_id = str(uuid.uuid4())
+            start = time.monotonic()
+            # Snapshot limits/usage for deltas
+            limits_before = dict(self._limits)
+            usage_before = dict(self._usage)
+            # Prepare prompt hash/length; avoid logging raw prompts
+            phash = hashlib.sha256(prompt.encode('utf-8')).hexdigest() if prompt else None
+            plength = len(prompt or '')
+            region = getattr(self.config, 'region', None)
+            provider_str = str(self.config.provider.value if isinstance(self.config.provider, LLMProvider) else self.config.provider)
+            model = self.config.model_name
+            self._log_event('llm_request_start', {
+                'trace_id': trace_id,
+                'provider': provider_str,
+                'model': model,
+                'region': region,
+                'timeout_s': self.config.timeout,
+                'prompt_len': plength,
+                **({} if not phash else {'prompt_hash': phash}),
+            }, redact=True)
+            # Cache check before any provider calls
+            cache_key = self._build_cache_key(provider_str, model, prompt, system_prompt)
+            if self._cache_enabled:
+                cached = self._cache_get(cache_key)
+                if cached is not None:
+                    self._log_event('llm_cache_hit', {
+                        'trace_id': trace_id,
+                        'provider': provider_str,
+                        'model': model,
+                        'region': region,
+                        'cache_key': cache_key[:16],
+                    })
+                    end = time.monotonic()
+                    self._emit_end_event(trace_id, provider_str, model, region, start, end, limits_before, usage_before, success=True)
+                    return cached
+
+            # Budget guardrails: block if exceeded (cache miss only)
+            if self._budget_exceeded():
+                reason = self._budget_reason()
+                self._log_event('llm_budget_block', {
+                    'trace_id': trace_id,
+                    'provider': provider_str,
+                    'model': model,
+                    'region': region,
+                    'reason': reason,
+                })
+                end = time.monotonic()
+                self._emit_end_event(trace_id, provider_str, model, region, start, end, limits_before, usage_before, success=False, error=RuntimeError('BudgetExceededError'))
+                raise RuntimeError(f"BudgetExceededError: {reason}")
+
+            primary = str(self.config.provider.value if isinstance(self.config.provider, LLMProvider) else self.config.provider).lower()
+            sequence: List[str] = [primary]
+            # Only add fallback providers when primary is bedrock and fallback enabled
+            if primary == 'bedrock' and self._fallback_enabled and self._fallback_providers:
+                sequence.extend([p for p in self._fallback_providers if p != primary])
+
+            last_err: Optional[Exception] = None
+            for prov in sequence:
+                try:
+                    if prov == 'openai':
+                        res = await self._openai_request(prompt, system_prompt)
+                    elif prov == 'anthropic':
+                        res = await self._anthropic_request(prompt, system_prompt)
+                    elif prov == 'huggingface':
+                        res = await self._huggingface_request(prompt, system_prompt)
+                    elif prov == 'bedrock':
+                        res = await self._bedrock_request(prompt, system_prompt)
+                    elif prov == 'local':
+                        res = await self._local_request(prompt, system_prompt)
+                    else:
+                        raise ValueError(f"Unsupported provider in fallback: {prov}")
+
+                    # Success path for primary provider call: emit end, cache, return
+                    end = time.monotonic()
+                    self._emit_end_event(trace_id, provider_str, model, region, start, end, limits_before, usage_before, success=True)
+                    if self._cache_enabled:
+                        self._cache_put(cache_key, res)
+                    return res
+                except Exception as e:
+                    # Log per-attempt failure
+                    self._log_event('llm_attempt_error', {
+                        'trace_id': trace_id,
+                        'provider': prov,
+                        'model': model,
+                        'region': region,
+                        'error': type(e).__name__,
+                        'message': str(e)[:300],
+                    }, redact=True)
+                    last_err = e
+                    # Prepare and try next provider by spinning a temp extractor with per-provider settings
+                    # Skip if this was the last one
+                    if prov == sequence[-1]:
+                        break
+                    # Build temp config for next provider
+                    next_idx = sequence.index(prov) + 1
+                    next_prov = sequence[next_idx]
+                    tmp_cfg = self._build_provider_config(next_prov)
+                    if not tmp_cfg:
+                        continue
+                    # Use a fresh extractor so we don't mutate shared config; disable nested fallback to avoid loops
+                    tmp_extractor = LLMContentExtractor(llm_config=tmp_cfg, config={'fallback': {'enabled': False}})
+                    try:
+                        res = await tmp_extractor._make_llm_request(prompt, system_prompt)
+                        # Merge usage into this extractor for unified reporting
+                        self._merge_usage_stats(tmp_extractor.get_usage_stats())
+                        end = time.monotonic()
+                        self._emit_end_event(trace_id, provider_str, model, region, start, end, limits_before, usage_before, success=True)
+                        if self._cache_enabled:
+                            self._cache_put(cache_key, res)
+                        return res
+                    except Exception as e2:
+                        last_err = e2
+                        continue
+            # If we reach here, all attempts failed
+            end = time.monotonic()
+            self._emit_end_event(trace_id, provider_str, model, region, start, end, limits_before, usage_before, success=False, error=last_err)
+            raise last_err or RuntimeError("All provider attempts failed")
+
+    def _build_cache_key(self, provider: str, model: str, prompt: str, system_prompt: Optional[str]) -> str:
+        h = hashlib.sha256()
+        h.update((provider or '').encode('utf-8'))
+        h.update(b'|')
+        h.update((model or '').encode('utf-8'))
+        h.update(b'|')
+        h.update((system_prompt or '').encode('utf-8'))
+        h.update(b'|')
+        h.update((prompt or '').encode('utf-8'))
+        return h.hexdigest()
+
+    def _cache_get(self, key: str) -> Optional[Dict[str, Any]]:
+        if key in self._memory_cache:
+            return self._memory_cache[key]
+        if not self._cache_dir:
+            return None
+        from pathlib import Path
+        p = Path(self._cache_dir)
+        try:
+            if p.is_dir():
+                f = p / f"{key}.json"
+                if f.exists():
+                    try:
+                        data = json.loads(f.read_text(encoding='utf-8'))
+                        self._memory_cache[key] = data
+                        return data
+                    except Exception:
+                        return None
+        except Exception:
+            return None
+        return None
+
+    def _cache_put(self, key: str, value: Dict[str, Any]) -> None:
+        self._memory_cache[key] = value
+        if not self._cache_dir:
+            return
+        from pathlib import Path
+        p = Path(self._cache_dir)
+        try:
+            p.mkdir(parents=True, exist_ok=True)
+            f = p / f"{key}.json"
+            try:
+                f.write_text(json.dumps(value, ensure_ascii=False), encoding='utf-8')
+                self._log_event('llm_cache_store', {'cache_key': key[:16], 'path': str(f)})
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+    def _budget_exceeded(self) -> bool:
+        now = time.time()
+        # reset windows
+        if now - self._hourly_started_at >= 3600:
+            self._hourly_started_at = now
+            self._hourly_cost_accum = 0.0
+        if now - self._daily_started_at >= 86400:
+            self._daily_started_at = now
+            self._daily_cost_accum = 0.0
+        if self._budget_hourly_usd is not None and self._hourly_cost_accum >= self._budget_hourly_usd:
+            return True
+        if self._budget_daily_usd is not None and self._daily_cost_accum >= self._budget_daily_usd:
+            return True
+        return False
+
+    def _budget_reason(self) -> str:
+        reasons = []
+        if self._budget_hourly_usd is not None and self._hourly_cost_accum >= self._budget_hourly_usd:
+            reasons.append(f"hourly cap {self._budget_hourly_usd:.4f} reached")
+        if self._budget_daily_usd is not None and self._daily_cost_accum >= self._budget_daily_usd:
+            reasons.append(f"daily cap {self._budget_daily_usd:.4f} reached")
+        return '; '.join(reasons) or 'budget reached'
+
+    def _emit_end_event(self, trace_id: str, provider: str, model: str, region: Optional[str], start: float, end: float,
+                         limits_before: Dict[str, Any], usage_before: Dict[str, Any], success: bool, error: Optional[Exception] = None) -> None:
+        latency_ms = int((end - start) * 1000)
+        # Compute deltas
+        retries_delta = int(self._limits.get('retries', 0) or 0) - int(limits_before.get('retries', 0) or 0)
+        throttle_delta = int(self._limits.get('throttle_events', 0) or 0) - int(limits_before.get('throttle_events', 0) or 0)
+        in_delta = float(self._usage.get('input_tokens', 0.0) or 0.0) - float(usage_before.get('input_tokens', 0.0) or 0.0)
+        out_delta = float(self._usage.get('output_tokens', 0.0) or 0.0) - float(usage_before.get('output_tokens', 0.0) or 0.0)
+        cost_delta = float(self._usage.get('estimated_cost_usd', 0.0) or 0.0) - float(usage_before.get('estimated_cost_usd', 0.0) or 0.0)
+        payload = {
+            'trace_id': trace_id,
+            'provider': provider,
+            'model': model,
+            'region': region,
+            'success': bool(success),
+            'latency_ms': latency_ms,
+            'usage_delta': {
+                'input_tokens': int(in_delta),
+                'output_tokens': int(out_delta),
+                'estimated_cost_usd': float(f"{cost_delta:.6f}")
+            },
+            'limits_delta': {
+                'retries': int(retries_delta),
+                'throttle_events': int(throttle_delta)
+            }
+        }
+        if not success and error is not None:
+            payload['error'] = {'type': type(error).__name__, 'message': str(error)[:300]}
+        self._log_event('llm_request_end', payload, redact=True)
+
+    def _log_event(self, event: str, payload: Dict[str, Any], redact: bool = True) -> None:
+        record = {'event': event, **payload}
+        if self._telemetry_json:
+            try:
+                logger.info(json.dumps(record, ensure_ascii=False))
+                return
+            except Exception:
+                pass
+        # Fallback to compact key=value line
+        parts = [f"event={event}"] + [f"{k}={v}" for k, v in record.items() if k != 'event']
+        logger.info(' '.join(parts))
+
+    def _build_provider_config(self, prov: str) -> Optional[LLMConfig]:
+        prov = prov.lower()
+        import os
+        if prov == 'openai':
+            api_key = (self._provider_settings.get('openai') or {}).get('api_key') or os.environ.get('OPENAI_API_KEY')
+            model = (self._provider_settings.get('openai') or {}).get('model') or 'gpt-4o-mini'
+            if not api_key:
+                return None
+            return LLMConfig(provider=LLMProvider.OPENAI, api_key=api_key, model_name=model,
+                             temperature=self.config.temperature, max_tokens=self.config.max_tokens, timeout=self.config.timeout)
+        if prov == 'anthropic':
+            api_key = (self._provider_settings.get('anthropic') or {}).get('api_key') or os.environ.get('ANTHROPIC_API_KEY')
+            model = (self._provider_settings.get('anthropic') or {}).get('model') or 'claude-3-haiku-20240307'
+            if not api_key:
+                return None
+            return LLMConfig(provider=LLMProvider.ANTHROPIC, api_key=api_key, model_name=model,
+                             temperature=self.config.temperature, max_tokens=self.config.max_tokens, timeout=self.config.timeout)
+        if prov == 'huggingface':
+            api_key = (self._provider_settings.get('huggingface') or {}).get('api_key') or os.environ.get('HUGGINGFACE_API_KEY')
+            model = (self._provider_settings.get('huggingface') or {}).get('model') or 'meta-llama/Meta-Llama-3-8B-Instruct'
+            if not api_key:
+                return None
+            return LLMConfig(provider=LLMProvider.HUGGINGFACE, api_key=api_key, model_name=model,
+                             temperature=self.config.temperature, max_tokens=self.config.max_tokens, timeout=self.config.timeout)
+        if prov == 'local':
+            base_url = (self._provider_settings.get('local') or {}).get('base_url') or os.environ.get('LOCAL_LLM_BASE_URL')
+            model = (self._provider_settings.get('local') or {}).get('model') or 'qwen2.5:14b'
+            if not base_url:
+                return None
+            return LLMConfig(provider=LLMProvider.LOCAL, base_url=base_url, model_name=model,
+                             temperature=self.config.temperature, max_tokens=self.config.max_tokens, timeout=self.config.timeout)
+        return None
     
     async def _openai_request(
         self, 
@@ -365,10 +763,11 @@ class LLMContentExtractor(ContentExtractor):
         """Make request to AWS Bedrock."""
         try:
             import boto3
-            from botocore.exceptions import ClientError
+            from botocore.exceptions import ClientError, EndpointConnectionError, ReadTimeoutError, ConnectionClosedError
+            from botocore.config import Config as BotoConfig
         except ImportError:
             raise ImportError("boto3 is required for Bedrock. Install with: pip install boto3")
-        
+
         # Setup AWS session with credentials from config or environment
         session_kwargs = {}
         if self.config.aws_access_key_id:
@@ -380,7 +779,18 @@ class LLMContentExtractor(ContentExtractor):
         
         session = boto3.Session(**session_kwargs)
         region = self.config.region or "us-east-1"
-        client = session.client('bedrock-runtime', region_name=region)
+        # Botocore client config with tighter timeouts; we use our own retry/backoff below
+        timeout = int(self.config.timeout or 30)
+        boto_config = BotoConfig(
+            connect_timeout=timeout,
+            read_timeout=timeout,
+            retries={'max_attempts': 0, 'mode': 'standard'}
+        )
+        # Some test stubs may not accept 'config' kwarg; fall back gracefully
+        try:
+            client = session.client('bedrock-runtime', region_name=region, config=boto_config)
+        except TypeError:
+            client = session.client('bedrock-runtime', region_name=region)
         
         # Prepare messages
         messages = []
@@ -395,46 +805,104 @@ class LLMContentExtractor(ContentExtractor):
         # Make the request
         model_id = self.config.model_name or "amazon.nova-lite-v1:0"
         
-        try:
-            response = client.converse(
-                modelId=model_id,
-                messages=messages,
-                inferenceConfig={
-                    'maxTokens': self.config.max_tokens,
-                    'temperature': self.config.temperature
-                }
-            )
-            
-            # Extract content from response
-            output = response.get('output', {}).get('message', {}).get('content', [])
-            content = ''
-            if output and isinstance(output, list):
-                texts = [c.get('text', '') for c in output if isinstance(c, dict)]
-                content = '\n'.join(texts).strip()
-            
-            # Track usage
-            usage = response.get('usage', {})
-            if usage:
-                input_tokens = usage.get('inputTokens', 0)
-                output_tokens = usage.get('outputTokens', 0)
-                self._record_usage('bedrock', model_id,
-                                   input_tokens=input_tokens,
-                                   output_tokens=output_tokens)
-            
-            # Try to parse as JSON, fallback to plain content
+        # Retry/backoff configuration (allow env overrides)
+        import os, random, asyncio
+        max_attempts = int(os.environ.get('BEDROCK_RETRY_MAX_ATTEMPTS', self.config.retry_max_attempts))
+        base_ms = int(os.environ.get('BEDROCK_RETRY_BASE_MS', self.config.retry_base_ms))
+        max_ms = int(os.environ.get('BEDROCK_RETRY_MAX_MS', self.config.retry_max_ms))
+
+        def _is_transient(err) -> bool:
+            # Botocore ClientError with throttling or 5xx
+            if isinstance(err, ClientError):
+                code = (err.response or {}).get('Error', {}).get('Code', '')
+                status = (err.response or {}).get('ResponseMetadata', {}).get('HTTPStatusCode')
+                if code in {"ThrottlingException", "TooManyRequestsException", "ServiceUnavailableException"}:
+                    return True
+                if status and int(status) in {429, 500, 502, 503, 504}:
+                    return True
+            # Network/transient botocore exceptions
+            if isinstance(err, (EndpointConnectionError, ReadTimeoutError, ConnectionClosedError)):
+                return True
+            return False
+
+        attempt = 0
+        last_error = None
+        while True:
             try:
-                return json.loads(content)
-            except json.JSONDecodeError:
-                return {"content": content}
-                
-        except ClientError as e:
-            error_code = e.response.get('Error', {}).get('Code', 'Unknown')
-            error_message = e.response.get('Error', {}).get('Message', str(e))
-            logger.error(f"Bedrock ClientError {error_code}: {error_message}")
-            raise RuntimeError(f"Bedrock request failed: {error_code} - {error_message}")
-        except Exception as e:
-            logger.error(f"Bedrock request error: {str(e)}")
-            raise
+                response = client.converse(
+                    modelId=model_id,
+                    messages=messages,
+                    inferenceConfig={
+                        'maxTokens': self.config.max_tokens,
+                        'temperature': self.config.temperature
+                    }
+                )
+                # Extract content from response
+                output = response.get('output', {}).get('message', {}).get('content', [])
+                content = ''
+                if output and isinstance(output, list):
+                    texts = [c.get('text', '') for c in output if isinstance(c, dict)]
+                    content = '\n'.join(texts).strip()
+                # Track usage
+                usage = response.get('usage', {})
+                if usage:
+                    input_tokens = usage.get('inputTokens', 0)
+                    output_tokens = usage.get('outputTokens', 0)
+                    self._record_usage('bedrock', model_id,
+                                       input_tokens=input_tokens,
+                                       output_tokens=output_tokens)
+                # Try to parse as JSON, fallback to plain content
+                try:
+                    return json.loads(content)
+                except json.JSONDecodeError:
+                    return {"content": content}
+
+            except Exception as e:
+                last_error = e
+                transient = _is_transient(e)
+                # If not transient or no more retries, raise
+                if (not transient) or (attempt >= max_attempts):
+                    if isinstance(e, ClientError):
+                        error_code = (e.response or {}).get('Error', {}).get('Code', 'Unknown')
+                        error_message = (e.response or {}).get('Error', {}).get('Message', str(e))
+                        logger.error(f"Bedrock ClientError {error_code}: {error_message}")
+                        # Update limits metadata
+                        self._limits['last_error_code'] = error_code
+                        raise RuntimeError(f"Bedrock request failed: {error_code} - {error_message}")
+                    logger.error(f"Bedrock request error: {str(e)}")
+                    raise
+
+                # Compute backoff with jitter, prefer Retry-After if present
+                retry_after_s = None
+                if isinstance(e, ClientError):
+                    try:
+                        headers = (getattr(e, 'response', {}) or {}).get('ResponseMetadata', {}).get('HTTPHeaders', {})
+                        ra = headers.get('retry-after') or headers.get('Retry-After')
+                        if ra:
+                            retry_after_s = float(ra)
+                    except Exception:
+                        retry_after_s = None
+                delay_ms = min(base_ms * (2 ** attempt), max_ms)
+                jitter_ms = random.randint(0, max(base_ms // 2, 1))
+                total_delay = retry_after_s if retry_after_s is not None else (delay_ms + jitter_ms) / 1000.0
+                # Log structured retry info
+                error_code = ''
+                status = None
+                if isinstance(e, ClientError):
+                    error_code = (e.response or {}).get('Error', {}).get('Code', '')
+                    status = (e.response or {}).get('ResponseMetadata', {}).get('HTTPStatusCode')
+                delay_log_ms = int(total_delay * 1000)
+                logger.warning(
+                    f"bedrock_retry attempt={attempt+1} delay_ms={delay_log_ms} code={error_code} status={status}"
+                )
+                # Update limits counters
+                self._limits['retries'] += 1
+                self._limits['last_retry_delay_ms'] = delay_log_ms
+                self._limits['last_error_code'] = error_code or status
+                if error_code in {"ThrottlingException", "TooManyRequestsException"} or status == 429:
+                    self._limits['throttle_events'] += 1
+                attempt += 1
+                await asyncio.sleep(total_delay)
     
     async def _local_request(
         self, 
@@ -725,14 +1193,72 @@ class LLMContentExtractor(ContentExtractor):
         
         # Estimate cost if we have price info
         provider_prices = self._price_map.get(provider_key.lower()) or {}
+        # Try direct lookup first
         model_prices = provider_prices.get(model_name) or {}
+        # Fallbacks: handle Bedrock ARNs or region-prefixed variants by substring matching
+        if not model_prices and provider_prices:
+            # Prefer the longest matching key contained in the model_name
+            candidates = [k for k in provider_prices.keys() if k in str(model_name)]
+            if candidates:
+                best = max(candidates, key=len)
+                model_prices = provider_prices.get(best) or {}
         in_price = model_prices.get('input')
         out_price = model_prices.get('output')
+        inc_cost = None
         if in_price is not None and out_price is not None:
-            cost = (self._usage['input_tokens'] / 1000.0) * in_price + (self._usage['output_tokens'] / 1000.0) * out_price
-            self._usage['estimated_cost_usd'] = cost
+            # Incremental cost for this call
+            inc_cost = (float(input_tokens or prompt_tokens) / 1000.0) * in_price + (float(output_tokens or completion_tokens) / 1000.0) * out_price
+            self._usage['estimated_cost_usd'] = (self._usage.get('estimated_cost_usd', 0.0) or 0.0) + inc_cost
+
+        # Per-provider accumulation
+        p = provider_key.lower()
+        byp = self._usage_by_provider.setdefault(p, {
+            'requests': 0.0, 'prompt_tokens': 0.0, 'completion_tokens': 0.0,
+            'input_tokens': 0.0, 'output_tokens': 0.0, 'estimated_cost_usd': 0.0
+        })
+        byp['requests'] += 1.0
+        byp['prompt_tokens'] += float(prompt_tokens)
+        byp['completion_tokens'] += float(completion_tokens)
+        byp['input_tokens'] += float(input_tokens or prompt_tokens)
+        byp['output_tokens'] += float(output_tokens or completion_tokens)
+        if in_price is not None and out_price is not None:
+            byp['estimated_cost_usd'] += (float(input_tokens or prompt_tokens) / 1000.0) * in_price + (float(output_tokens or completion_tokens) / 1000.0) * out_price
+
+        # Update budget windows with inc_cost
+        if inc_cost is not None:
+            now = time.time()
+            if now - self._hourly_started_at >= 3600:
+                self._hourly_started_at = now
+                self._hourly_cost_accum = 0.0
+            if now - self._daily_started_at >= 86400:
+                self._daily_started_at = now
+                self._daily_cost_accum = 0.0
+            self._hourly_cost_accum += float(inc_cost)
+            self._daily_cost_accum += float(inc_cost)
 
     def get_usage_stats(self) -> Dict[str, float]:
         """Return aggregate token usage and estimated cost."""
         # Return a shallow copy to avoid external mutation
-        return dict(self._usage)
+        out = dict(self._usage)
+        # Back-compat alias
+        if 'estimated_cost' not in out:
+            out['estimated_cost'] = out.get('estimated_cost_usd', 0.0)
+        # Include limits snapshot
+        out['limits'] = dict(self._limits)
+        # Include per-provider breakdown
+        out['by_provider'] = {k: dict(v) for k, v in self._usage_by_provider.items()}
+        return out
+
+    def _merge_usage_stats(self, stats: Dict[str, Any]) -> None:
+        # Merge per-provider breakdown and totals from another extractor stats dict
+        byp = stats.get('by_provider') or {}
+        for k, v in byp.items():
+            dst = self._usage_by_provider.setdefault(k, {
+                'requests': 0.0, 'prompt_tokens': 0.0, 'completion_tokens': 0.0,
+                'input_tokens': 0.0, 'output_tokens': 0.0, 'estimated_cost_usd': 0.0
+            })
+            for fld in ('requests','prompt_tokens','completion_tokens','input_tokens','output_tokens','estimated_cost_usd'):
+                dst[fld] = float(dst.get(fld, 0.0)) + float(v.get(fld, 0.0) or 0.0)
+        # Merge overall totals
+        for fld in ('prompt_tokens','completion_tokens','total_tokens','input_tokens','output_tokens','estimated_cost_usd','requests'):
+            self._usage[fld] = float(self._usage.get(fld, 0.0) or 0.0) + float(stats.get(fld, 0.0) or 0.0)

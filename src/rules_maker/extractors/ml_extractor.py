@@ -116,7 +116,10 @@ class MLContentExtractor(ContentExtractor):
             return {
                 'title': title,
                 'content': main_content,
-                'sections': [section.dict() for section in sections],
+                'sections': [
+                    (section.model_dump() if hasattr(section, 'model_dump') else section.dict() if hasattr(section, 'dict') else section)
+                    for section in sections
+                ],
                 'document_type': doc_type,
                 'code_examples': code_examples,
                 'navigation': navigation,
@@ -243,6 +246,32 @@ class MLContentExtractor(ContentExtractor):
         
         logger.info(f"Training completed. Performance: {performance}")
         return performance
+
+    def evaluate(self, test_set: TrainingSet) -> Dict[str, float]:
+        """Minimal evaluation on a held-out set using document type classification accuracy.
+
+        This is a lightweight heuristic evaluation to provide a quick checkpoint
+        metric without introducing new heavy dependencies or complex labeling.
+        """
+        if not test_set.examples:
+            return {"accuracy": 0.0, "total": 0, "correct": 0}
+
+        correct = 0
+        total = 0
+        for ex in test_set.examples:
+            try:
+                soup = BeautifulSoup(ex.input_html, 'html.parser')
+                result = self.extract(soup, str(ex.url))
+                pred = str(result.get('document_type') or '').lower()
+                gold = str(ex.documentation_type.value).lower()
+                if pred == gold:
+                    correct += 1
+                total += 1
+            except Exception:
+                total += 1
+
+        acc = (correct / total) if total else 0.0
+        return {"accuracy": acc, "total": total, "correct": correct}
     
     def save_model(self, path: str) -> None:
         """Save the trained model to disk."""

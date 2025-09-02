@@ -86,7 +86,7 @@ from rules_maker.transformers.cursor_transformer import CursorRuleTransformer
 from rules_maker.models import ScrapingResult
 
 result = ScrapingResult(
-    url='https://fastapi.tiangolo.com/', 
+    url='https://fastapi.tiangolo.com/',
     title='FastAPI Documentation',
     content='FastAPI is a modern, fast web framework for building APIs with Python 3.7+ based on standard Python type hints. Create API endpoints, handle request/response validation, automatic interactive API documentation with Swagger UI, dependency injection system, async/await support.'
 )
@@ -104,8 +104,8 @@ from rules_maker.transformers.windsurf_transformer import WindsurfRuleTransforme
 from rules_maker.models import ScrapingResult
 
 result = ScrapingResult(
-    url='https://fastapi.tiangolo.com/', 
-    title='FastAPI Documentation', 
+    url='https://fastapi.tiangolo.com/',
+    title='FastAPI Documentation',
     content='FastAPI is a modern, fast web framework for building APIs with Python 3.7+ based on standard Python type hints. Create API endpoints, handle request/response validation, automatic interactive API documentation with Swagger UI, dependency injection system, async/await support.'
 )
 
@@ -171,8 +171,9 @@ PYTHONPATH=src python -m rules_maker.cli setup --check-deps
 ### Core Pipeline Architecture
 
 The Rules Maker follows a **4-stage transformation pipeline**:
+
 1. **Scraping** → Documentation content extraction from URLs
-2. **Extraction** → Content analysis and feature extraction 
+2. **Extraction** → Content analysis and feature extraction
 3. **Transformation** → Rule generation using detected technology patterns
 4. **Templating** → Professional formatting via Jinja2 templates
 
@@ -189,6 +190,7 @@ The Rules Maker follows a **4-stage transformation pipeline**:
 ### Module Architecture
 
 **8-Module System:**
+
 - **scrapers/**: Multi-strategy scraping (base, async, adaptive)  
 - **transformers/**: Rule generation engines (cursor_transformer, windsurf_transformer)
 - **extractors/**: Content extraction (ml_extractor, llm_extractor)
@@ -227,12 +229,16 @@ class ContentSection(BaseModel):
 ### Rule Generation System
 
 **Two-Phase Rule Generation**:
+
 1. **Analysis Phase**: Technology detection using weighted regex scoring across 12+ frameworks (Python, JavaScript, React, Vue, Angular, Next.js, etc.)
 2. **Generation Phase**: Professional rule formatting using technology-specific templates
 
+
 **Rule Format Specifications**:
+
 - **Cursor Rules**: Expert role definitions, critical instructions (🚨 NEVER/ALWAYS), 6 structured sections (principles, code style, tech guidelines, error handling, performance, critical instructions)
 - **Windsurf Rules**: 4-phase development workflow (Analysis → Implementation → Testing → Review), quality gates with checkboxes (✅), measurable criteria
+
 
 **Template System**: Jinja2 templates in `templates/templates/*.j2` provide professional formatting. Technology detection drives template variable population for framework-specific customization.
 
@@ -245,9 +251,11 @@ class ContentSection(BaseModel):
 ### Quick Start with Bedrock
 
 **Prerequisites:**
+
 1. AWS Bedrock credentials in `docs/plans/bedrock-long-term-api-key.csv`
 2. Install boto3: `pip install boto3`
 3. Ensure access to `amazon.nova-lite-v1:0` model
+
 
 **Simple Usage:**
 ```python
@@ -259,7 +267,7 @@ maker = BedrockRulesMaker(model_id="amazon.nova-lite-v1:0")
 # Generate rules from documentation
 documentation = "Your framework documentation content..."
 cursor_rules = maker.generate_cursor_rules(documentation)
-windsurf_rules = maker.generate_windsurf_rules(documentation) 
+windsurf_rules = maker.generate_windsurf_rules(documentation)
 
 # View usage stats
 stats = maker.get_usage_stats()
@@ -283,6 +291,7 @@ rules = asyncio.run(generate_enhanced())
 ```
 
 **Supported Bedrock Models:**
+
 - `amazon.nova-lite-v1:0` (recommended - fast & cost-effective)
 - `amazon.nova-micro-v1:0` (ultra low-cost)
 - `amazon.nova-pro-v1:0` (high capability)
@@ -301,7 +310,7 @@ from rules_maker.models import ScrapingResult
 # Create documentation content
 doc_result = ScrapingResult(
     url='https://your-docs.com/',
-    title='Your Framework Documentation', 
+    title='Your Framework Documentation',
     content='Your documentation content here - API guides, tutorials, best practices...'
 )
 
@@ -397,11 +406,13 @@ python -m venv venv && source venv/bin/activate  # Create new
 - Async scraping architecture with 5x+ performance improvement
 - Professional rule formatting matching industry standards
 
+
 **⚠️ Known Limitations:**
 
 - **CLI Robustness**: Command-line interface requires `PYTHONPATH=src` prefix for imports
 - **Dependency Management**: Manual dependency installation required (no automated setup)
 - **Template Extensions**: Limited to Cursor/Windsurf formats (extensible via strategy pattern)
+
 
 **🔧 Recommended Usage Pattern:**
 Python API usage is strongly recommended over CLI for production applications due to import path complexity.

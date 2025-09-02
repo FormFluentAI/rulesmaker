@@ -343,7 +343,9 @@ def test(model_path, test_url):
         
         # Show sections
         for i, section in enumerate(result.get('sections', [])[:5], 1):
-            section_dict = section.dict() if hasattr(section, 'dict') else section
+            section_dict = (
+                section.model_dump() if hasattr(section, 'model_dump') else section.dict() if hasattr(section, 'dict') else section
+            )
             title = section_dict.get('title', 'Untitled')
             section_type = section_dict.get('metadata', {}).get('section_type', 'unknown')
             click.echo(f"  {i}. {title} (Type: {section_type})")

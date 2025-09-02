@@ -23,12 +23,13 @@ class BedrockRulesMaker:
     """Main interface for using Rules Maker with AWS Bedrock."""
     
     def __init__(
-        self, 
+        self,
         model_id: str = "amazon.nova-lite-v1:0",
         region: str = "us-east-1",
         credentials_csv_path: Optional[str] = None,
         temperature: float = 0.3,
-        max_tokens: int = 2000
+        max_tokens: int = 2000,
+        config: Optional[Dict[str, Any]] = None,
     ):
         """
         Initialize Bedrock Rules Maker.
@@ -40,12 +41,33 @@ class BedrockRulesMaker:
             temperature: Model temperature for generation
             max_tokens: Maximum tokens to generate
         """
-        self.model_id = model_id
-        self.region = region
-        self.temperature = temperature
-        self.max_tokens = max_tokens
+        # Keep raw config for downstream components
+        self._config = config if isinstance(config, dict) else None
+        # Allow overriding via config dict and environment
+        cfg = (config or {}).get('bedrock') if isinstance(config, dict) else None
+        env_model = os.environ.get('BEDROCK_MODEL_ID')
+        env_region = os.environ.get('AWS_REGION') or os.environ.get('BEDROCK_REGION')
+        env_timeout = os.environ.get('BEDROCK_TIMEOUT')
+        env_conc = os.environ.get('BEDROCK_MAX_CONCURRENCY')
+
+        self.model_id = (cfg or {}).get('model_id') or model_id or env_model or "amazon.nova-lite-v1:0"
+        self.region = (cfg or {}).get('region') or region or env_region or "us-east-1"
+        self.temperature = float((cfg or {}).get('temperature', temperature))
+        self.max_tokens = int((cfg or {}).get('max_tokens', max_tokens))
+        self.timeout = int((cfg or {}).get('timeout') or (env_timeout or 30))
+        self.max_concurrency = int((cfg or {}).get('concurrency') or (env_conc or 4))
+        retry_cfg = ((cfg or {}).get('retry') or {})
+        self.retry_max_attempts = int(retry_cfg.get('max_attempts', int(os.environ.get('BEDROCK_RETRY_MAX_ATTEMPTS', 3))))
+        self.retry_base_ms = int(retry_cfg.get('base_ms', int(os.environ.get('BEDROCK_RETRY_BASE_MS', 250))))
+        self.retry_max_ms = int(retry_cfg.get('max_ms', int(os.environ.get('BEDROCK_RETRY_MAX_MS', 2000))))
         
         # Setup credentials
+        # Credentials CSV may come from config dict as well
+        if not credentials_csv_path and cfg:
+            credentials_csv_path = cfg.get('credentials_csv') or None
+        if credentials_csv_path:
+            credentials_csv_path = str(credentials_csv_path)
+
         if credentials_csv_path or not self._has_aws_credentials():
             logger.info("Setting up Bedrock credentials from CSV...")
             self.credential_setup = setup_bedrock_credentials(credentials_csv_path)
@@ -57,25 +79,30 @@ class BedrockRulesMaker:
             logger.info("Using existing AWS credentials from environment")
             # Still validate access
             manager = get_credential_manager()
-            validation = manager.validate_bedrock_access(model_id, region)
+            validation = manager.validate_bedrock_access(self.model_id, self.region)
             if not validation['success']:
                 raise RuntimeError(f"Bedrock validation failed: {validation['error']}")
         
         # Setup LLM config for Bedrock
         self.llm_config = LLMConfig(
             provider=LLMProvider.BEDROCK,
-            model_name=model_id,
-            region=region,
-            temperature=temperature,
-            max_tokens=max_tokens
+            model_name=self.model_id,
+            region=self.region,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            timeout=self.timeout,
+            retry_max_attempts=self.retry_max_attempts,
+            retry_base_ms=self.retry_base_ms,
+            retry_max_ms=self.retry_max_ms,
+            max_concurrency=self.max_concurrency,
         )
         
         # Initialize components
-        self.extractor = LLMContentExtractor(llm_config=self.llm_config)
+        self.extractor = LLMContentExtractor(llm_config=self.llm_config, config=self._config or {})
         self.cursor_transformer = CursorRuleTransformer()
         self.windsurf_transformer = WindsurfRuleTransformer()
         
-        logger.info(f"BedrockRulesMaker initialized with model: {model_id}")
+        logger.info(f"BedrockRulesMaker initialized with model: {self.model_id}")
     
     def _has_aws_credentials(self) -> bool:
         """Check if AWS credentials are already available."""

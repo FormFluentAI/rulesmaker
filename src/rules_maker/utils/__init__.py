@@ -12,7 +12,6 @@ from .main_utils import (
     normalize_url,
     clean_content,
     extract_metadata_from_html,
-    detect_documentation_type,
     setup_logging,
     extract_navigation_links,
     is_documentation_url,
@@ -25,6 +24,28 @@ from .main_utils import (
     split_text_into_chunks,
     calculate_text_similarity
 )
+from .main_utils import detect_documentation_type as _basic_detect_doc_type
+from ..models import DocumentationType
+
+def detect_documentation_type(url: str, title: str = "", content: str = "") -> DocumentationType:
+    """Compatibility wrapper: map 3-arg signature to basic detector and enum.
+
+    This preserves the legacy call sites that expect (url, title, content)
+    while leveraging the simpler detector from main_utils.
+    """
+    result = _basic_detect_doc_type(content or "", url or "")
+    mapping = {
+        'api': DocumentationType.API,
+        'tutorial': DocumentationType.TUTORIAL,
+        'installation': DocumentationType.REFERENCE,
+        'reference': DocumentationType.REFERENCE,
+        'framework': DocumentationType.FRAMEWORK,
+        'readme': DocumentationType.README,
+        'changelog': DocumentationType.CHANGELOG,
+        'library': DocumentationType.LIBRARY if hasattr(DocumentationType, 'LIBRARY') else DocumentationType.FRAMEWORK,
+        'unknown': DocumentationType.UNKNOWN,
+    }
+    return mapping.get(str(result).lower(), DocumentationType.UNKNOWN)
 
 __all__ = [
     'CredentialManager', 

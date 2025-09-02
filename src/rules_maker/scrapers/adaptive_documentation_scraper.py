@@ -30,7 +30,8 @@ class AdaptiveDocumentationScraper(AsyncDocumentationScraper):
         ml_model_path: Optional[str] = None,
         llm_config: Optional[LLMConfig] = None,
         use_ml: bool = True,
-        use_llm: bool = False
+        use_llm: bool = False,
+        app_config: Optional[Dict[str, Any]] = None,
     ):
         """Initialize the adaptive scraper."""
         super().__init__(config)
@@ -48,7 +49,7 @@ class AdaptiveDocumentationScraper(AsyncDocumentationScraper):
             self.ml_extractor = None
         
         if self.use_llm:
-            self.llm_extractor = LLMContentExtractor(llm_config=llm_config)
+            self.llm_extractor = LLMContentExtractor(llm_config=llm_config, config=app_config or {})
         else:
             self.llm_extractor = None
         
@@ -100,7 +101,10 @@ class AdaptiveDocumentationScraper(AsyncDocumentationScraper):
     async def _enhance_with_adaptive_extraction(self, result: ScrapingResult) -> ScrapingResult:
         """Enhance scraping result with adaptive ML/LLM extraction."""
         from bs4 import BeautifulSoup
-        
+        # If there is no HTML to enhance, return as-is
+        if not result.raw_html:
+            return result
+
         soup = BeautifulSoup(result.raw_html, 'html.parser')
         url = str(result.url)
         

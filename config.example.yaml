@@ -38,3 +38,58 @@ filters:
     - "documentation"
     - "api"
     - "guide"
+
+## Bedrock Configuration
+bedrock:
+  # Default Bedrock model and region
+  model_id: "amazon.nova-lite-v1:0"
+  region: "us-east-1"
+
+  # Optional path to a CSV containing long-term credentials for Bedrock
+  # See docs/plans/bedrock-long-term-api-key.csv for an example format
+  credentials_csv: ""
+
+  # LLM request behavior
+  timeout: 30            # seconds (connect/read)
+  concurrency: 4         # max concurrent Bedrock LLM calls
+
+  # Retry/backoff policy for throttling and transient errors
+  retry:
+    max_attempts: 5      # total attempts (initial + retries)
+    base_ms: 200         # base backoff in milliseconds
+    max_ms: 4000         # max backoff in milliseconds
+
+  # Fallback when Bedrock is unavailable
+  fallback:
+    enabled: false
+    # Order to try when Bedrock fails: any of [openai, anthropic, huggingface, local]
+    providers:
+      - openai
+
+## Optional multi-provider settings (used by fallback)
+providers:
+  openai:
+    api_key: ""           # or env OPENAI_API_KEY
+    model: "gpt-4o-mini"
+  anthropic:
+    api_key: ""           # or env ANTHROPIC_API_KEY
+    model: "claude-3-haiku-20240307"
+  huggingface:
+    api_key: ""           # or env HUGGINGFACE_API_KEY
+    model: "meta-llama/Meta-Llama-3-8B-Instruct"
+  local:
+    base_url: ""          # e.g., http://localhost:11434
+    model: "qwen2.5:14b"
+
+## Telemetry and Logging
+telemetry:
+  json: false            # emit JSON structured logs when true
+  redact_prompts: true   # do not log prompt content; log hash + length only
+
+## Caching and Budgets
+cache:
+  enabled: false
+  dir: ""                 # default: ~/.cache/rules_maker/llm
+budget:
+  hourly_usd: null        # e.g., 0.50 blocks calls after $0.50 in the last hour
+  daily_usd: null         # e.g., 2.00 blocks calls after $2.00 in the last day

@@ -81,7 +81,7 @@ api_docs = scraper.scrape_url(
 
 # Generate Cursor rules for API usage
 cursor_rules = transformer.transform(
-    api_docs, 
+    api_docs,
     template="api_guidelines"
 )
 ```
@@ -225,6 +225,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - 📧 Email: [support@rules-maker.com](mailto:support@rules-maker.com)
 - 💬 Discord: [Join our community](https://discord.gg/rules-maker)
 - 🐛 Issues: [GitHub Issues](https://github.com/yourusername/rules-maker/issues)
+
 
 ---
 

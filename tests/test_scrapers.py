@@ -50,7 +50,7 @@ class TestDocumentationScraper:
         assert result.status == ScrapingStatus.COMPLETED
         assert "Test Documentation" in result.title
         assert "API Reference" in result.content
-        assert result.url == "https://example.com/docs"
+        assert str(result.url) == "https://example.com/docs"
     
     @patch('requests.Session.get')
     def test_failed_scraping(self, mock_get):

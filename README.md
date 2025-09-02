@@ -6,6 +6,8 @@ Transform web documentation into professional AI coding assistant rules for Curs
 
 **Core functionality is working and tested!** Generate professional-grade Cursor and Windsurf rules from documentation content.
 
+Note: Pydantic V2 compliant (model_validate/model_dump). CLI imports are now lazy to avoid optional scraping deps unless used.
+
 ### 🎯 What Works Right Now
 
 - ✅ **Cursor Rules Generation**: Professional developer guidelines with expert roles and critical instructions
@@ -37,7 +39,7 @@ from rules_maker.models import ScrapingResult
 
 # Create content from your documentation
 result = ScrapingResult(
-    url='https://your-docs.com/', 
+    url='https://your-docs.com/',
     title='Your Framework Documentation',
     content='Your documentation content here - API guides, tutorials, best practices...'
 )
@@ -57,7 +59,7 @@ from rules_maker.models import ScrapingResult
 
 # Same content, different rule format
 result = ScrapingResult(
-    url='https://your-docs.com/', 
+    url='https://your-docs.com/',
     title='Your Framework Documentation',
     content='Your documentation content here...'
 )
@@ -191,6 +193,77 @@ rules-maker/
 - **More Formats**: Support for additional AI assistants
 - **Learning System**: Adaptive rule generation based on user feedback
 
+## 🧠 Learning Engine (Phase 2)
+
+Record usage events and optimize your rules using the new LearningEngine.
+
+### Record Usage Events
+```python
+from rules_maker.models import Rule, RuleType
+from rules_maker.learning.models import GeneratedRule, UsageEvent
+
+# Your existing rule
+rule = Rule(
+    id="naming-001",
+    title="Use descriptive names",
+    description="Prefer descriptive variable and function names.",
+    content="...",
+    type=RuleType.BEST_PRACTICE,
+    priority=2,
+    confidence_score=0.4,
+)
+
+# Collect usage signals over time
+events = [
+    UsageEvent(rule_id="naming-001", success=True, feedback_score=0.5, context={"section": "naming"}),
+    UsageEvent(rule_id="naming-001", success=True, context={"section": "naming"}),
+    UsageEvent(rule_id="naming-001", success=False, context={"section": "examples"}),
+]
+
+generated = GeneratedRule(rule=rule, usage_events=events)
+```
+
+### Analyze and Optimize
+```python
+from rules_maker.learning import LearningEngine
+
+# Provide a rule_map so the engine can update your actual Rule objects
+engine = LearningEngine(config={"rule_map": {rule.id: rule}})
+
+insights = engine.analyze_usage_patterns([generated])
+optimized = engine.optimize_rules(insights)
+
+print("Top rules:", insights.top_rules)
+print("Underperforming:", insights.underperforming_rules)
+for change in optimized.changes:
+    print(change.rule_id, change.change_type, change.before, "=>", change.after)
+
+# Updated Rule objects are in optimized.rules
+updated_rule = next(r for r in optimized.rules if r.id == rule.id)
+print("New priority:", updated_rule.priority)
+print("New confidence:", updated_rule.confidence_score)
+```
+
+### Validate Improvements
+```python
+qm = engine.validate_improvements(before=rule, after=updated_rule)
+print("Overall improvement score:", qm.overall_score)
+```
+
+### Simple A/B Aggregation (optional)
+```python
+from rules_maker.learning.models import ABTest
+
+experiment = ABTest(experiment_key="exp-1", rule_id=rule.id, variants=[])
+# Tag events with variants via `context={"variant": "A"}` or "B"
+ab_events = [
+    UsageEvent(rule_id=rule.id, success=True, context={"variant": "A"}),
+    UsageEvent(rule_id=rule.id, success=False, context={"variant": "B"}),
+]
+result = engine.summarize_ab_test(experiment, ab_events)
+print("Winner variant:", result.winner_variant)
+```
+
 ## 🤝 Contributing
 
 Rules Maker is designed to be extensible. Add new transformers, improve existing ones, or integrate with additional AI assistants.
@@ -200,6 +273,7 @@ Rules Maker is designed to be extensible. Add new transformers, improve existing
 - **Quick Issues**: Check STATUS.md for common setup problems
 - **Examples**: See PHASE1_SUMMARY.md for tested working examples
 - **Implementation Details**: Review docs/PHASE1_COMPLETE.md for technical details
+
 
 ---
 

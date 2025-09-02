@@ -16,10 +16,12 @@ class RuleTransformer(BaseTransformer):
         
         if self.config.rule_format.value == "json":
             import json
-            return json.dumps(ruleset.dict(), indent=2)
+            data = ruleset.model_dump() if hasattr(ruleset, 'model_dump') else ruleset.dict()
+            return json.dumps(data, indent=2)
         elif self.config.rule_format.value == "yaml":
             import yaml
-            return yaml.dump(ruleset.dict(), default_flow_style=False)
+            data = ruleset.model_dump() if hasattr(ruleset, 'model_dump') else ruleset.dict()
+            return yaml.dump(data, default_flow_style=False)
         else:
             # Default text format
             output = f"# {ruleset.name}\n\n{ruleset.description}\n\n"

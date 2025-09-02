@@ -186,7 +186,7 @@ class BasicLearningStrategy(LearningStrategy):
             'vocabulary': list(self.vocabulary),
             'doc_type_keywords': {k.value: v for k, v in self.doc_type_keywords.items()},
             'is_trained': self.is_trained,
-            'performance_metrics': self.performance_metrics.dict() if self.performance_metrics else None
+            'performance_metrics': (self.performance_metrics.model_dump() if hasattr(self.performance_metrics, 'model_dump') else self.performance_metrics.dict()) if self.performance_metrics else None
         }
         
         with open(model_path, 'w') as f:
