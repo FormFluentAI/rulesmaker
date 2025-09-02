@@ -10,26 +10,26 @@ Rules Maker is a Python tool that transforms web documentation into professional
 
 ### Environment Setup
 ```bash
-# Activate virtual environment (if using the rm/ directory)
+# Option 1: Use Makefile (Recommended)
+make setup-cu129  # Creates venv, installs all deps + PyTorch with CUDA
+make venv         # Creates virtual environment only
+make install      # Installs from requirements.txt files
+make test         # Runs pytest
+make clean-venv   # Removes virtual environment
+
+# Option 2: Manual setup with existing rm/ environment
 source rm/bin/activate
 
-# Or create a new virtual environment
-python -m venv venv && source venv/bin/activate
+# Option 3: Standard pip installation
+pip install -e .                    # Install in development mode
+pip install -e ".[dev]"             # Install with dev dependencies
+pip install -e ".[all]"             # Install all optional dependencies
+pip install -e ".[bedrock]"         # Install with Bedrock support
+pip install -e ".[openai,anthropic]" # Install with LLM providers
 
-# Install core dependencies for rule generation
-pip install pydantic requests beautifulsoup4 click fake-useragent jinja2 aiohttp numpy
-
-# Install development dependencies
-pip install pytest pytest-asyncio pytest-cov black flake8 mypy pre-commit
-
-# Install optional ML dependencies (for advanced extraction)
-pip install scikit-learn sentence-transformers nltk
-
-# Install optional LLM dependencies (for enhanced rule generation)
-pip install openai anthropic
-
-# Install full web scraping dependencies
-pip install lxml httpx aiofiles more-itertools python-dotenv rich jsonschema
+# Alternative: From requirements files
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
 
 ### AWS Bedrock Integration Commands
@@ -118,17 +118,19 @@ print(rules)
 ### Testing Commands
 
 ```bash
-# Run all tests
-PYTHONPATH=src pytest
+# Using Makefile (Recommended)
+make test
 
-# Run with coverage
-PYTHONPATH=src pytest --cov=rules_maker
+# Manual pytest commands
+PYTHONPATH=src pytest                                    # Run all tests
+PYTHONPATH=src pytest --cov=rules_maker                  # Run with coverage
+PYTHONPATH=src pytest tests/test_phase1.py               # Run specific test file
+PYTHONPATH=src pytest tests/test_phase1.py::test_cursor_transformer  # Run single test
 
-# Run specific test files
-PYTHONPATH=src pytest tests/test_phase1.py
-
-# Run a single test
-PYTHONPATH=src pytest tests/test_phase1.py::test_cursor_transformer
+# Test specific components
+PYTHONPATH=src pytest tests/test_bedrock_concurrency.py  # Bedrock integration tests
+PYTHONPATH=src pytest tests/test_learning_engine.py      # Learning pipeline tests
+PYTHONPATH=src pytest tests/test_templates.py            # Template system tests
 ```
 
 ### Linting and Formatting
@@ -147,22 +149,19 @@ mypy src/rules_maker/
 black src/ tests/ && flake8 src/ tests/ && mypy src/rules_maker/
 ```
 
-### CLI Commands (Note: May require PYTHONPATH=src prefix)
+### CLI Commands
 
 ```bash
-# Basic scraping
+# Using installed package entry points (if installed with pip install -e .)
+rules-maker scrape https://docs.python.org/3/
+rm-setup --check-deps
+rm-doctor  # Check system health
+
+# Direct module execution (Note: requires PYTHONPATH=src)
 PYTHONPATH=src python -m rules_maker.cli scrape https://docs.python.org/3/
-
-# Async scraping for better performance
 PYTHONPATH=src python -m rules_maker.cli scrape https://docs.python.org/3/ --async-scrape
-
-# Deep scraping (follow links)
 PYTHONPATH=src python -m rules_maker.cli scrape https://docs.python.org/3/ --deep --max-pages 5
-
-# Generate Windsurf format rules
 PYTHONPATH=src python -m rules_maker.cli scrape https://docs.python.org/3/ --format windsurf
-
-# Check dependencies
 PYTHONPATH=src python -m rules_maker.cli setup --check-deps
 ```
 
@@ -189,16 +188,18 @@ The Rules Maker follows a **4-stage transformation pipeline**:
 
 ### Module Architecture
 
-**8-Module System:**
+**Core Module Architecture:**
 
-- **scrapers/**: Multi-strategy scraping (base, async, adaptive)  
-- **transformers/**: Rule generation engines (cursor_transformer, windsurf_transformer)
-- **extractors/**: Content extraction (ml_extractor, llm_extractor)
-- **models.py**: Comprehensive Pydantic data models
-- **templates/**: Jinja2 template system with .j2 files
-- **processors/**: Content processing pipeline
-- **strategies/**: Strategy pattern implementations
-- **filters/**: Content filtering and validation
+- **scrapers/**: Multi-strategy scraping (base, async_documentation_scraper, adaptive_documentation_scraper)  
+- **transformers/**: Rule generation engines (cursor_transformer, windsurf_transformer, workflow_transformer)
+- **extractors/**: Content extraction (ml_extractor, llm_extractor, structured_extractor)
+- **models.py**: Comprehensive Pydantic data models with type safety
+- **templates/**: Jinja2 template system with engine.py and rule templates
+- **processors/**: Content processing pipeline (documentation_processor, code_processor, api_processor)
+- **strategies/**: Strategy pattern implementations including learning_strategy
+- **filters/**: Content filtering and validation (quality_filter, relevance_filter, duplicate_filter)
+- **learning/**: ML pipeline components (engine.py, pattern_analyzer.py, usage_tracker.py)
+- **utils/**: Utility functions and credential management
 
 ### Key Data Models
 
@@ -389,11 +390,22 @@ PYTHONPATH=src python -m rules_maker.cli setup --check-deps
 ```
 
 ### Virtual Environment
-Ensure you're in the correct virtual environment. The project includes an `rm/` directory with a pre-configured environment, or create your own:
+Ensure you're in the correct virtual environment:
 ```bash
-source rm/bin/activate  # Use existing
-# OR
-python -m venv venv && source venv/bin/activate  # Create new
+# Option 1: Use Makefile to create and activate
+make venv && source .venv/bin/activate
+
+# Option 2: Use existing rm/ environment
+source rm/bin/activate
+
+# Option 3: Create manually
+python -m venv venv && source venv/bin/activate
+```
+
+### PyTorch and CUDA
+Check PyTorch CUDA availability for ML components:
+```bash
+make torch-info  # Shows PyTorch version and CUDA availability
 ```
 
 ## Production Status & Key Limitations
@@ -417,8 +429,86 @@ python -m venv venv && source venv/bin/activate  # Create new
 **🔧 Recommended Usage Pattern:**
 Python API usage is strongly recommended over CLI for production applications due to import path complexity.
 
+## ML-Powered Batch Processing (NEW)
+
+### Advanced Batch Processing System
+
+**Process 100+ Documentation Sources with ML Intelligence:**
+```bash
+# Process popular frameworks with self-improving ML pipeline
+PYTHONPATH=src python examples/batch_processing_demo.py --bedrock
+
+# Custom batch processing with intelligent clustering
+PYTHONPATH=src python -c "
+from rules_maker.batch_processor import MLBatchProcessor, DocumentationSource
+import asyncio
+
+sources = [
+    DocumentationSource('https://reactjs.org/docs/', 'React', 'javascript', 'react', priority=5),
+    DocumentationSource('https://fastapi.tiangolo.com/', 'FastAPI', 'python', 'fastapi', priority=5),
+    # Add 100+ sources...
+]
+
+async def process():
+    processor = MLBatchProcessor(
+        bedrock_config={'model_id': 'amazon.nova-lite-v1:0'},
+        output_dir='rules/intelligent_batch',
+        quality_threshold=0.7
+    )
+    result = await processor.process_documentation_batch(sources)
+    print(f'Generated {result.total_rules_generated} rules with {result.quality_metrics}')
+
+asyncio.run(process())
+"
+```
+
+**Self-Improving Feedback System:**
+```bash
+# Demonstrate self-improving ML engine with quality scoring
+PYTHONPATH=src python -c "
+from rules_maker.learning.self_improving_engine import SelfImprovingEngine
+import asyncio
+
+async def demo_feedback():
+    engine = SelfImprovingEngine(quality_threshold=0.7)
+    
+    # Collect feedback signals
+    await engine.collect_feedback_signal('rule_123', 'usage_success', 0.8, source='user')
+    await engine.collect_feedback_signal('rule_123', 'user_rating', 0.9, source='user')
+    
+    # Self-awarding system automatically boosts quality scores
+    awards = await engine.self_award_quality_improvements(rules, batch_performance)
+    print(f'Self-awarded improvements: {awards}')
+
+asyncio.run(demo_feedback())
+"
+```
+
+### Key ML Features
+
+- **Intelligent Clustering**: TF-IDF vectorization + K-means for semantic rule grouping
+- **Self-Awarding System**: Automatic quality score boosting based on performance trends
+- **Quality Prediction**: ML models predict rule effectiveness before deployment
+- **Adaptive Thresholds**: Dynamic quality standards based on system performance
+- **Coherence Optimization**: Cosine similarity analysis for logically coherent rule sets
+
+### Comprehensive Testing Commands
+
+```bash
+# Test ML batch processing system
+PYTHONPATH=src pytest tests/test_batch_processing.py -v
+
+# Test self-improving engine
+PYTHONPATH=src pytest tests/test_batch_processing.py::TestSelfImprovingEngine -v
+
+# Integration tests
+PYTHONPATH=src pytest tests/test_batch_processing.py::TestIntegration -v
+```
+
 **🚨 Critical Implementation Notes:**
 
 - Always use `PYTHONPATH=src` prefix for CLI commands
 - Async operations provide 5x+ performance improvements over synchronous alternatives
 - Technology detection is regex-based and may require content preprocessing for optimal results
+- ML batch processing requires scikit-learn and numpy for clustering algorithms
+- Self-improving engine automatically saves state and learns from feedback patterns

@@ -1,0 +1,19 @@
+{
+  "cluster_id": "javascript_windsurf_cluster_1",
+  "name": "Javascript Windsurf - Cluster 2",
+  "technology": "javascript",
+  "framework": "angular",
+  "coherence_score": 0.7544819185364906,
+  "rules_count": 4,
+  "semantic_keywords": [
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Fastify",
+    "Vue.js",
+    "Angular",
+    "Next.js"
+  ],
+  "generated_at": 1756779149.2874527
+}

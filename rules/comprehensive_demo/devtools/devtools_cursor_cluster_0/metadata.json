@@ -1,0 +1,23 @@
+{
+  "cluster_id": "devtools_cursor_cluster_0",
+  "name": "Devtools Cursor - Cluster 1",
+  "technology": "devtools",
+  "framework": "github",
+  "coherence_score": 0.7381448449873185,
+  "rules_count": 6,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "GitHub",
+    "Jenkins",
+    "Nginx",
+    "Apache HTTP Server",
+    "Docker Compose",
+    "GitLab"
+  ],
+  "generated_at": 1756783465.2177846
+}

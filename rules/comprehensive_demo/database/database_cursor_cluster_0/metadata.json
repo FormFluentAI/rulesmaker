@@ -1,0 +1,21 @@
+{
+  "cluster_id": "database_cursor_cluster_0",
+  "name": "Database Cursor - Cluster 1",
+  "technology": "database",
+  "framework": "mongodb",
+  "coherence_score": 0.6973990023084393,
+  "rules_count": 5,
+  "semantic_keywords": [
+    "function",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Apache Cassandra",
+    "Redis",
+    "MongoDB",
+    "InfluxDB",
+    "Elasticsearch"
+  ],
+  "generated_at": 1756783465.2179587
+}

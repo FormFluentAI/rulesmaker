@@ -1,0 +1,17 @@
+{
+  "cluster_id": "cloud_cursor_cluster_0",
+  "name": "Cloud Cursor - Cluster 1",
+  "technology": "cloud",
+  "framework": "aws",
+  "coherence_score": 0.7324242887485946,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "error",
+    "test"
+  ],
+  "sources": [
+    "AWS",
+    "Helm"
+  ],
+  "generated_at": 1756783465.2178278
+}

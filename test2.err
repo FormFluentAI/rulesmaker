@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/home/ollie/dev/rules-maker/examples/run_nova_client_local.py", line 20, in <module>
+    print(run_once(prompt, temperature=0.7, max_tokens=1024))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ollie/dev/rules-maker/examples/nova_client.py", line 61, in run_once
+    resp = client.converse(
+           ^^^^^^^^^^^^^^^^
+  File "/home/ollie/miniconda3/envs/rulescraper/lib/python3.11/site-packages/botocore/client.py", line 602, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ollie/miniconda3/envs/rulescraper/lib/python3.11/site-packages/botocore/context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ollie/miniconda3/envs/rulescraper/lib/python3.11/site-packages/botocore/client.py", line 1078, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.exceptions.ClientError: An error occurred (UnrecognizedClientException) when calling the Converse operation: The security token included in the request is invalid.
+ERROR: An error occurred (UnrecognizedClientException) when calling the Converse operation: The security token included in the request is invalid.
+Traceback (most recent call last):
+  File "/home/ollie/dev/rules-maker/examples/run_nova_client_local.py", line 20, in <module>
+    print(run_once(prompt, temperature=0.7, max_tokens=1024))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ollie/dev/rules-maker/examples/nova_client.py", line 61, in run_once
+    resp = client.converse(
+           ^^^^^^^^^^^^^^^^
+  File "/home/ollie/miniconda3/envs/rulescraper/lib/python3.11/site-packages/botocore/client.py", line 602, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ollie/miniconda3/envs/rulescraper/lib/python3.11/site-packages/botocore/context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ollie/miniconda3/envs/rulescraper/lib/python3.11/site-packages/botocore/client.py", line 1078, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.exceptions.ClientError: An error occurred (UnrecognizedClientException) when calling the Converse operation: The security token included in the request is invalid.

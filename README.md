@@ -24,11 +24,13 @@ Note: Pydantic V2 compliant (model_validate/model_dump). CLI imports are now laz
 git clone <repository-url>
 cd rules-maker
 
-# Setup virtual environment
-source rm/bin/activate  # or python -m venv venv && source venv/bin/activate
+# One-command setup with venv + deps
+make setup-cu129  # installs deps and torch/torchvision from cu129 channel
 
-# Install core dependencies
-pip install pydantic requests beautifulsoup4 click fake-useragent jinja2 aiohttp numpy
+# Use manually instead:
+#   python -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements.txt -r requirements-dev.txt
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu129
 ```
 
 ### 2. Generate Cursor Rules (Verified Working)
@@ -143,6 +145,18 @@ export OPENAI_API_KEY="your-key-here"
 pip install lxml httpx aiofiles more-itertools python-dotenv rich jsonschema
 ```
 
+### CUDA 12.9 (cu129) PyTorch
+- For NVIDIA 50xx GPUs (e.g., 5070 Ti) using CUDA 12.9-compatible drivers, install PyTorch from the cu129 wheel index.
+- Use the Makefile target:
+  - `make setup-cu129`
+- Or run manually inside your venv:
+  - `pip install torch torchvision --index-url https://download.pytorch.org/whl/cu129`
+- Verify:
+  - `make torch-info` or
+  - `python -c "import torch;print(torch.__version__, torch.version.cuda, torch.cuda.is_available())"`
+
+Note: Recent torch wheels may report `+cu128` while still being compatible with CUDA 12.9 drivers (minor-version compatibility). This is expected; `torchvision` shows `+cu129`.
+
 ## 📁 Project Structure
 
 ```
@@ -167,7 +181,13 @@ rules-maker/
 
 ## 🧪 Testing & Verification
 
-**Latest Test Results (September 1, 2025):**
+Run tests:
+```bash
+source .venv/bin/activate  # if not already active
+make test                  # or: pytest -q
+```
+
+**Latest Test Results (Local):**
 ```
 ✅ ScrapingResult model working correctly
 ✅ Cursor transformer working - generated 1880 chars

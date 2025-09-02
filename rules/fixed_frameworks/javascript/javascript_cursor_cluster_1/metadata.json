@@ -1,0 +1,19 @@
+{
+  "cluster_id": "javascript_cursor_cluster_1",
+  "name": "Javascript Cursor - Cluster 2",
+  "technology": "javascript",
+  "framework": "react",
+  "coherence_score": 0.8472095628689897,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "class",
+    "error",
+    "test",
+    "function"
+  ],
+  "sources": [
+    "React",
+    "Next.js"
+  ],
+  "generated_at": 1756779149.287171
+}

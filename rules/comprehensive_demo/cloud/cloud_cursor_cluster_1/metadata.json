@@ -1,0 +1,21 @@
+{
+  "cluster_id": "cloud_cursor_cluster_1",
+  "name": "Cloud Cursor - Cluster 2",
+  "technology": "cloud",
+  "framework": "azure",
+  "coherence_score": 0.6917732613223713,
+  "rules_count": 4,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Azure",
+    "Google Cloud",
+    "Docker",
+    "Terraform"
+  ],
+  "generated_at": 1756783465.2180018
+}

@@ -46,9 +46,11 @@ def main(ctx, verbose, config):
               help='LLM provider for adaptive scraping')
 @click.option('--llm-api-key', help='API key for LLM provider')
 @click.option('--llm-model', help='LLM model name')
+@click.option('--category-hint', help='Category hint to tailor output (e.g., routing)')
+@click.option('--preset', 'taxonomy_preset', help='Taxonomy preset for categories (e.g., nextjs)')
 @click.pass_context
 def scrape(ctx, url, output, output_format, max_pages, deep, async_scrape, adaptive, 
-           llm_provider, llm_api_key, llm_model):
+           llm_provider, llm_api_key, llm_model, category_hint, taxonomy_preset):
     """Scrape documentation from a URL and generate rules."""
     click.echo(f"Scraping documentation from: {url}")
     
@@ -126,7 +128,9 @@ def scrape(ctx, url, output, output_format, max_pages, deep, async_scrape, adapt
         
         # Transform results
         transformation_config = TransformationConfig(
-            rule_format=RuleFormat(output_format)
+            rule_format=RuleFormat(output_format),
+            category_hint=category_hint,
+            taxonomy_preset=taxonomy_preset
         )
         
         if output_format == 'cursor':
@@ -163,7 +167,9 @@ def scrape(ctx, url, output, output_format, max_pages, deep, async_scrape, adapt
               default='cursor', help='Output format')
 @click.option('--parallel', is_flag=True, help='Enable parallel scraping (uses async scraper)')
 @click.option('--adaptive', is_flag=True, help='Use adaptive scraper with ML enhancement')
-def batch(urls_file, output_dir, output_format, parallel, adaptive):
+@click.option('--category-hint', help='Category hint to tailor output for all URLs')
+@click.option('--preset', 'taxonomy_preset', help='Taxonomy preset for categories (e.g., nextjs)')
+def batch(urls_file, output_dir, output_format, parallel, adaptive, category_hint, taxonomy_preset):
     """Scrape multiple URLs from a file."""
     urls_path = Path(urls_file)
     urls = [line.strip() for line in urls_path.read_text().splitlines() if line.strip()]
@@ -200,7 +206,12 @@ def batch(urls_file, output_dir, output_format, parallel, adaptive):
                         output_file = output_path / filename
                         
                         # Transform and save
-                        transformer = CursorRuleTransformer() if output_format == 'cursor' else WindsurfRuleTransformer()
+                        tx_cfg = TransformationConfig(
+                            rule_format=RuleFormat(output_format),
+                            category_hint=category_hint,
+                            taxonomy_preset=taxonomy_preset
+                        )
+                        transformer = CursorRuleTransformer(tx_cfg) if output_format == 'cursor' else WindsurfRuleTransformer(tx_cfg)
                         content = transformer.transform([result])
                         
                         output_file.write_text(content)
@@ -235,7 +246,12 @@ def batch(urls_file, output_dir, output_format, parallel, adaptive):
                     output_file = output_path / filename
                     
                     # Transform and save
-                    transformer = CursorRuleTransformer() if output_format == 'cursor' else WindsurfRuleTransformer()
+                    tx_cfg = TransformationConfig(
+                        rule_format=RuleFormat(output_format),
+                        category_hint=category_hint,
+                        taxonomy_preset=taxonomy_preset
+                    )
+                    transformer = CursorRuleTransformer(tx_cfg) if output_format == 'cursor' else WindsurfRuleTransformer(tx_cfg)
                     content = transformer.transform([result])
                     
                     output_file.write_text(content)

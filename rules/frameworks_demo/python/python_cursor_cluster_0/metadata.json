@@ -1,0 +1,21 @@
+{
+  "cluster_id": "python_cursor_cluster_0",
+  "name": "Python Cursor - Cluster 1",
+  "technology": "python",
+  "framework": "flask",
+  "coherence_score": 0.8431717940992254,
+  "rules_count": 3,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "async",
+    "test"
+  ],
+  "sources": [
+    "FastAPI",
+    "Flask",
+    "Django"
+  ],
+  "generated_at": 1756783447.7166162
+}

@@ -78,6 +78,8 @@ class TransformationConfig(BaseModel):
     language_hint: Optional[str] = None
     framework_hint: Optional[str] = None
     custom_instructions: str = ""
+    category_hint: Optional[str] = None
+    taxonomy_preset: Optional[str] = None
 
 
 class ScrapingResult(BaseModel):

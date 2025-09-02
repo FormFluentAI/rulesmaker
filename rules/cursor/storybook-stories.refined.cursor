@@ -1,0 +1,102 @@
+Storybook: Writing Stories — Focused Rules
+
+Scope
+- Focus: Component Story Format (CSF), args-first stories, interactions (play), parameters, decorators, and composing stories for the Writing Stories section.
+
+File Layout
+- Co-locate stories with components: `Component/Component.stories.(js|ts|jsx|tsx|vue|svelte)`.
+- Story files are dev-only and excluded from production bundles.
+
+CSF Essentials
+- Default export: Provide static, analyzable metadata.
+  - Include `title` OR `component` to enable static analysis and automatic titles.
+  - Use TypeScript helpers: `satisfies Meta<typeof Component>`.
+  - Example:
+    `import type { Meta } from '@storybook/your-framework'
+    import { Button } from './Button'
+    const meta = { component: Button } satisfies Meta<typeof Button>
+    export default meta`
+- Named exports: Each named export is a story.
+  - Use UpperCamelCase names (e.g., `Primary`, `Secondary`).
+  - Strongly type stories: `type Story = StoryObj<typeof meta>`.
+
+Defining Stories (Args-First)
+- Prefer args to express variations; do not hardcode JSX in stories when args suffice.
+  - Example:
+    `type Story = StoryObj<typeof meta>
+    export const Primary: Story = { args: { primary: true, label: 'Button' } }`
+- Reuse args via spread to compose variants:
+  `export const Secondary: Story = { args: { ...Primary.args, label: '😄👍' } }`
+- Rename story in the UI without changing export name:
+  `export const Primary: Story = { name: 'I am the primary', args: { ... } }`
+
+Hooks Usage (React)
+- Prefer args; treat hooks-based render as advanced/exceptional.
+- If required, implement a wrapper component and expose it with `render`:
+  `const ButtonWithHooks = () => { /* useState, etc. */ return <Button .../> }
+  export const WithHooks: Story = { render: () => <ButtonWithHooks /> }`
+
+Composing Stories Across Components
+- Import args from child component stories to build composites; avoid duplication:
+  `import * as ButtonStories from './Button.stories'
+  export const Pair: Story = {
+    args: { buttons: [{ ...ButtonStories.Primary.args }, { ...ButtonStories.Secondary.args }], orientation: 'horizontal' }
+  }`
+- Caveat: Multi-component stories limit args composition benefits at scale; see multi-component stories workflow.
+
+Interactions with play()
+- Use `play` to script user flows and make assertions with `@storybook/test`:
+  `import { expect } from 'storybook/test'
+  export const FilledForm: Story = {
+    play: async ({ canvas, userEvent }) => {
+      await userEvent.type(canvas.getByTestId('email'), 'email@provider.com')
+      await userEvent.click(canvas.getByRole('button'))
+      await expect(canvas.getByText('Everything is perfect...')).toBeInTheDocument()
+    }
+  }`
+- Debug and step through interactions via the Interactions panel.
+
+Parameters (Static Metadata)
+- Configure addons per story/component via `parameters`:
+  `const meta = { component: Button, parameters: { backgrounds: { options: {} } } }`
+- Parameters cascade: global → component → story; nearest wins.
+
+Decorators (Context/Chrome)
+- Wrap stories for theming/layout/providers:
+  `const meta = { component: Button, decorators: [(Story) => <div style={{ margin: '3em' }}><Story /></div>] }`
+- Apply at story, component, or global level; decorators may accept functions.
+
+Stories for Multiple Components
+- When parent/child components render together, provide explicit `render` functions:
+  `export const ManyItems: Story = {
+    render: (args) => (<List {...args}><ListItem /><ListItem /><ListItem /></List>)
+  }`
+- You may reuse child stories’ args: `import { Selected, Unselected } from './ListItem.stories'` and spread them.
+
+Naming & Metadata Requirements
+- Default export must be statically analyzable (title and/or component; id if used must be static).
+- Use UpperCamelCase named exports for stories.
+- Ensure stable, serializable `args` objects; avoid functions in args unless supported by addons.
+
+Anti-Patterns
+- Don’t mutate shared `args` objects between stories; always spread and override.
+- Don’t rely on dynamic values in default export (breaks static analysis).
+- Don’t prefer custom `render` over args for simple variants.
+- Don’t bypass Controls by hardcoding values that should be tweakable.
+
+Quick Checklist
+- [ ] Story file co-located and named `*.stories.*`.
+- [ ] Default export has static `title` or `component`.
+- [ ] Stories are named exports in UpperCamelCase.
+- [ ] Variants expressed with `args` and composition.
+- [ ] Optional `play` covers key interactions and assertions.
+- [ ] Parameters/decorators set where needed (global/component/story).
+
+References
+- https://storybook.js.org/docs/writing-stories
+- https://storybook.js.org/docs/essentials/interactions
+- https://storybook.js.org/docs/api/csf
+
+—
+Generated from 15 pages of “Writing Stories” section; tailored to CSF and Storybook 7+ patterns.
+

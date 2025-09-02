@@ -1,0 +1,21 @@
+{
+  "cluster_id": "javascript_cursor_cluster_0",
+  "name": "Javascript Cursor - Cluster 1",
+  "technology": "javascript",
+  "framework": "angular",
+  "coherence_score": 0.7155458064759301,
+  "rules_count": 4,
+  "semantic_keywords": [
+    "class",
+    "error",
+    "test",
+    "function"
+  ],
+  "sources": [
+    "Svelte",
+    "Fastify",
+    "Vue.js",
+    "Angular"
+  ],
+  "generated_at": 1756779149.2878566
+}

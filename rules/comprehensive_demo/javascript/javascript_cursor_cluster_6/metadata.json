@@ -1,0 +1,17 @@
+{
+  "cluster_id": "javascript_cursor_cluster_6",
+  "name": "Javascript Cursor - Cluster 7",
+  "technology": "javascript",
+  "framework": "sveltekit",
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "function",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "SvelteKit"
+  ],
+  "generated_at": 1756783465.2165346
+}

@@ -1,0 +1,21 @@
+{
+  "cluster_id": "cloud_cursor_cluster_2",
+  "name": "Cloud Cursor - Cluster 3",
+  "technology": "cloud",
+  "framework": "prometheus",
+  "coherence_score": 0.7384154152079003,
+  "rules_count": 4,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Prometheus",
+    "Ansible",
+    "Kubernetes",
+    "Istio"
+  ],
+  "generated_at": 1756783465.2177396
+}

@@ -22,7 +22,34 @@ class WindsurfRuleTransformer(RuleTransformer):
         tech_stack = self._identify_technology_stack(results)
         domain_info = self._analyze_domain(results)
         
-        return self._generate_windsurf_rules(results, tech_stack, domain_info)
+        base = self._generate_windsurf_rules(results, tech_stack, domain_info)
+        
+        # Optional category-focused prologue mirroring Cursor parity
+        cat = getattr(self.config, 'category_hint', None)
+        if cat:
+            preset = getattr(self.config, 'taxonomy_preset', None)
+            canonical = self._canonicalize_category(cat, preset)
+            prologue: List[str] = []
+            prologue.append(f"# Category: {canonical.replace('-', ' ').title()}")
+            prologue.append("")
+            prologue.extend(self._category_specific_guidelines(canonical))
+            prologue.append("")
+            topics = self._collect_focus_topics(results)
+            if topics:
+                prologue.append("## Focus Topics")
+                prologue.append("")
+                prologue.extend([f"- {t}" for t in topics])
+                prologue.append("")
+            snippets = self._extract_top_code_snippets(results, limit=2)
+            if snippets:
+                prologue.append("## Example Snippets")
+                prologue.append("")
+                for s in snippets:
+                    prologue.append(s)
+                    prologue.append("")
+            return "\n".join(prologue) + "\n" + base
+        
+        return base
     
     def _identify_technology_stack(self, results: List[ScrapingResult]) -> Dict[str, Any]:
         """Identify tech stack using regex word boundaries and URL weighting."""
@@ -272,6 +299,151 @@ class WindsurfRuleTransformer(RuleTransformer):
         ])
         
         return insights
+
+    # --- Category parity helpers (mirrors Cursor) ---
+    def _canonicalize_category(self, category: str, preset: Any) -> str:
+        if not preset:
+            return category
+        cat = category.lower()
+        if str(preset).lower() == 'nextjs':
+            mapping = {
+                'routing': ['routing', 'route', 'linking', 'navigation', 'navigating', 'app', 'pages', 'link', 'router', 'parallel-routes', 'intercepting-routes', 'nested-routes'],
+                'data-fetching': ['data', 'fetch', 'fetching', 'rsc', 'server-components', 'getserversideprops', 'getstaticprops', 'loader', 'actions-data'],
+                'caching': ['cache', 'caching', 'revalidation', 'revalidate', 'revalidatepath', 'revalidatetag'],
+                'server-actions': ['server-actions', 'actions', 'use server', 'form-actions'],
+                'errors': ['error', 'errors', 'loading', 'not-found', 'boundary', 'boundaries'],
+                'assets-images': ['image', 'images', 'assets', 'static', 'public', 'next/image', 'font', 'next/font'],
+                'styling': ['style', 'styles', 'styling', 'css', 'tailwind', 'sass', 'css-modules'],
+                'metadata': ['metadata', 'seo', 'og', 'open-graph', 'sitemap', 'robots'],
+                'middleware-edge': ['middleware', 'edge', 'edge-runtime', 'matcher'],
+                'architecture': ['architecture', 'patterns', 'best-practices', 'structure', 'app-structure'],
+                'i18n': ['i18n', 'internationalization', 'localization', 'locale', 'languages'],
+            }
+            for canonical, synonyms in mapping.items():
+                if any(word in cat for word in synonyms):
+                    return canonical
+        return category
+
+    def _category_specific_guidelines(self, category: str) -> List[str]:
+        cat = category.lower()
+        bullets: List[str] = []
+        def add(title: str, items: List[str]):
+            if items:
+                bullets.append(f"## {title}")
+                bullets.append("")
+                bullets.extend([f"- {it}" for it in items])
+                bullets.append("")
+        if any(k in cat for k in ["getting-started", "installation", "setup"]):
+            add("Setup Essentials", [
+                "Initialize with `create-next-app` and App Router",
+                "Enable strict TypeScript and ESLint core-web-vitals",
+                "Structure `app/` with root `layout.tsx`",
+            ])
+        if "routing" in cat or "linking" in cat or "navigation" in cat or cat == "app":
+            add("Routing & Navigation", [
+                "Define routes by folders in `app/`",
+                "Use `Link` for client navigation, not `<a>`",
+                "Provide `default.tsx` for parallel routes fallbacks",
+            ])
+        if "data" in cat or "fetch" in cat:
+            add("Data Fetching", [
+                "Fetch in Server Components; prefer static + revalidate",
+                "Control cache via `{ next: { revalidate, tags } }`",
+                "Use `revalidateTag`/`revalidatePath` post-mutations",
+            ])
+        if "cach" in cat or "revalid" in cat:
+            add("Caching & Revalidation", [
+                "Default static; opt into dynamic only when required",
+                "Tag critical queries; invalidate narrowly",
+                "Avoid broad cache flushes",
+            ])
+        if "server" in cat and "action" in cat:
+            add("Server Actions", [
+                "Mark functions `'use server'`; validate inputs",
+                "Keep secrets server-side; never expose tokens",
+                "Revalidate relevant paths/tags after writes",
+            ])
+        if "error" in cat or "loading" in cat or "not-found" in cat:
+            add("Error/Loading Boundaries", [
+                "Provide segment-level `error.tsx`, `loading.tsx`, `not-found.tsx`",
+                "Log server errors once; avoid leaking stack traces",
+                "Reset state in client error boundaries",
+            ])
+        if "image" in cat or "assets" in cat:
+            add("Assets & Images", [
+                "Use `next/image` with proper `sizes`/`fill`",
+                "Serve static files from `public/` with `/` paths",
+                "Load fonts via `next/font` to prevent CLS",
+            ])
+        if "css" in cat or "styling" in cat or "tailwind" in cat:
+            add("Styling", [
+                "Prefer CSS Modules or Tailwind; minimize runtime CSS-in-JS",
+                "Scope styles; use layout-level CSS for shells",
+                "Avoid hydration flashes with consistent theming",
+            ])
+        if "metadata" in cat or "seo" in cat:
+            add("Metadata & SEO", [
+                "Use `export const metadata` or `generateMetadata`",
+                "Set canonicals, OpenGraph, and i18n `alternates`",
+                "Generate `app/robots.ts` and `app/sitemap.ts` when needed",
+            ])
+        if "middleware" in cat or "edge" in cat:
+            add("Middleware & Edge", [
+                "Constrain `config.matcher` to targeted paths",
+                "Avoid Node-only APIs in edge runtime",
+                "Keep middleware fast and stateless",
+            ])
+        if "architecture" in cat or "patterns" in cat:
+            add("Architecture", [
+                "Default to Server Components; isolate client islands",
+                "Co-locate by feature within route segments",
+                "Extract shared logic into server utilities",
+            ])
+        if not bullets:
+            add("Category Focus", ["Apply framework best practices specific to this topic."])
+        return bullets
+
+    def _collect_focus_topics(self, results: List[ScrapingResult]) -> List[str]:
+        titles: List[str] = []
+        seen = set()
+        for r in results:
+            for s in (r.sections or []):
+                sd = s.model_dump() if hasattr(s, 'model_dump') else s.dict() if hasattr(s, 'dict') else s
+                t = str(sd.get('title', '')).strip()
+                if t and t.lower() not in seen:
+                    seen.add(t.lower())
+                    titles.append(t)
+                if len(titles) >= 12:
+                    break
+            if len(titles) >= 12:
+                break
+        return titles
+
+    def _extract_top_code_snippets(self, results: List[ScrapingResult], limit: int = 2) -> List[str]:
+        pattern = re.compile(r"```[ \t]*([a-zA-Z0-9+-]*)\n([\s\S]*?)\n```", re.MULTILINE)
+        preferred = ["tsx", "ts", "jsx", "js", "bash", "sh"]
+        collected = []
+        out: List[str] = []
+        for res in results:
+            content = res.content or ""
+            for m in pattern.finditer(content):
+                lang = (m.group(1) or "").lower()
+                code = (m.group(2) or "").strip()
+                if not code:
+                    continue
+                lines = code.splitlines()
+                if len(lines) > 20:
+                    code = "\n".join(lines[:20]) + "\n// ..."
+                block = f"```{lang}\n{code}\n```" if lang else f"```\n{code}\n```"
+                score = (preferred.index(lang) if lang in preferred else len(preferred) + 1)
+                collected.append((score, block))
+        collected.sort(key=lambda x: x[0])
+        for _, block in collected:
+            if block not in out:
+                out.append(block)
+            if len(out) >= limit:
+                break
+        return out
     
     def _create_empty_windsurf_rules(self) -> str:
         """Create empty Windsurf rules template."""

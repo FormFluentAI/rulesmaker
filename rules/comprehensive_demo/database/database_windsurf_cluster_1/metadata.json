@@ -1,0 +1,20 @@
+{
+  "cluster_id": "database_windsurf_cluster_1",
+  "name": "Database Windsurf - Cluster 2",
+  "technology": "database",
+  "framework": "mongodb",
+  "coherence_score": 0.7122983231985955,
+  "rules_count": 5,
+  "semantic_keywords": [
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Apache Cassandra",
+    "PostgreSQL",
+    "MongoDB",
+    "InfluxDB",
+    "Elasticsearch"
+  ],
+  "generated_at": 1756783465.2179143
+}

@@ -1,0 +1,18 @@
+{
+  "cluster_id": "typescript_cursor_single",
+  "name": "Typescript Cursor Rules",
+  "technology": "typescript",
+  "framework": null,
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "TypeScript"
+  ],
+  "generated_at": 1756783447.720232
+}

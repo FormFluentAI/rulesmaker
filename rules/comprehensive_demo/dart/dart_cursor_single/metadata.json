@@ -1,0 +1,16 @@
+{
+  "cluster_id": "dart_cursor_single",
+  "name": "Dart Cursor Rules",
+  "technology": "dart",
+  "framework": "flutter",
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Flutter"
+  ],
+  "generated_at": 1756783465.2167056
+}

@@ -1,0 +1,27 @@
+{
+  "rules": [
+    {
+      "id": "r1",
+      "title": "Use async IO",
+      "description": "Prefer asyncio and non-blocking IO for network/file ops",
+      "content": "Use asyncio, aiohttp, and async file APIs when possible.",
+      "priority": 2,
+      "confidence_score": 0.3,
+      "tags": ["async", "io"],
+      "examples": ["async def fetch(session, url): ..."],
+      "metadata": {"category": "performance"}
+    },
+    {
+      "id": "r2",
+      "title": "Logging basics",
+      "description": "Log at appropriate levels with context-rich messages",
+      "content": "Use structured logs, INFO for milestones, DEBUG for details.",
+      "priority": 1,
+      "confidence_score": 0.2,
+      "tags": ["logging"],
+      "examples": ["logger.info('Processed items', extra={'count': n})"],
+      "metadata": {"category": "observability"}
+    }
+  ]
+}
+

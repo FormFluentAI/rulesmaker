@@ -1,0 +1,16 @@
+{
+  "cluster_id": "swift_cursor_single",
+  "name": "Swift Cursor Rules",
+  "technology": "swift",
+  "framework": null,
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Swift"
+  ],
+  "generated_at": 1756783447.7179902
+}

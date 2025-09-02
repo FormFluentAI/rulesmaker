@@ -1,0 +1,17 @@
+{
+  "cluster_id": "python_cursor_cluster_3",
+  "name": "Python Cursor - Cluster 4",
+  "technology": "python",
+  "framework": "sklearn",
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "class",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Scikit-learn"
+  ],
+  "generated_at": 1756783465.2163167
+}

@@ -1,0 +1,169 @@
+{
+  "insights": {
+    "by_rule": {
+      "r1": {
+        "rule_id": "r1",
+        "title": "Use async IO",
+        "usage_count": 2,
+        "success_count": 2,
+        "success_rate": 1.0,
+        "avg_feedback": 0.7,
+        "last_used_at": "2025-09-01 12:05:00+00:00",
+        "sections_effectiveness": {
+          "__all__": 1.0
+        }
+      },
+      "r2": {
+        "rule_id": "r2",
+        "title": "Logging basics",
+        "usage_count": 2,
+        "success_count": 0,
+        "success_rate": 0.0,
+        "avg_feedback": -0.15000000000000002,
+        "last_used_at": "2025-09-01 12:12:00+00:00",
+        "sections_effectiveness": {
+          "__all__": 0.0
+        }
+      }
+    },
+    "total_events": 4,
+    "global_success_rate": 0.5,
+    "underperforming_rules": [],
+    "top_rules": [
+      "r1",
+      "r2"
+    ]
+  },
+  "optimized": {
+    "rules": [
+      {
+        "id": "r1",
+        "title": "Use async IO",
+        "description": "Prefer asyncio and non-blocking IO for network/file ops",
+        "content": "Use asyncio, aiohttp, and async file APIs when possible.",
+        "type": "best_practice",
+        "category": "",
+        "priority": 2,
+        "confidence_score": 0.6275,
+        "tags": [
+          "async",
+          "io"
+        ],
+        "examples": [
+          "async def fetch(session, url): ..."
+        ],
+        "anti_patterns": [],
+        "metadata": {
+          "category": "performance"
+        }
+      },
+      {
+        "id": "r2",
+        "title": "Logging basics",
+        "description": "Log at appropriate levels with context-rich messages",
+        "content": "Use structured logs, INFO for milestones, DEBUG for details.",
+        "type": "best_practice",
+        "category": "",
+        "priority": 1,
+        "confidence_score": 0.16375,
+        "tags": [
+          "logging"
+        ],
+        "examples": [
+          "logger.info('Processed items', extra={'count': n})"
+        ],
+        "anti_patterns": [],
+        "metadata": {
+          "category": "observability"
+        }
+      }
+    ],
+    "changes": [
+      {
+        "rule_id": "r1",
+        "change_type": "priority_confidence_update",
+        "description": "Adjusted priority/confidence based on 2 usages",
+        "before": {
+          "priority": 2,
+          "confidence_score": 0.3
+        },
+        "after": {
+          "priority": 2,
+          "confidence_score": 0.6275
+        },
+        "score_delta": 0.0
+      },
+      {
+        "rule_id": "r2",
+        "change_type": "priority_confidence_update",
+        "description": "Adjusted priority/confidence based on 2 usages",
+        "before": {
+          "priority": 1,
+          "confidence_score": 0.2
+        },
+        "after": {
+          "priority": 1,
+          "confidence_score": 0.16375
+        },
+        "score_delta": 0.0
+      }
+    ],
+    "quality_score": 0.5
+  },
+  "validations": {
+    "r1": {
+      "relevance_improvement": 0.32749999999999996,
+      "clarity_improvement": 0.0,
+      "duplication_reduction": 0.0,
+      "overall_score": 0.16374999999999998,
+      "notes": "Heuristic comparison based on rule fields"
+    },
+    "r2": {
+      "relevance_improvement": -0.036250000000000004,
+      "clarity_improvement": 0.0,
+      "duplication_reduction": 0.0,
+      "overall_score": -0.018125000000000002,
+      "notes": "Heuristic comparison based on rule fields"
+    }
+  },
+  "content_analysis": {
+    "content_summary": "# Project Docs: Async Processing and Logging  This project heavily uses asynchronous patterns in Python with asyncio. We rely on aiohttp for network IO and async file operations. ",
+    "languages": [],
+    "frameworks": [],
+    "key_topics": [
+      "testing",
+      "api",
+      "logging",
+      "async",
+      "observability"
+    ],
+    "patterns": {
+      "patterns": [],
+      "languages": [],
+      "categories": [],
+      "metadata": {}
+    },
+    "best_practices": {
+      "items": [
+        {
+          "name": "Establish testing baseline",
+          "description": "Add unit tests for core modules and critical paths.",
+          "rationale": "Prevents regressions and documents expected behaviors.",
+          "references": [],
+          "confidence": 0.7,
+          "tags": [
+            "testing",
+            "quality"
+          ]
+        }
+      ]
+    },
+    "anti_patterns": {
+      "items": []
+    },
+    "metadata": {
+      "length": 542
+    }
+  },
+  "recommendations": []
+}

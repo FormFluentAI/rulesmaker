@@ -1,0 +1,16 @@
+{
+  "cluster_id": "python_windsurf_single",
+  "name": "Python Windsurf Rules",
+  "technology": "python",
+  "framework": "fastapi",
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "FastAPI"
+  ],
+  "generated_at": 1756784618.5781717
+}

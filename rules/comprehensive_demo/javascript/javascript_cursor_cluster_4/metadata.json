@@ -1,0 +1,19 @@
+{
+  "cluster_id": "javascript_cursor_cluster_4",
+  "name": "Javascript Cursor - Cluster 5",
+  "technology": "javascript",
+  "framework": "electron",
+  "coherence_score": 0.846790385774814,
+  "rules_count": 3,
+  "semantic_keywords": [
+    "function",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Webpack",
+    "Electron",
+    "Qwik"
+  ],
+  "generated_at": 1756783465.2097974
+}

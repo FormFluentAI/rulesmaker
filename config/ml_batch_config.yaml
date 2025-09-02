@@ -1,0 +1,203 @@
+# ML Batch Processing Configuration
+# Configuration for ML-enhanced batch processing with Rules Maker
+
+# === Batch Processing Configuration ===
+batch_processing:
+  # Core batch settings
+  max_concurrent: 15              # Maximum concurrent processing operations
+  quality_threshold: 0.7          # Minimum quality score for rule inclusion  
+  enable_clustering: true         # Enable intelligent rule clustering
+  coherence_threshold: 0.6        # Minimum clustering coherence score
+  max_clusters: 5                 # Maximum number of clusters to create
+  
+  # Performance settings
+  timeout_seconds: 300            # Processing timeout per source
+  retry_attempts: 3               # Retry attempts for failed operations
+  memory_limit_gb: 8              # Memory usage limit (approximate)
+  
+  # Output settings
+  output_format: ["cursor", "windsurf"]  # Rule formats to generate
+  include_metadata: true          # Include ML analysis metadata in output
+  generate_reports: true          # Generate quality analysis reports
+
+# === ML Engine Configuration ===
+ml_engine:
+  # Model settings
+  quality_threshold: 0.7          # Quality classification threshold
+  enable_self_improvement: true   # Enable feedback loops and learning
+  clustering_algorithm: "kmeans"  # Clustering algorithm (kmeans, dbscan)
+  model_directory: "models/"      # Directory for storing ML models
+  
+  # Feature extraction
+  tfidf_max_features: 1000       # Maximum TF-IDF features
+  ngram_range: [1, 2]            # N-gram range for text analysis
+  stop_words: "english"          # Stop words language
+  
+  # ML model parameters
+  random_forest_estimators: 100   # Number of trees in Random Forest
+  gradient_boost_estimators: 100  # Number of boosting stages
+  clustering_max_features: 100    # Features for clustering analysis
+  
+  # Performance settings
+  enable_parallel_processing: true
+  n_jobs: -1                     # Use all available cores (-1)
+
+# === Bedrock Integration ===
+bedrock_integration:
+  # Model settings
+  model_id: "amazon.nova-lite-v1:0"  # Primary Bedrock model
+  fallback_model: "amazon.nova-micro-v1:0"  # Fallback for rate limits
+  region: "us-east-1"            # AWS region
+  
+  # Request settings  
+  temperature: 0.3               # Lower temperature for consistent output
+  max_tokens: 4000              # Maximum tokens per request
+  top_p: 0.9                    # Nucleus sampling parameter
+  
+  # Rate limiting and retries
+  requests_per_minute: 100       # Rate limit for Bedrock requests
+  retry_delay_seconds: 2         # Delay between retries
+  max_retries: 3                # Maximum retry attempts
+  
+  # Cost management
+  enable_cost_tracking: true     # Track API usage costs
+  daily_cost_limit_usd: 50.0    # Daily spending limit
+  warn_threshold_usd: 40.0      # Warning threshold
+
+# === Integrated Learning Configuration ===
+integrated_learning:
+  # System settings
+  enable_ml: true               # Enable ML capabilities
+  ml_weight: 0.6               # Weight for ML vs base engine (0.0-1.0)
+  feedback_integration: true    # Enable feedback collection and learning
+  
+  # Base engine settings
+  base_engine_config:
+    success_threshold: 0.7      # Success threshold for base learning
+    min_events: 3              # Minimum events for analysis
+    priority_boost: 0.1        # Priority boost for successful rules
+  
+  # ML strategy settings  
+  ml_strategy_config:
+    quality_threshold: 0.7      # Quality threshold for ML strategy
+    model_directory: "models/"  # Model storage directory
+    
+  # Self-improvement settings
+  self_improvement:
+    enable_awards: true         # Enable self-awarding quality improvements
+    award_threshold: 0.8        # Threshold for automatic quality awards
+    learning_rate: 0.1          # Learning rate for improvements
+    feedback_window_days: 30    # Window for feedback analysis
+
+# === Documentation Source Management ===
+source_management:
+  # Source discovery
+  enable_auto_discovery: true   # Automatically discover related documentation
+  discovery_depth: 2           # Maximum discovery depth (links to follow)
+  respect_robots_txt: true     # Respect robots.txt files
+  
+  # Source quality filtering
+  min_content_length: 500      # Minimum content length (chars)
+  max_content_length: 50000    # Maximum content length (chars)
+  exclude_file_types: [".pdf", ".doc", ".ppt"]  # Excluded file types
+  
+  # Source prioritization
+  priority_domains:            # High-priority domains
+    - "docs.python.org"
+    - "reactjs.org"
+    - "fastapi.tiangolo.com" 
+    - "vuejs.org"
+    - "angular.io"
+  
+  # Update settings
+  cache_duration_hours: 24     # Cache duration for scraped content
+  enable_incremental_updates: true  # Only process changed content
+  change_detection_method: "content_hash"  # Change detection method
+
+# === Output and Formatting ===  
+output_formatting:
+  # File organization
+  output_directory: "rules/ml_batch_output"
+  create_subdirectories: true   # Create subdirs by technology/format
+  include_timestamps: true      # Include timestamps in filenames
+  
+  # Rule formatting
+  include_quality_metrics: true # Include quality scores in rules
+  include_source_attribution: true  # Include source URLs and credits
+  include_generation_metadata: true # Include generation timestamps
+  
+  # Quality sections
+  add_ml_assessment_section: true   # Add ML quality assessment
+  add_improvement_recommendations: true  # Add improvement suggestions
+  add_clustering_analysis: true    # Add clustering insights
+  
+  # Export formats
+  export_formats:
+    - format: "cursor"
+      filename_template: "{technology}_cursor_rules.md"
+      include_examples: true
+    - format: "windsurf" 
+      filename_template: "{technology}_windsurf_rules.md"
+      include_workflow: true
+    - format: "json"
+      filename_template: "{technology}_metadata.json"
+      include_full_analysis: true
+
+# === Monitoring and Logging ===
+monitoring:
+  # Logging configuration
+  log_level: "INFO"            # Logging level (DEBUG, INFO, WARN, ERROR)
+  log_file: "logs/ml_batch_processing.log"
+  rotate_logs: true            # Enable log rotation
+  max_log_size_mb: 50         # Maximum log file size
+  
+  # Performance monitoring  
+  track_processing_time: true   # Track processing time per source
+  track_memory_usage: true     # Track memory usage
+  track_api_costs: true        # Track Bedrock API costs
+  
+  # Quality monitoring
+  track_quality_metrics: true  # Track quality score trends
+  alert_quality_threshold: 0.5 # Alert if average quality drops below
+  generate_daily_reports: true # Generate daily quality reports
+  
+  # Health checks
+  enable_health_endpoints: false  # Enable health check endpoints (for web deployments)
+  health_check_interval_minutes: 15
+
+# === Development and Testing ===
+development:
+  # Testing settings
+  enable_dry_run: false        # Dry run mode (no actual processing)
+  sample_size_limit: null      # Limit processing to N sources (null = no limit)
+  debug_mode: false           # Enable debug mode with verbose output
+  
+  # Development features
+  save_intermediate_results: false  # Save intermediate processing results
+  enable_profiling: false      # Enable performance profiling  
+  mock_external_apis: false    # Mock external API calls for testing
+  
+  # Validation settings
+  strict_validation: true      # Enable strict input validation
+  validate_outputs: true       # Validate generated rule formats
+  check_duplicate_sources: true # Check for and handle duplicate sources
+
+# === Advanced Features ===
+advanced:
+  # Experimental features
+  enable_semantic_search: false    # Semantic search for related content
+  enable_auto_tagging: true       # Automatic technology tagging
+  enable_content_summarization: true  # AI-powered content summarization
+  
+  # Custom processors
+  custom_processor_modules: []     # Custom processor module paths
+  custom_transformer_modules: []   # Custom transformer module paths
+  
+  # Integration settings
+  webhook_notifications: []       # Webhook URLs for notifications
+  external_quality_apis: []       # External quality assessment APIs
+  
+  # Backup and recovery
+  enable_backup: true             # Enable automatic backups
+  backup_directory: "backups/"    # Backup storage directory
+  backup_retention_days: 30       # Backup retention period

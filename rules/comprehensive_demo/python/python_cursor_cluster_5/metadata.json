@@ -1,0 +1,20 @@
+{
+  "cluster_id": "python_cursor_cluster_5",
+  "name": "Python Cursor - Cluster 6",
+  "technology": "python",
+  "framework": "fastapi",
+  "coherence_score": 0.8710902448372672,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "async",
+    "test"
+  ],
+  "sources": [
+    "FastAPI",
+    "Django"
+  ],
+  "generated_at": 1756783465.2095127
+}

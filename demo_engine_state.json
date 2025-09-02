@@ -1,0 +1,383 @@
+{
+  "feedback_signals": [
+    {
+      "rule_id": "rule_cursor_5b055bd8",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.2194872,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_5b055bd8",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.2195003,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_5b055bd8",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.2195039,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_e2b9dcb1",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.2195153,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_e2b9dcb1",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.2195225,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_e2b9dcb1",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.2195275,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_41b6ae35",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.2195315,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_41b6ae35",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.2195356,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_41b6ae35",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.2195413,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_29c93cda",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.2195454,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_29c93cda",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.219551,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_29c93cda",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.2195542,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_ed5bd29e",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.219557,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_ed5bd29e",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.2195597,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_ed5bd29e",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.2195625,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_59471bfc",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.2195663,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_59471bfc",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.2195692,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_59471bfc",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.219572,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_02cc48b8",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.219575,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_02cc48b8",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.2195778,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_02cc48b8",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.2195807,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_c09e3e22",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.2195835,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_c09e3e22",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.2195864,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_c09e3e22",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.2195892,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_fd5f6b6f",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.2195916,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_fd5f6b6f",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.2195945,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_fd5f6b6f",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.2195973,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_5a305bd5",
+      "signal_type": "usage_success",
+      "value": 0.8,
+      "timestamp": 1756783465.2196,
+      "context": {
+        "usage_type": "cursor_ide"
+      },
+      "source": "user",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_5a305bd5",
+      "signal_type": "quality_score",
+      "value": 0.75,
+      "timestamp": 1756783465.2196026,
+      "context": {
+        "evaluator": "ml_model"
+      },
+      "source": "system",
+      "confidence": 1.0
+    },
+    {
+      "rule_id": "rule_cursor_5a305bd5",
+      "signal_type": "user_rating",
+      "value": 0.7,
+      "timestamp": 1756783465.2196057,
+      "context": {
+        "rating_context": "rule_helpfulness"
+      },
+      "source": "user",
+      "confidence": 1.0
+    }
+  ],
+  "quality_history": {
+    "rule_cursor_5b055bd8": [
+      0.75,
+      0.7
+    ],
+    "rule_cursor_e2b9dcb1": [
+      0.75,
+      0.7
+    ],
+    "rule_cursor_41b6ae35": [
+      0.75,
+      0.7
+    ],
+    "rule_cursor_29c93cda": [
+      0.75,
+      0.7
+    ],
+    "rule_cursor_ed5bd29e": [
+      0.75,
+      0.7
+    ],
+    "rule_cursor_59471bfc": [
+      0.75,
+      0.7
+    ],
+    "rule_cursor_02cc48b8": [
+      0.75,
+      0.7
+    ],
+    "rule_cursor_c09e3e22": [
+      0.75,
+      0.7
+    ],
+    "rule_cursor_fd5f6b6f": [
+      0.75,
+      0.7
+    ],
+    "rule_cursor_5a305bd5": [
+      0.75,
+      0.7
+    ]
+  },
+  "adaptive_thresholds": {
+    "quality_threshold": 0.6,
+    "success_threshold": 0.6,
+    "improvement_threshold": 0.1
+  },
+  "model_performance": {},
+  "last_model_update": 0
+}

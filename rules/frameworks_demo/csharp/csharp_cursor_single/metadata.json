@@ -1,0 +1,17 @@
+{
+  "cluster_id": "csharp_cursor_single",
+  "name": "Csharp Cursor Rules",
+  "technology": "csharp",
+  "framework": "dotnet",
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "function",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "ASP.NET Core"
+  ],
+  "generated_at": 1756783447.7198184
+}

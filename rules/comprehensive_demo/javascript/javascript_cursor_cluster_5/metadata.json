@@ -1,0 +1,20 @@
+{
+  "cluster_id": "javascript_cursor_cluster_5",
+  "name": "Javascript Cursor - Cluster 6",
+  "technology": "javascript",
+  "framework": "react-native",
+  "coherence_score": 0.8490300538115668,
+  "rules_count": 3,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Parcel",
+    "React Native",
+    "Svelte"
+  ],
+  "generated_at": 1756783465.2097409
+}

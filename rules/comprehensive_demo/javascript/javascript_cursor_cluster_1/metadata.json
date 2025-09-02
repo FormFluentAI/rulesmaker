@@ -1,0 +1,25 @@
+{
+  "cluster_id": "javascript_cursor_cluster_1",
+  "name": "Javascript Cursor - Cluster 2",
+  "technology": "javascript",
+  "framework": "mocha",
+  "coherence_score": 0.8151707958041083,
+  "rules_count": 7,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "async",
+    "test"
+  ],
+  "sources": [
+    "Ionic",
+    "Astro",
+    "Expo",
+    "Express.js",
+    "Cypress",
+    "Mocha",
+    "Remix"
+  ],
+  "generated_at": 1756783465.2152374
+}

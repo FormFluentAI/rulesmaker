@@ -1,0 +1,25 @@
+{
+  "cluster_id": "python_cursor_cluster_0",
+  "name": "Python Cursor - Cluster 1",
+  "technology": "python",
+  "framework": "django",
+  "coherence_score": 0.8195909892586904,
+  "rules_count": 7,
+  "semantic_keywords": [
+    "class",
+    "async",
+    "error",
+    "test",
+    "function"
+  ],
+  "sources": [
+    "Pytest",
+    "FastAPI",
+    "Pydantic",
+    "Django",
+    "Flask",
+    "Requests",
+    "Click"
+  ],
+  "generated_at": 1756779149.2873123
+}

@@ -1,0 +1,18 @@
+{
+  "cluster_id": "go_cursor_single",
+  "name": "Go Cursor Rules",
+  "technology": "go",
+  "framework": null,
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "class",
+    "error",
+    "test",
+    "function"
+  ],
+  "sources": [
+    "Go Documentation"
+  ],
+  "generated_at": 1756779149.2877066
+}

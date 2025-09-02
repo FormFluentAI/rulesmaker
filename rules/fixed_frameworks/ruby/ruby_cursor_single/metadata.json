@@ -1,0 +1,18 @@
+{
+  "cluster_id": "ruby_cursor_single",
+  "name": "Ruby Cursor Rules",
+  "technology": "ruby",
+  "framework": "rails",
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "class",
+    "error",
+    "test",
+    "function"
+  ],
+  "sources": [
+    "Ruby on Rails"
+  ],
+  "generated_at": 1756779149.2877877
+}

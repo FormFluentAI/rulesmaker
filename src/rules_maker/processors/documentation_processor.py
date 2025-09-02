@@ -4,9 +4,10 @@ Documentation processor for Rules Maker.
 
 from typing import Dict, Any, List
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 from .base import ContentProcessor
-from ..models import DocumentationStructure, ContentSection, DocumentationType
+from ..models import DocumentationStructure
 from ..utils import detect_documentation_type
 
 
@@ -40,17 +41,14 @@ class DocumentationProcessor(ContentProcessor):
         # Extract navigation links
         nav_links = self._extract_navigation(soup, url)
         
-        # Extract code examples
-        code_examples = self._extract_code_examples(soup)
-        
         return DocumentationStructure(
-            title=title,
-            url=url,
+            name=title,
+            base_url=url,
             documentation_type=doc_type,
             sections=sections,
             metadata=doc_metadata,
-            navigation_links=nav_links,
-            code_examples=code_examples
+            navigation={'links': nav_links},
+            last_updated=datetime.now()
         )
     
     def _extract_navigation(self, soup: BeautifulSoup, base_url: str) -> List[Dict[str, str]]:

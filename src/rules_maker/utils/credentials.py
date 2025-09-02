@@ -26,7 +26,11 @@ class CredentialManager:
         """Find the project root directory."""
         current = Path(__file__).parent
         while current != current.parent:
-            if (current / "pyproject.toml").exists() or (current / "setup.py").exists():
+            # Look for project markers, but skip if we're in src/rules_maker
+            has_project_marker = (current / "pyproject.toml").exists() or (current / "setup.py").exists()
+            is_src_subdir = current.name == "rules_maker" and current.parent.name == "src"
+            
+            if has_project_marker and not is_src_subdir:
                 return current
             current = current.parent
         return Path.cwd()
@@ -237,7 +241,14 @@ class CredentialManager:
         try:
             import boto3
             from botocore.exceptions import ClientError
-            
+        except ImportError:
+            return {
+                'success': False,
+                'error': 'boto3 not installed',
+                'install_command': 'pip install boto3'
+            }
+        
+        try:            
             model_id = model_id or os.environ.get('BEDROCK_MODEL_ID', 'amazon.nova-lite-v1:0')
             region = region or os.environ.get('AWS_REGION', 'us-east-1')
             
@@ -275,12 +286,6 @@ class CredentialManager:
                 'error_code': e.response.get('Error', {}).get('Code', 'Unknown'),
                 'model_id': model_id,
                 'region': region
-            }
-        except ImportError:
-            return {
-                'success': False,
-                'error': 'boto3 not installed',
-                'install_command': 'pip install boto3'
             }
         except Exception as e:
             return {

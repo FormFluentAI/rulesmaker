@@ -1,0 +1,16 @@
+{
+  "cluster_id": "rust_windsurf_single",
+  "name": "Rust Windsurf Rules",
+  "technology": "rust",
+  "framework": null,
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Rust"
+  ],
+  "generated_at": 1756783447.7209787
+}

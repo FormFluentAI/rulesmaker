@@ -1,0 +1,18 @@
+{
+  "cluster_id": "javascript_cursor_cluster_0",
+  "name": "Javascript Cursor - Cluster 1",
+  "technology": "javascript",
+  "framework": "vue",
+  "coherence_score": 0.7849496745817854,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "class",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Vite",
+    "Vue.js"
+  ],
+  "generated_at": 1756783465.2157853
+}

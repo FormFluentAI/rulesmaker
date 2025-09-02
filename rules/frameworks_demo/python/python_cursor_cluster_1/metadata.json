@@ -1,0 +1,19 @@
+{
+  "cluster_id": "python_cursor_cluster_1",
+  "name": "Python Cursor - Cluster 2",
+  "technology": "python",
+  "framework": "pytorch",
+  "coherence_score": 0.8099129673337162,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "PyTorch",
+    "TensorFlow"
+  ],
+  "generated_at": 1756783447.7169886
+}

@@ -1,0 +1,18 @@
+{
+  "cluster_id": "javascript_cursor_cluster_7",
+  "name": "Javascript Cursor - Cluster 8",
+  "technology": "javascript",
+  "framework": "jest",
+  "coherence_score": 0.8652645187307685,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "function",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "Rollup",
+    "Jest"
+  ],
+  "generated_at": 1756783465.20961
+}

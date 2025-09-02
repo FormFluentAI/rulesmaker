@@ -1,0 +1,17 @@
+{
+  "cluster_id": "python_cursor_cluster_4",
+  "name": "Python Cursor - Cluster 5",
+  "technology": "python",
+  "framework": "opencv",
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "function",
+    "error",
+    "test"
+  ],
+  "sources": [
+    "OpenCV"
+  ],
+  "generated_at": 1756783465.2163625
+}

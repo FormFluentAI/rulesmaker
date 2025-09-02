@@ -1,0 +1,27 @@
+{
+  "cluster_id": "python_cursor_cluster_1",
+  "name": "Python Cursor - Cluster 2",
+  "technology": "python",
+  "framework": "celery",
+  "coherence_score": 0.8359477176329732,
+  "rules_count": 9,
+  "semantic_keywords": [
+    "function",
+    "class",
+    "error",
+    "async",
+    "test"
+  ],
+  "sources": [
+    "Celery",
+    "Pydantic",
+    "Click",
+    "NumPy",
+    "Matplotlib",
+    "Flask",
+    "Pandas",
+    "Pytest",
+    "Requests"
+  ],
+  "generated_at": 1756783465.2098782
+}

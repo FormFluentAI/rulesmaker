@@ -95,29 +95,85 @@ def main(ctx, verbose, config, json_logs, redact_prompts, provider, model_id, re
 
 
 @main.command()
-@click.argument('url')
-@click.option('--output', '-o', type=click.Path(), help='Output file path')
+@click.argument('url', required=False)
+@click.option('--output', '-o', type=click.Path(), help='Output path. For single file, extension is normalized by format (.mdc for cursor, .md for windsurf).')
 @click.option('--format', 'output_format', type=click.Choice(['cursor', 'windsurf', 'json', 'yaml']), 
-              default='cursor', help='Output format')
+              default='cursor', help='Output format/ruleset (cursor|windsurf|json|yaml)')
+@click.option('--split', type=click.Choice(['none', 'page', 'category']), default='none', help='Split output by page or by URL category')
+@click.option('--output-dir', '-d', type=click.Path(), help='Directory for split outputs when --split=page')
 @click.option('--max-pages', type=int, default=10, help='Maximum pages to scrape')
 @click.option('--deep', is_flag=True, help='Enable deep scraping (follow links)')
 @click.option('--async-scrape', is_flag=True, help='Use async scraper for better performance')
 @click.option('--adaptive', is_flag=True, help='Use adaptive scraper with ML/LLM enhancement')
+@click.option('--ml', 'use_ml', is_flag=True, help='Use ML-enhanced transformer (Cursor format only)')
 @click.option('--llm-provider', type=click.Choice(['openai', 'anthropic', 'huggingface', 'bedrock', 'local']), 
               help='LLM provider for adaptive scraping')
 @click.option('--llm-api-key', help='API key for LLM provider')
 @click.option('--llm-model', help='LLM model name')
 @click.option('--credentials-csv', type=click.Path(exists=True), help='Credentials CSV for provider bedrock')
 @click.option('--region', help='Region for provider bedrock')
+@click.option('--interactive/--no-interactive', '-i/ ', default=False, help='Interactive wizard to choose options')
 @click.pass_context
-def scrape(ctx, url, output, output_format, max_pages, deep, async_scrape, adaptive, 
-           llm_provider, llm_api_key, llm_model, credentials_csv, region):
+def scrape(ctx, url, output, output_format, split, output_dir, max_pages, deep, async_scrape, adaptive, 
+           llm_provider, llm_api_key, llm_model, credentials_csv, region, interactive, use_ml):
     """Scrape documentation from a URL and generate rules."""
-    # Lazy imports to avoid requiring optional dependencies unless this command is used
+    # Interactive wizard for friendlier UX
+    if interactive:
+        # Helper for extension mapping
+        def _ext_for(fmt: str) -> str:
+            return ".mdc" if fmt == 'cursor' else ".md" if fmt == 'windsurf' else f".{fmt}"
+        from urllib.parse import urlparse
+
+        if not url:
+            url = click.prompt("Enter documentation URL", type=str)
+        # Format choice
+        output_format = click.prompt(
+            "Choose rules format",
+            type=click.Choice(['cursor', 'windsurf', 'json', 'yaml'], case_sensitive=False),
+            default=output_format or 'cursor'
+        )
+        # Split choice
+        split = click.prompt(
+            "How to divide output",
+            type=click.Choice(['none', 'page', 'category'], case_sensitive=False),
+            default=split or 'none'
+        )
+        # Deep crawl
+        deep = click.confirm("Enable deep scraping (follow links)?", default=bool(deep))
+        # Max pages
+        max_pages = click.prompt("Max pages", type=int, default=max_pages or 10)
+
+        # Suggest defaults for output path/dir
+        parsed = urlparse(url)
+        domain = (parsed.netloc or 'docs').replace(':', '_')
+        ext = _ext_for(output_format)
+        if split == 'none':
+            suggested = output or f"rules/{domain}{ext}"
+            output = click.prompt("Output file path", type=str, default=suggested)
+        else:
+            sub = 'pages' if split == 'page' else 'categories'
+            suggested_dir = output_dir or f"rules/{domain}/{output_format}/{sub}"
+            output_dir = click.prompt("Output directory", type=str, default=suggested_dir)
+
+        # Optional async/adaptive selection
+        mode = click.prompt(
+            "Scraper mode",
+            type=click.Choice(['standard', 'async', 'adaptive'], case_sensitive=False),
+            default='standard'
+        )
+        async_scrape = (mode == 'async')
+        adaptive = (mode == 'adaptive')
+
+    # Lazy and selective imports to avoid optional deps unless needed
     from .models import ScrapingConfig, TransformationConfig, RuleFormat
     from .transformers import CursorRuleTransformer, WindsurfRuleTransformer
-    from .scrapers import DocumentationScraper, AsyncDocumentationScraper, AdaptiveDocumentationScraper
-    from .extractors.llm_extractor import LLMConfig, LLMProvider
+    if adaptive:
+        from .scrapers.adaptive_documentation_scraper import AdaptiveDocumentationScraper
+        from .extractors.llm_extractor import LLMConfig, LLMProvider
+    elif async_scrape:
+        from .scrapers.async_documentation_scraper import AsyncDocumentationScraper
+    else:
+        from .scrapers.documentation_scraper import DocumentationScraper
     click.echo(f"Scraping documentation from: {url}")
     
     try:
@@ -233,18 +289,119 @@ def scrape(ctx, url, output, output_format, max_pages, deep, async_scrape, adapt
             from .transformers import RuleTransformer
             transformer = RuleTransformer(transformation_config)
         
-        transformed_content = transformer.transform(results)
-        
-        # Output results
-        if output:
-            output_path = Path(output)
-            output_path.write_text(transformed_content)
-            click.echo(f"Rules saved to: {output_path}")
+        # Helper: normalize extension per format
+        def _ext_for(fmt: str) -> str:
+            return ".mdc" if fmt == 'cursor' else ".md" if fmt == 'windsurf' else f".{fmt}"
+
+        if split == 'page':
+            # Write one file per page result
+            outdir = Path(output_dir or (output if output and Path(output).is_dir() else "rules_output"))
+            outdir.mkdir(parents=True, exist_ok=True)
+            ext = _ext_for(output_format)
+            written = 0
+            for res in results:
+                if use_ml and output_format == 'cursor':
+                    from .transformers.ml_cursor_transformer import MLCursorTransformer
+                    content = _run_async(MLCursorTransformer().transform([res]))
+                else:
+                    content = transformer.transform([res])
+                # Derive filename from URL
+                fname = str(res.url).replace('https://', '').replace('http://', '').replace('/', '_')
+                if not fname:
+                    fname = "index"
+                file_path = outdir / f"{fname}{ext}"
+                file_path.write_text(content)
+                written += 1
+            click.echo(f"🗂️  Wrote {written} files to: {outdir}")
+        elif split == 'category':
+            # Group results by URL-derived category and write one file per category
+            from urllib.parse import urlparse
+            outdir = Path(output_dir or (output if output and Path(output).is_dir() else "rules_output"))
+            outdir.mkdir(parents=True, exist_ok=True)
+            ext = _ext_for(output_format)
+
+            def _slug(s: str) -> str:
+                import re
+                s = s.strip().lower()
+                s = re.sub(r"[^a-z0-9\-_/]", "-", s)
+                s = s.replace('/', '-').replace('_', '-')
+                s = re.sub(r"-+", "-", s).strip('-')
+                return s or "uncategorized"
+
+            def _category_from_url(u: str) -> str:
+                try:
+                    p = urlparse(u)
+                    segs = [seg for seg in (p.path or '').split('/') if seg]
+                    if not segs:
+                        return "uncategorized"
+                    # Find 'docs' anchor
+                    if 'docs' in segs:
+                        i = segs.index('docs')
+                        # Prefer segment after 'app' when present
+                        if i + 1 < len(segs) and segs[i + 1] == 'app':
+                            # Special-case Next.js: building-your-application/<topic>
+                            if i + 2 < len(segs) and segs[i + 2] == 'building-your-application' and i + 3 < len(segs):
+                                return _slug(segs[i + 3])
+                            if i + 2 < len(segs):
+                                return _slug(segs[i + 2])
+                        # Fallback: next segment after docs
+                        if i + 1 < len(segs):
+                            return _slug(segs[i + 1])
+                    # Otherwise take first meaningful segment
+                    return _slug(segs[0])
+                except Exception:
+                    return "uncategorized"
+
+            buckets: dict[str, list] = {}
+            for res in results:
+                cat = _category_from_url(str(res.url))
+                buckets.setdefault(cat, []).append(res)
+
+            written = 0
+            for cat, group in buckets.items():
+                # Use a transformer configured with category hint to specialize rules
+                from .models import TransformationConfig, RuleFormat
+                if use_ml and output_format == 'cursor':
+                    from .transformers.ml_cursor_transformer import MLCursorTransformer
+                    content = _run_async(MLCursorTransformer().transform(group))
+                else:
+                    if output_format == 'cursor':
+                        from .transformers import CursorRuleTransformer as _T
+                    elif output_format == 'windsurf':
+                        from .transformers import WindsurfRuleTransformer as _T
+                    else:
+                        from .transformers import RuleTransformer as _T
+                    cfg = TransformationConfig(
+                        rule_format=RuleFormat(output_format),
+                        category_hint=cat,
+                    )
+                    content = _T(cfg).transform(group)
+                ext = _ext_for(output_format)
+                file_path = outdir / f"{cat}{ext}"
+                file_path.write_text(content)
+                written += 1
+            click.echo(f"🗂️  Wrote {written} category files to: {outdir}")
         else:
-            click.echo("\n" + "="*50)
-            click.echo("GENERATED RULES:")
-            click.echo("="*50)
-            click.echo(transformed_content)
+            # Single combined file
+            if use_ml and output_format == 'cursor':
+                from .transformers.ml_cursor_transformer import MLCursorTransformer
+                transformed_content = _run_async(MLCursorTransformer().transform(results))
+            else:
+                transformed_content = transformer.transform(results)
+            if output:
+                output_path = Path(output)
+                # Normalize extension if needed
+                ext = _ext_for(output_format)
+                if output_path.suffix.lower() != ext:
+                    output_path = output_path.with_suffix(ext)
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                output_path.write_text(transformed_content)
+                click.echo(f"Rules saved to: {output_path}")
+            else:
+                click.echo("\n" + "="*50)
+                click.echo("GENERATED RULES:")
+                click.echo("="*50)
+                click.echo(transformed_content)
             
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
@@ -258,7 +415,8 @@ def scrape(ctx, url, output, output_format, max_pages, deep, async_scrape, adapt
               default='cursor', help='Output format')
 @click.option('--parallel', is_flag=True, help='Enable parallel scraping (uses async scraper)')
 @click.option('--adaptive', is_flag=True, help='Use adaptive scraper with ML enhancement')
-def batch(urls_file, output_dir, output_format, parallel, adaptive):
+@click.option('--ml', 'use_ml', is_flag=True, help='Use ML-enhanced transformer (Cursor format only)')
+def batch(urls_file, output_dir, output_format, parallel, adaptive, use_ml):
     """Scrape multiple URLs from a file."""
     # Lazy imports for heavy deps
     from .scrapers import DocumentationScraper, AsyncDocumentationScraper, AdaptiveDocumentationScraper
@@ -298,8 +456,12 @@ def batch(urls_file, output_dir, output_format, parallel, adaptive):
                         output_file = output_path / filename
                         
                         # Transform and save
-                        transformer = CursorRuleTransformer() if output_format == 'cursor' else WindsurfRuleTransformer()
-                        content = transformer.transform([result])
+                        if use_ml and output_format == 'cursor':
+                            from .transformers.ml_cursor_transformer import MLCursorTransformer
+                            content = await MLCursorTransformer().transform([result])
+                        else:
+                            transformer = CursorRuleTransformer() if output_format == 'cursor' else WindsurfRuleTransformer()
+                            content = transformer.transform([result])
                         
                         output_file.write_text(content)
                         click.echo(f"  ✅ Saved to: {output_file}")
@@ -333,8 +495,12 @@ def batch(urls_file, output_dir, output_format, parallel, adaptive):
                     output_file = output_path / filename
                     
                     # Transform and save
-                    transformer = CursorRuleTransformer() if output_format == 'cursor' else WindsurfRuleTransformer()
-                    content = transformer.transform([result])
+                    if use_ml and output_format == 'cursor':
+                        from .transformers.ml_cursor_transformer import MLCursorTransformer
+                        content = _run_async(MLCursorTransformer().transform([result]))
+                    else:
+                        transformer = CursorRuleTransformer() if output_format == 'cursor' else WindsurfRuleTransformer()
+                        content = transformer.transform([result])
                     
                     output_file.write_text(content)
                     click.echo(f"  ✅ Saved to: {output_file}")

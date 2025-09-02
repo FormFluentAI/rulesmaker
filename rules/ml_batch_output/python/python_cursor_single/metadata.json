@@ -1,0 +1,18 @@
+{
+  "cluster_id": "python_cursor_single",
+  "name": "Python Cursor Rules",
+  "technology": "python",
+  "framework": "fastapi",
+  "coherence_score": 0.75,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "test",
+    "async",
+    "function",
+    "error"
+  ],
+  "sources": [
+    "FastAPI"
+  ],
+  "generated_at": 1756784618.5779927
+}
