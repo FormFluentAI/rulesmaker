@@ -1,3 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+rm/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Environment files
+.env
+.env.*
+.env.localbash
+
+# Build / distribution
+dist/
+build/
+*.egg-info/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+coverage.xml
+
+# Caches and tools
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
 # pixi environments
 .pixi/*
 !.pixi/config.toml
