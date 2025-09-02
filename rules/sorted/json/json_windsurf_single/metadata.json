@@ -1,0 +1,16 @@
+{
+  "cluster_id": "json_windsurf_single",
+  "name": "Json Windsurf Rules",
+  "technology": "json",
+  "framework": null,
+  "coherence_score": 0.65,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "JSON Schema"
+  ],
+  "generated_at": 1756819535.80628
+}

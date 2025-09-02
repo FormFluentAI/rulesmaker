@@ -1,0 +1,19 @@
+{
+  "cluster_id": "typescript_windsurf_cluster_0",
+  "name": "Typescript Windsurf - Cluster 1",
+  "technology": "typescript",
+  "framework": null,
+  "coherence_score": 0.7573160208139893,
+  "rules_count": 4,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Statsmodels",
+    "Requests Readthedocs",
+    "Flask Palletsprojects",
+    "Jinja Palletsprojects"
+  ],
+  "generated_at": 1756819535.80114
+}

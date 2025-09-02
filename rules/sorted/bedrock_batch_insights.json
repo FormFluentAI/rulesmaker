@@ -1,0 +1,1635 @@
+{
+  "bedrock_batch_results": {
+    "model_id": "amazon.nova-lite-v1:0",
+    "sources_processed": 181,
+    "total_rules_generated": 181,
+    "processing_time": 30.413598775863647,
+    "quality_metrics": {
+      "overall_coherence": 0.7404718517542423,
+      "technology_coverage": 0.35,
+      "rule_diversity": 0.5838709677419355,
+      "semantic_richness": 0.02,
+      "improvement_score": 0.4032258064516129
+    },
+    "cost_analysis": null
+  },
+  "clusters": [
+    {
+      "id": "unknown_windsurf_cluster_4",
+      "name": "Unknown Windsurf - Cluster 5",
+      "technology": "unknown",
+      "coherence_score": 0.8600000000000019,
+      "rules_count": 5
+    },
+    {
+      "id": "python_windsurf_cluster_2",
+      "name": "Python Windsurf - Cluster 3",
+      "technology": "python",
+      "coherence_score": 0.8600000000000002,
+      "rules_count": 2
+    },
+    {
+      "id": "unknown_windsurf_cluster_3",
+      "name": "Unknown Windsurf - Cluster 4",
+      "technology": "unknown",
+      "coherence_score": 0.8110901895113701,
+      "rules_count": 9
+    },
+    {
+      "id": "unknown_windsurf_cluster_7",
+      "name": "Unknown Windsurf - Cluster 8",
+      "technology": "unknown",
+      "coherence_score": 0.8069351222316671,
+      "rules_count": 2
+    },
+    {
+      "id": "javascript_windsurf_cluster_2",
+      "name": "Javascript Windsurf - Cluster 3",
+      "technology": "javascript",
+      "coherence_score": 0.8036268921343627,
+      "rules_count": 2
+    },
+    {
+      "id": "unknown_windsurf_cluster_1",
+      "name": "Unknown Windsurf - Cluster 2",
+      "technology": "unknown",
+      "coherence_score": 0.8011004578830025,
+      "rules_count": 20
+    },
+    {
+      "id": "javascript_windsurf_cluster_3",
+      "name": "Javascript Windsurf - Cluster 4",
+      "technology": "javascript",
+      "coherence_score": 0.7969009337933357,
+      "rules_count": 6
+    },
+    {
+      "id": "python_windsurf_cluster_1",
+      "name": "Python Windsurf - Cluster 2",
+      "technology": "python",
+      "coherence_score": 0.7895918937668012,
+      "rules_count": 4
+    },
+    {
+      "id": "unknown_windsurf_cluster_6",
+      "name": "Unknown Windsurf - Cluster 7",
+      "technology": "unknown",
+      "coherence_score": 0.7839800445079477,
+      "rules_count": 14
+    },
+    {
+      "id": "unknown_windsurf_cluster_2",
+      "name": "Unknown Windsurf - Cluster 3",
+      "technology": "unknown",
+      "coherence_score": 0.7763247305281085,
+      "rules_count": 33
+    },
+    {
+      "id": "css_windsurf_cluster_1",
+      "name": "Css Windsurf - Cluster 2",
+      "technology": "css",
+      "coherence_score": 0.7743489300323535,
+      "rules_count": 2
+    },
+    {
+      "id": "javascript_windsurf_cluster_0",
+      "name": "Javascript Windsurf - Cluster 1",
+      "technology": "javascript",
+      "coherence_score": 0.768416140815732,
+      "rules_count": 11
+    },
+    {
+      "id": "unknown_windsurf_cluster_5",
+      "name": "Unknown Windsurf - Cluster 6",
+      "technology": "unknown",
+      "coherence_score": 0.7642765924889714,
+      "rules_count": 15
+    },
+    {
+      "id": "javascript_windsurf_cluster_4",
+      "name": "Javascript Windsurf - Cluster 5",
+      "technology": "javascript",
+      "coherence_score": 0.759288662825822,
+      "rules_count": 2
+    },
+    {
+      "id": "javascript_windsurf_cluster_5",
+      "name": "Javascript Windsurf - Cluster 6",
+      "technology": "javascript",
+      "coherence_score": 0.757805726088063,
+      "rules_count": 4
+    },
+    {
+      "id": "typescript_windsurf_cluster_0",
+      "name": "Typescript Windsurf - Cluster 1",
+      "technology": "typescript",
+      "coherence_score": 0.7573160208139893,
+      "rules_count": 4
+    },
+    {
+      "id": "javascript_windsurf_cluster_1",
+      "name": "Javascript Windsurf - Cluster 2",
+      "technology": "javascript",
+      "coherence_score": 0.7510923595021332,
+      "rules_count": 8
+    },
+    {
+      "id": "python_windsurf_cluster_5",
+      "name": "Python Windsurf - Cluster 6",
+      "technology": "python",
+      "coherence_score": 0.749606538174964,
+      "rules_count": 11
+    },
+    {
+      "id": "python_windsurf_cluster_3",
+      "name": "Python Windsurf - Cluster 4",
+      "technology": "python",
+      "coherence_score": 0.7484841834848357,
+      "rules_count": 8
+    },
+    {
+      "id": "python_windsurf_cluster_0",
+      "name": "Python Windsurf - Cluster 1",
+      "technology": "python",
+      "coherence_score": 0.7462975616756484,
+      "rules_count": 3
+    },
+    {
+      "id": "css_windsurf_cluster_0",
+      "name": "Css Windsurf - Cluster 1",
+      "technology": "css",
+      "coherence_score": 0.7462179765994088,
+      "rules_count": 3
+    },
+    {
+      "id": "typescript_windsurf_cluster_1",
+      "name": "Typescript Windsurf - Cluster 2",
+      "technology": "typescript",
+      "coherence_score": 0.6919264475230016,
+      "rules_count": 4
+    },
+    {
+      "id": "python_windsurf_cluster_4",
+      "name": "Python Windsurf - Cluster 5",
+      "technology": "python",
+      "coherence_score": 0.65,
+      "rules_count": 1
+    },
+    {
+      "id": "python_windsurf_cluster_6",
+      "name": "Python Windsurf - Cluster 7",
+      "technology": "python",
+      "coherence_score": 0.65,
+      "rules_count": 1
+    },
+    {
+      "id": "python_windsurf_cluster_7",
+      "name": "Python Windsurf - Cluster 8",
+      "technology": "python",
+      "coherence_score": 0.65,
+      "rules_count": 1
+    },
+    {
+      "id": "unknown_windsurf_cluster_0",
+      "name": "Unknown Windsurf - Cluster 1",
+      "technology": "unknown",
+      "coherence_score": 0.65,
+      "rules_count": 1
+    },
+    {
+      "id": "javascript_windsurf_cluster_6",
+      "name": "Javascript Windsurf - Cluster 7",
+      "technology": "javascript",
+      "coherence_score": 0.65,
+      "rules_count": 1
+    },
+    {
+      "id": "javascript_windsurf_cluster_7",
+      "name": "Javascript Windsurf - Cluster 8",
+      "technology": "javascript",
+      "coherence_score": 0.65,
+      "rules_count": 1
+    },
+    {
+      "id": "json_windsurf_single",
+      "name": "Json Windsurf Rules",
+      "technology": "json",
+      "coherence_score": 0.65,
+      "rules_count": 1
+    },
+    {
+      "id": "ai_windsurf_cluster_0",
+      "name": "Ai Windsurf - Cluster 1",
+      "technology": "ai",
+      "coherence_score": 0.65,
+      "rules_count": 1
+    },
+    {
+      "id": "ai_windsurf_cluster_1",
+      "name": "Ai Windsurf - Cluster 2",
+      "technology": "ai",
+      "coherence_score": 0.65,
+      "rules_count": 1
+    }
+  ],
+  "insights": {
+    "technology_distribution": {
+      "unknown": 99,
+      "python": 31,
+      "javascript": 35,
+      "css": 5,
+      "typescript": 8,
+      "json": 1,
+      "ai": 2
+    },
+    "quality_distribution": {
+      "0.8": 6,
+      "0.7": 15,
+      "0.6": 10
+    },
+    "top_performing_sources": [
+      [
+        "Scikit Image",
+        0.65
+      ],
+      [
+        "Zustand Docs Pmnd Rs",
+        0.65
+      ],
+      [
+        "Hibernate",
+        0.65
+      ],
+      [
+        "Docs Aws Amazon",
+        0.65
+      ],
+      [
+        "Micronaut",
+        0.65
+      ]
+    ],
+    "improvement_opportunities": [
+      "Low coherence in typescript rules (score: 0.692)",
+      "Low coherence in python rules (score: 0.650)",
+      "Low coherence in python rules (score: 0.650)"
+    ],
+    "recommendations": [
+      "Expand technology coverage by adding more diverse documentation sources",
+      "Include more detailed and varied documentation to improve semantic richness"
+    ]
+  },
+  "source_details": [
+    {
+      "name": "FastAPI",
+      "url": "https://fastapi.tiangolo.com/",
+      "technology": "python",
+      "framework": "fastapi",
+      "priority": 1
+    },
+    {
+      "name": "React",
+      "url": "https://react.dev/learn",
+      "technology": "javascript",
+      "framework": "react",
+      "priority": 1
+    },
+    {
+      "name": "Vue.js",
+      "url": "https://vuejs.org/guide/",
+      "technology": "javascript",
+      "framework": "vue",
+      "priority": 1
+    },
+    {
+      "name": "Django",
+      "url": "https://www.djangoproject.com/",
+      "technology": "python",
+      "framework": "django",
+      "priority": 1
+    },
+    {
+      "name": "Django REST Framework",
+      "url": "https://www.django-rest-framework.org/",
+      "technology": "python",
+      "framework": "django-rest-framework",
+      "priority": 1
+    },
+    {
+      "name": "Next.js",
+      "url": "https://nextjs.org/",
+      "technology": "javascript",
+      "framework": "nextjs",
+      "priority": 1
+    },
+    {
+      "name": "Gatsby",
+      "url": "https://www.gatsbyjs.com/",
+      "technology": "javascript",
+      "framework": "gatsby",
+      "priority": 1
+    },
+    {
+      "name": "Nuxt.js",
+      "url": "https://www.nuxtjs.org/",
+      "technology": "javascript",
+      "framework": "nuxtjs",
+      "priority": 1
+    },
+    {
+      "name": "Svelte",
+      "url": "https://www.svelte.dev/",
+      "technology": "javascript",
+      "framework": "svelte",
+      "priority": 1
+    },
+    {
+      "name": "SvelteKit",
+      "url": "https://www.sveltekit.dev/",
+      "technology": "javascript",
+      "framework": "sveltekit",
+      "priority": 1
+    },
+    {
+      "name": "React Official",
+      "url": "https://reactjs.org/",
+      "technology": "javascript",
+      "framework": "react",
+      "priority": 1
+    },
+    {
+      "name": "JavaScript Info",
+      "url": "https://javascript.info/",
+      "technology": "javascript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "TypeScript",
+      "url": "https://www.typescriptlang.org/",
+      "technology": "typescript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Python Official",
+      "url": "https://www.python.org/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Ollama",
+      "url": "https://ollama.com/",
+      "technology": "ai",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "TensorFlow",
+      "url": "https://www.tensorflow.org/",
+      "technology": "python",
+      "framework": "tensorflow",
+      "priority": 1
+    },
+    {
+      "name": "PyTorch",
+      "url": "https://www.pytorch.org/",
+      "technology": "python",
+      "framework": "pytorch",
+      "priority": 1
+    },
+    {
+      "name": "Scikit-learn",
+      "url": "https://www.scikit-learn.org/stable/",
+      "technology": "python",
+      "framework": "scikit-learn",
+      "priority": 1
+    },
+    {
+      "name": "NLTK",
+      "url": "https://www.nltk.org/",
+      "technology": "python",
+      "framework": "nltk",
+      "priority": 1
+    },
+    {
+      "name": "OpenAI",
+      "url": "https://www.openai.com/",
+      "technology": "ai",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Anthropic",
+      "url": "https://www.anthropic.com/",
+      "technology": "ai",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Boto3",
+      "url": "https://boto3.amazonaws.com/v1/documentation/api/latest/index.html",
+      "technology": "python",
+      "framework": "boto3",
+      "priority": 1
+    },
+    {
+      "name": "Pydantic",
+      "url": "https://www.pydantic.dev",
+      "technology": "python",
+      "framework": "pydantic",
+      "priority": 1
+    },
+    {
+      "name": "Hugging Face Transformers",
+      "url": "https://huggingface.co/docs/transformers/index",
+      "technology": "python",
+      "framework": "transformers",
+      "priority": 1
+    },
+    {
+      "name": "Click",
+      "url": "https://click.palletsprojects.com/",
+      "technology": "python",
+      "framework": "click",
+      "priority": 1
+    },
+    {
+      "name": "Rich",
+      "url": "https://rich.readthedocs.io/",
+      "technology": "python",
+      "framework": "rich",
+      "priority": 1
+    },
+    {
+      "name": "HTTPX",
+      "url": "https://www.python-httpx.org/",
+      "technology": "python",
+      "framework": "httpx",
+      "priority": 1
+    },
+    {
+      "name": "Fake UserAgent",
+      "url": "https://fake-useragent.readthedocs.io/",
+      "technology": "python",
+      "framework": "fake-useragent",
+      "priority": 1
+    },
+    {
+      "name": "JSON Schema",
+      "url": "https://json-schema.org/",
+      "technology": "json",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "More Itertools",
+      "url": "https://more-itertools.readthedocs.io/",
+      "technology": "python",
+      "framework": "more-itertools",
+      "priority": 1
+    },
+    {
+      "name": "Sentence Transformers",
+      "url": "https://sbert.net/",
+      "technology": "python",
+      "framework": "sentence-transformers",
+      "priority": 1
+    },
+    {
+      "name": "Hugging Face Transformers Docs",
+      "url": "https://huggingface.co/docs/transformers/",
+      "technology": "python",
+      "framework": "transformers",
+      "priority": 1
+    },
+    {
+      "name": "Hugging Face Tokenizers",
+      "url": "https://huggingface.co/docs/tokenizers/",
+      "technology": "python",
+      "framework": "tokenizers",
+      "priority": 1
+    },
+    {
+      "name": "Angular",
+      "url": "https://angular.io/docs",
+      "technology": "typescript",
+      "framework": "angular",
+      "priority": 1
+    },
+    {
+      "name": "MDN JavaScript",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+      "technology": "javascript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Webpack",
+      "url": "https://webpack.js.org/",
+      "technology": "javascript",
+      "framework": "webpack",
+      "priority": 1
+    },
+    {
+      "name": "Vite",
+      "url": "https://vitejs.dev/",
+      "technology": "javascript",
+      "framework": "vite",
+      "priority": 1
+    },
+    {
+      "name": "Parcel",
+      "url": "https://parceljs.org/",
+      "technology": "javascript",
+      "framework": "parcel",
+      "priority": 1
+    },
+    {
+      "name": "Rollup",
+      "url": "https://rollupjs.org/",
+      "technology": "javascript",
+      "framework": "rollup",
+      "priority": 1
+    },
+    {
+      "name": "Babel",
+      "url": "https://babeljs.io/docs/",
+      "technology": "javascript",
+      "framework": "babel",
+      "priority": 1
+    },
+    {
+      "name": "ESLint",
+      "url": "https://eslint.org/docs/",
+      "technology": "javascript",
+      "framework": "eslint",
+      "priority": 1
+    },
+    {
+      "name": "Prettier",
+      "url": "https://prettier.io/docs/",
+      "technology": "javascript",
+      "framework": "prettier",
+      "priority": 1
+    },
+    {
+      "name": "Jest",
+      "url": "https://jestjs.io/docs/",
+      "technology": "javascript",
+      "framework": "jest",
+      "priority": 1
+    },
+    {
+      "name": "Testing Library",
+      "url": "https://testing-library.com/",
+      "technology": "javascript",
+      "framework": "testing-library",
+      "priority": 1
+    },
+    {
+      "name": "Storybook",
+      "url": "https://storybook.js.org/docs/",
+      "technology": "javascript",
+      "framework": "storybook",
+      "priority": 1
+    },
+    {
+      "name": "Ember.js",
+      "url": "https://emberjs.com/",
+      "technology": "javascript",
+      "framework": "ember",
+      "priority": 1
+    },
+    {
+      "name": "Node.js",
+      "url": "https://nodejs.org/en/docs/",
+      "technology": "javascript",
+      "framework": "nodejs",
+      "priority": 1
+    },
+    {
+      "name": "Express.js",
+      "url": "https://expressjs.com/",
+      "technology": "javascript",
+      "framework": "express",
+      "priority": 1
+    },
+    {
+      "name": "Koa.js",
+      "url": "https://koajs.com/",
+      "technology": "javascript",
+      "framework": "koa",
+      "priority": 1
+    },
+    {
+      "name": "Socket.IO",
+      "url": "https://socket.io/docs/",
+      "technology": "javascript",
+      "framework": "socketio",
+      "priority": 1
+    },
+    {
+      "name": "Passport.js",
+      "url": "https://www.passportjs.org/docs/",
+      "technology": "javascript",
+      "framework": "passport",
+      "priority": 1
+    },
+    {
+      "name": "Mongoose",
+      "url": "https://mongoosejs.com/docs/",
+      "technology": "javascript",
+      "framework": "mongoose",
+      "priority": 1
+    },
+    {
+      "name": "Sequelize",
+      "url": "https://sequelize.org/docs/",
+      "technology": "javascript",
+      "framework": "sequelize",
+      "priority": 1
+    },
+    {
+      "name": "MDN CSS",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/CSS",
+      "technology": "css",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Tailwind CSS",
+      "url": "https://tailwindcss.com/docs",
+      "technology": "css",
+      "framework": "tailwind",
+      "priority": 1
+    },
+    {
+      "name": "Bootstrap",
+      "url": "https://getbootstrap.com/docs/",
+      "technology": "css",
+      "framework": "bootstrap",
+      "priority": 1
+    },
+    {
+      "name": "Sass",
+      "url": "https://sass-lang.com/documentation/",
+      "technology": "css",
+      "framework": "sass",
+      "priority": 1
+    },
+    {
+      "name": "Styled Components",
+      "url": "https://styled-components.com/docs/",
+      "technology": "javascript",
+      "framework": "styled-components",
+      "priority": 1
+    },
+    {
+      "name": "Emotion",
+      "url": "https://emotion.sh/docs/",
+      "technology": "javascript",
+      "framework": "emotion",
+      "priority": 1
+    },
+    {
+      "name": "Bulma",
+      "url": "https://bulma.io/documentation/",
+      "technology": "css",
+      "framework": "bulma",
+      "priority": 1
+    },
+    {
+      "name": "Flask Palletsprojects",
+      "url": "https://flask.palletsprojects.com/",
+      "technology": "typescript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Sqlalchemy",
+      "url": "https://docs.sqlalchemy.org/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Celery Readthedocs",
+      "url": "https://celery.readthedocs.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Tornado Readthedocs",
+      "url": "https://tornado.readthedocs.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Aiohttp",
+      "url": "https://docs.aiohttp.org/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Bottlepy",
+      "url": "https://bottlepy.org/docs/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Falconframework",
+      "url": "https://falconframework.org/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Numpy",
+      "url": "https://numpy.org/doc/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Pandas Pydata",
+      "url": "https://pandas.pydata.org/docs/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Matplotlib",
+      "url": "https://matplotlib.org/stable/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Seaborn Pydata",
+      "url": "https://seaborn.pydata.org/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Plotly",
+      "url": "https://plotly.com/python/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Scipy",
+      "url": "https://docs.scipy.org/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Scikit Image",
+      "url": "https://scikit-image.org/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Xgboost Readthedocs",
+      "url": "https://xgboost.readthedocs.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Lightgbm Readthedocs",
+      "url": "https://lightgbm.readthedocs.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Statsmodels",
+      "url": "https://statsmodels.org/stable/",
+      "technology": "typescript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Spacy",
+      "url": "https://spacy.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Gensim Readthedocs",
+      "url": "https://gensim.readthedocs.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Spring",
+      "url": "https://spring.io/projects/spring-framework",
+      "technology": "typescript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Spring",
+      "url": "https://spring.io/projects/spring-boot",
+      "technology": "typescript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Hibernate",
+      "url": "https://hibernate.org/orm/documentation/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Micronaut",
+      "url": "https://micronaut.io/documentation/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Quarkus",
+      "url": "https://quarkus.io/guides/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Vertx",
+      "url": "https://vertx.io/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Developer Android",
+      "url": "https://developer.android.com/docs",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Kotlinlang",
+      "url": "https://kotlinlang.org/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Developer Apple",
+      "url": "https://developer.apple.com/documentation/swift/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Developer Apple",
+      "url": "https://developer.apple.com/documentation/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Reactnative",
+      "url": "https://reactnative.dev/docs/",
+      "technology": "javascript",
+      "framework": "react",
+      "priority": 1
+    },
+    {
+      "name": "Flutter",
+      "url": "https://flutter.dev/docs",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Ionicframework",
+      "url": "https://ionicframework.com/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Microsoft",
+      "url": "https://docs.microsoft.com/en-us/dotnet/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Microsoft",
+      "url": "https://docs.microsoft.com/en-us/aspnet/core/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Microsoft",
+      "url": "https://docs.microsoft.com/en-us/dotnet/csharp/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Microsoft",
+      "url": "https://docs.microsoft.com/en-us/ef/core/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Unity",
+      "url": "https://unity.com/learn",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Dev Mysql",
+      "url": "https://dev.mysql.com/doc/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Postgresql",
+      "url": "https://www.postgresql.org/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Mongodb",
+      "url": "https://docs.mongodb.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Redis",
+      "url": "https://redis.io/documentation",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Elastic Co",
+      "url": "https://www.elastic.co/guide/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Neo4J",
+      "url": "https://neo4j.com/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Sqlite",
+      "url": "https://sqlite.org/docs.html",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Docker",
+      "url": "https://docs.docker.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Kubernetes",
+      "url": "https://kubernetes.io/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Ansible",
+      "url": "https://docs.ansible.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Terraform",
+      "url": "https://www.terraform.io/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Aws Amazon",
+      "url": "https://docs.aws.amazon.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Cloud Google",
+      "url": "https://cloud.google.com/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Microsoft",
+      "url": "https://docs.microsoft.com/en-us/azure/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Gitlab",
+      "url": "https://docs.gitlab.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Github",
+      "url": "https://docs.github.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Pytest",
+      "url": "https://docs.pytest.org/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Selenium Python Readthedocs",
+      "url": "https://selenium-python.readthedocs.io/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Playwright",
+      "url": "https://playwright.dev/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Mochajs",
+      "url": "https://mochajs.org/",
+      "technology": "javascript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Cypress",
+      "url": "https://www.cypress.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Webdriver",
+      "url": "https://webdriver.io/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Ruby Lang",
+      "url": "https://www.ruby-lang.org/en/documentation/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Rubyonrails",
+      "url": "https://rubyonrails.org/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Golang",
+      "url": "https://golang.org/doc/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Doc Rust Lang",
+      "url": "https://doc.rust-lang.org/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Elixir Lang",
+      "url": "https://elixir-lang.org/docs.html",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Php",
+      "url": "https://www.php.net/docs.php",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Laravel",
+      "url": "https://laravel.com/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Symfony",
+      "url": "https://symfony.com/doc/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Scala Lang",
+      "url": "https://www.scala-lang.org/documentation/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Clojure",
+      "url": "https://clojure.org/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Lua",
+      "url": "https://www.lua.org/docs.html",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "R Project",
+      "url": "https://www.r-project.org/other-docs.html",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Godotengine",
+      "url": "https://docs.godotengine.org/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Pygame",
+      "url": "https://www.pygame.org/docs/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Phaser",
+      "url": "https://phaser.io/learn",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Threejs",
+      "url": "https://threejs.org/docs/",
+      "technology": "javascript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Swagger",
+      "url": "https://swagger.io/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Postman",
+      "url": "https://www.postman.com/api-platform/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Stoplight",
+      "url": "https://stoplight.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Readme",
+      "url": "https://readme.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docusaurus",
+      "url": "https://docusaurus.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docsify Js",
+      "url": "https://docsify.js.org/",
+      "technology": "javascript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Git Scm",
+      "url": "https://git-scm.com/doc",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Gradle",
+      "url": "https://gradle.org/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Maven Apache",
+      "url": "https://maven.apache.org/guides/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Ethereum",
+      "url": "https://ethereum.org/developers/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Soliditylang",
+      "url": "https://docs.soliditylang.org/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Ethers",
+      "url": "https://docs.ethers.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Strapi",
+      "url": "https://strapi.io/documentation/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Nestjs",
+      "url": "https://docs.nestjs.com/",
+      "technology": "javascript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Remix Run",
+      "url": "https://remix.run/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Apollographql",
+      "url": "https://www.apollographql.com/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Graphql",
+      "url": "https://graphql.org/learn/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Prisma",
+      "url": "https://www.prisma.io/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Trpc",
+      "url": "https://trpc.io/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Tanstack",
+      "url": "https://tanstack.com/query/latest",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Zustand Docs Pmnd Rs",
+      "url": "https://zustand.docs.pmnd.rs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Redux Js",
+      "url": "https://redux.js.org/",
+      "technology": "javascript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Mobx Js",
+      "url": "https://mobx.js.org/README.html",
+      "technology": "javascript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Recoiljs",
+      "url": "https://recoiljs.org/",
+      "technology": "javascript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Framer",
+      "url": "https://www.framer.com/motion/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Chakra Ui",
+      "url": "https://chakra-ui.com/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Mui",
+      "url": "https://mui.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Ant Design",
+      "url": "https://ant.design/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Mantine",
+      "url": "https://mantine.dev/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Ui Shadcn",
+      "url": "https://ui.shadcn.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Headlessui",
+      "url": "https://headlessui.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Radix Ui",
+      "url": "https://www.radix-ui.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Requests Readthedocs",
+      "url": "https://requests.readthedocs.io/",
+      "technology": "typescript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Python",
+      "url": "https://docs.python.org/3/library/asyncio.html",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Jinja Palletsprojects",
+      "url": "https://jinja.palletsprojects.com/",
+      "technology": "typescript",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Marshmallow Readthedocs",
+      "url": "https://marshmallow.readthedocs.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Alembic Sqlalchemy",
+      "url": "https://alembic.sqlalchemy.org/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Fastapi Tiangolo",
+      "url": "https://fastapi.tiangolo.com/advanced/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Strawberry Rocks",
+      "url": "https://strawberry.rocks/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Graphene Python",
+      "url": "https://graphene-python.org/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Black Readthedocs",
+      "url": "https://black.readthedocs.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Flake8 Pycqa",
+      "url": "https://flake8.pycqa.org/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Mypy Readthedocs",
+      "url": "https://mypy.readthedocs.io/",
+      "technology": "python",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Coverage Readthedocs",
+      "url": "https://coverage.readthedocs.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Tox Readthedocs",
+      "url": "https://tox.readthedocs.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Jenkins",
+      "url": "https://www.jenkins.io/doc/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Concourse Ci",
+      "url": "https://concourse-ci.org/docs.html",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Spinnaker",
+      "url": "https://www.spinnaker.io/guides/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Argoproj Github",
+      "url": "https://argoproj.github.io/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Helm Sh",
+      "url": "https://helm.sh/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Istio",
+      "url": "https://istio.io/latest/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Prometheus",
+      "url": "https://prometheus.io/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Grafana",
+      "url": "https://grafana.com/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Influxdata",
+      "url": "https://docs.influxdata.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Clickhouse",
+      "url": "https://clickhouse.com/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Timescale",
+      "url": "https://www.timescale.com/docs/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Docs Snowflake",
+      "url": "https://docs.snowflake.com/",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    },
+    {
+      "name": "Cloud Google",
+      "url": "https://cloud.google.com/bigquery/docs",
+      "technology": "unknown",
+      "framework": null,
+      "priority": 1
+    }
+  ]
+}

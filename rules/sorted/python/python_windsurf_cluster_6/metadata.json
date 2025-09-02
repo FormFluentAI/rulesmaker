@@ -1,0 +1,16 @@
+{
+  "cluster_id": "python_windsurf_cluster_6",
+  "name": "Python Windsurf - Cluster 7",
+  "technology": "python",
+  "framework": "fastapi",
+  "coherence_score": 0.65,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "FastAPI"
+  ],
+  "generated_at": 1756819535.8060703
+}

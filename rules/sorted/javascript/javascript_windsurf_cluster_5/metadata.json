@@ -1,0 +1,19 @@
+{
+  "cluster_id": "javascript_windsurf_cluster_5",
+  "name": "Javascript Windsurf - Cluster 6",
+  "technology": "javascript",
+  "framework": "passport",
+  "coherence_score": 0.757805726088063,
+  "rules_count": 4,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Ember.js",
+    "Jest",
+    "Passport.js",
+    "Styled Components"
+  ],
+  "generated_at": 1756819535.8010976
+}

@@ -1,0 +1,17 @@
+{
+  "cluster_id": "javascript_windsurf_cluster_2",
+  "name": "Javascript Windsurf - Cluster 3",
+  "technology": "javascript",
+  "framework": "react",
+  "coherence_score": 0.8036268921343627,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "React Official",
+    "React"
+  ],
+  "generated_at": 1756819535.800508
+}

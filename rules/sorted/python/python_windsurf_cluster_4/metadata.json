@@ -1,0 +1,16 @@
+{
+  "cluster_id": "python_windsurf_cluster_4",
+  "name": "Python Windsurf - Cluster 5",
+  "technology": "python",
+  "framework": "tensorflow",
+  "coherence_score": 0.65,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "TensorFlow"
+  ],
+  "generated_at": 1756819535.8060272
+}

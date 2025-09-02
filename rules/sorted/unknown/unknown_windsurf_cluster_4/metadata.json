@@ -1,0 +1,20 @@
+{
+  "cluster_id": "unknown_windsurf_cluster_4",
+  "name": "Unknown Windsurf - Cluster 5",
+  "technology": "unknown",
+  "framework": null,
+  "coherence_score": 0.8600000000000019,
+  "rules_count": 5,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Hibernate",
+    "Scikit Image",
+    "Docs Aws Amazon",
+    "Zustand Docs Pmnd Rs",
+    "Micronaut"
+  ],
+  "generated_at": 1756819535.8001328
+}

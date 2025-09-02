@@ -1,0 +1,10 @@
+sources:
+  - url: "https://docs.python.org/3/tutorial/"
+    name: "Python Tutorial"
+    technology: "python"
+    category: "tutorial"
+  - url: "https://fastapi.tiangolo.com/tutorial/"
+    name: "FastAPI Tutorial"
+    technology: "python"
+    framework: "fastapi"
+    category: "tutorial"

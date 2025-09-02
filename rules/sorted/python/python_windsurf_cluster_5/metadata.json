@@ -1,0 +1,26 @@
+{
+  "cluster_id": "python_windsurf_cluster_5",
+  "name": "Python Windsurf - Cluster 6",
+  "technology": "python",
+  "framework": null,
+  "coherence_score": 0.749606538174964,
+  "rules_count": 11,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Sentence Transformers",
+    "Docs Python",
+    "Pygame",
+    "Selenium Python Readthedocs",
+    "PyTorch",
+    "NLTK",
+    "Django",
+    "Graphene Python",
+    "Python Official",
+    "Pydantic",
+    "Flake8 Pycqa"
+  ],
+  "generated_at": 1756819535.805669
+}

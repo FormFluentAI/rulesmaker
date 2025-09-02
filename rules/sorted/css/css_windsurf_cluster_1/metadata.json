@@ -1,0 +1,17 @@
+{
+  "cluster_id": "css_windsurf_cluster_1",
+  "name": "Css Windsurf - Cluster 2",
+  "technology": "css",
+  "framework": "bootstrap",
+  "coherence_score": 0.7743489300323535,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "MDN CSS",
+    "Bootstrap"
+  ],
+  "generated_at": 1756819535.8008964
+}

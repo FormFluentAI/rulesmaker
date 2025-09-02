@@ -1,0 +1,19 @@
+{
+  "cluster_id": "python_windsurf_cluster_1",
+  "name": "Python Windsurf - Cluster 2",
+  "technology": "python",
+  "framework": null,
+  "coherence_score": 0.7895918937668012,
+  "rules_count": 4,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Scikit-learn",
+    "Numpy",
+    "Docs Scipy",
+    "Rich"
+  ],
+  "generated_at": 1756819535.8007004
+}

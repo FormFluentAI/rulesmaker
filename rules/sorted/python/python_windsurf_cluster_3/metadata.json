@@ -1,0 +1,23 @@
+{
+  "cluster_id": "python_windsurf_cluster_3",
+  "name": "Python Windsurf - Cluster 4",
+  "technology": "python",
+  "framework": null,
+  "coherence_score": 0.7484841834848357,
+  "rules_count": 8,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Click",
+    "Plotly",
+    "Hugging Face Tokenizers",
+    "HTTPX",
+    "Docs Pytest",
+    "Django REST Framework",
+    "Seaborn Pydata",
+    "Pandas Pydata"
+  ],
+  "generated_at": 1756819535.8057263
+}

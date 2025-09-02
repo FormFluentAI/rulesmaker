@@ -1287,13 +1287,40 @@ def batch(ctx, sources_file, output_dir, model_id, parallel_requests, cost_limit
             
             click.echo(f"\n📄 Enhanced insights report saved: {insights_file}")
             
+            # Automatically organize generated rules using smart organizer
+            try:
+                click.echo(f"\n📁 Organizing generated rules...")
+                from pathlib import Path as PathLib
+                import sys
+                import os
+                
+                # Add the project root to Python path to import smart_organizer
+                project_root = PathLib(__file__).parent.parent.parent
+                if str(project_root) not in sys.path:
+                    sys.path.insert(0, str(project_root))
+                
+                # Import and run the smart organizer
+                from smart_organizer import RulesOrganizer
+                
+                organizer = RulesOrganizer(output_dir)
+                organized_files, moved_files = organizer.organize_files()
+                organizer.create_manifest(organized_files, moved_files)
+                organizer.create_readme()
+                
+                click.echo(f"✅ Rules automatically organized into categories")
+                click.echo(f"   Organized directory: {output_dir}")
+                click.echo(f"   Manifest file: {PathLib(output_dir) / 'rules' / 'sorted' / 'MANIFEST.json'}")
+                
+            except ImportError as e:
+                click.echo(f"⚠️ Smart organizer not available: {e}")
+                click.echo("   Rules generated but not automatically organized")
+            except Exception as e:
+                click.echo(f"⚠️ Failed to organize rules: {e}")
+                click.echo("   Rules generated but organization failed")
+        
         except Exception as e:
             click.echo(f"❌ Bedrock batch processing failed: {e}", err=True)
-            raise
-    
-    _run_async(run_bedrock_batch())
-
-
+            raise click.Abort()
 # ===================================
 # ML BATCH PROCESSING COMMAND GROUP
 # ===================================
@@ -1394,6 +1421,36 @@ def frameworks(ctx, output_dir, bedrock, config, formats, max_concurrent, qualit
             }, f, indent=2, default=str)
         
         click.echo(f"\n📄 Insights report saved: {insights_file}")
+        
+        # Automatically organize generated rules using smart organizer
+        try:
+            click.echo(f"\n📁 Organizing generated rules...")
+            from pathlib import Path
+            import sys
+            import os
+            
+            # Add the project root to Python path to import smart_organizer
+            project_root = Path(__file__).parent.parent.parent
+            if str(project_root) not in sys.path:
+                sys.path.insert(0, str(project_root))
+            
+            # Import and run the smart organizer
+            from smart_organizer import RulesOrganizer
+            
+            organizer = RulesOrganizer(output_dir)
+            organized_files, moved_files = organizer.organize_files()
+            organizer.create_manifest(organized_files, moved_files)
+            
+            click.echo(f"✅ Rules automatically organized into categories")
+            click.echo(f"   Organized directory: {output_dir}")
+            click.echo(f"   Manifest file: {Path(output_dir) / 'organization_manifest.json'}")
+            
+        except ImportError as e:
+            click.echo(f"⚠️ Smart organizer not available: {e}")
+            click.echo("   Rules generated but not automatically organized")
+        except Exception as e:
+            click.echo(f"⚠️ Failed to organize rules: {e}")
+            click.echo("   Rules generated but organization failed")
     
     _run_async(run_frameworks_processing())
 
@@ -1476,6 +1533,36 @@ def cloud(ctx, output_dir, bedrock, config, formats, max_concurrent, quality_thr
             }, f, indent=2, default=str)
         
         click.echo(f"\n📄 Insights report saved: {insights_file}")
+        
+        # Automatically organize generated rules using smart organizer
+        try:
+            click.echo(f"\n📁 Organizing generated rules...")
+            from pathlib import Path
+            import sys
+            import os
+            
+            # Add the project root to Python path to import smart_organizer
+            project_root = Path(__file__).parent.parent.parent
+            if str(project_root) not in sys.path:
+                sys.path.insert(0, str(project_root))
+            
+            # Import and run the smart organizer
+            from smart_organizer import RulesOrganizer
+            
+            organizer = RulesOrganizer(output_dir)
+            organized_files, moved_files = organizer.organize_files()
+            organizer.create_manifest(organized_files, moved_files)
+            
+            click.echo(f"✅ Rules automatically organized into categories")
+            click.echo(f"   Organized directory: {output_dir}")
+            click.echo(f"   Manifest file: {Path(output_dir) / 'organization_manifest.json'}")
+            
+        except ImportError as e:
+            click.echo(f"⚠️ Smart organizer not available: {e}")
+            click.echo("   Rules generated but not automatically organized")
+        except Exception as e:
+            click.echo(f"⚠️ Failed to organize rules: {e}")
+            click.echo("   Rules generated but organization failed")
     
     _run_async(run_cloud_processing())
 
@@ -1626,6 +1713,36 @@ def custom(ctx, sources_file, output_dir, bedrock, config, formats, max_concurre
             }, f, indent=2, default=str)
         
         click.echo(f"\n📄 Insights report saved: {insights_file}")
+        
+        # Automatically organize generated rules using smart organizer
+        try:
+            click.echo(f"\n📁 Organizing generated rules...")
+            from pathlib import Path
+            import sys
+            import os
+            
+            # Add the project root to Python path to import smart_organizer
+            project_root = Path(__file__).parent.parent.parent
+            if str(project_root) not in sys.path:
+                sys.path.insert(0, str(project_root))
+            
+            # Import and run the smart organizer
+            from smart_organizer import RulesOrganizer
+            
+            organizer = RulesOrganizer(output_dir)
+            organized_files, moved_files = organizer.organize_files()
+            organizer.create_manifest(organized_files, moved_files)
+            
+            click.echo(f"✅ Rules automatically organized into categories")
+            click.echo(f"   Organized directory: {output_dir}")
+            click.echo(f"   Manifest file: {Path(output_dir) / 'organization_manifest.json'}")
+            
+        except ImportError as e:
+            click.echo(f"⚠️ Smart organizer not available: {e}")
+            click.echo("   Rules generated but not automatically organized")
+        except Exception as e:
+            click.echo(f"⚠️ Failed to organize rules: {e}")
+            click.echo("   Rules generated but organization failed")
     
     _run_async(run_custom_processing())
 

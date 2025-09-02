@@ -1,0 +1,16 @@
+{
+  "cluster_id": "ai_windsurf_cluster_1",
+  "name": "Ai Windsurf - Cluster 2",
+  "technology": "ai",
+  "framework": null,
+  "coherence_score": 0.65,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Ollama"
+  ],
+  "generated_at": 1756819535.806363
+}

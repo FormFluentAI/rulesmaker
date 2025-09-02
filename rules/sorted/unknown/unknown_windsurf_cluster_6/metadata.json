@@ -1,0 +1,28 @@
+{
+  "cluster_id": "unknown_windsurf_cluster_6",
+  "name": "Unknown Windsurf - Cluster 7",
+  "technology": "unknown",
+  "framework": null,
+  "coherence_score": 0.7839800445079477,
+  "rules_count": 14,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Ethereum",
+    "Readme",
+    "Clickhouse",
+    "Istio",
+    "Docs Influxdata",
+    "Developer Apple",
+    "Concourse Ci",
+    "Cloud Google",
+    "Symfony",
+    "Cypress",
+    "Laravel",
+    "Docs Github",
+    "Radix Ui"
+  ],
+  "generated_at": 1756819535.8007665
+}

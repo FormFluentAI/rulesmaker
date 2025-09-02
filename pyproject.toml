@@ -106,8 +106,8 @@ version = {attr = "rules_maker.version.__version__"}
 
 [tool.black]
 line-length = 88
-target-version = ['py39']
-include = '\.pyi?$'
+target-version = ["py310"]
+
 
 [tool.mypy]
 python_version = "3.9"

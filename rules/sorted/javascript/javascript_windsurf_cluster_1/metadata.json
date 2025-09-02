@@ -1,0 +1,23 @@
+{
+  "cluster_id": "javascript_windsurf_cluster_1",
+  "name": "Javascript Windsurf - Cluster 2",
+  "technology": "javascript",
+  "framework": "gatsby",
+  "coherence_score": 0.7510923595021332,
+  "rules_count": 8,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Testing Library",
+    "Emotion",
+    "Mobx Js",
+    "Redux Js",
+    "Gatsby",
+    "Mochajs",
+    "Storybook",
+    "Recoiljs"
+  ],
+  "generated_at": 1756819535.8055801
+}

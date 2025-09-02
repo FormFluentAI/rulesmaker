@@ -1,0 +1,17 @@
+{
+  "cluster_id": "unknown_windsurf_cluster_7",
+  "name": "Unknown Windsurf - Cluster 8",
+  "technology": "unknown",
+  "framework": null,
+  "coherence_score": 0.8069351222316671,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Docs Docker",
+    "Docs Gitlab"
+  ],
+  "generated_at": 1756819535.8004189
+}

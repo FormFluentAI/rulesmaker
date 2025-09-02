@@ -1,0 +1,17 @@
+{
+  "cluster_id": "javascript_windsurf_cluster_4",
+  "name": "Javascript Windsurf - Cluster 5",
+  "technology": "javascript",
+  "framework": "vue",
+  "coherence_score": 0.759288662825822,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Nuxt.js",
+    "Vue.js"
+  ],
+  "generated_at": 1756819535.8010545
+}

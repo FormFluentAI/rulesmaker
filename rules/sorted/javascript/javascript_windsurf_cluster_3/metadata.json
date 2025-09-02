@@ -1,0 +1,21 @@
+{
+  "cluster_id": "javascript_windsurf_cluster_3",
+  "name": "Javascript Windsurf - Cluster 4",
+  "technology": "javascript",
+  "framework": "koa",
+  "coherence_score": 0.7969009337933357,
+  "rules_count": 6,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Threejs",
+    "Vite",
+    "Koa.js",
+    "Rollup",
+    "Docsify Js",
+    "Docs Nestjs"
+  ],
+  "generated_at": 1756819535.8006346
+}

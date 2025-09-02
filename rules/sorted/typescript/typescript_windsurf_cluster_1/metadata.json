@@ -1,0 +1,18 @@
+{
+  "cluster_id": "typescript_windsurf_cluster_1",
+  "name": "Typescript Windsurf - Cluster 2",
+  "technology": "typescript",
+  "framework": "angular",
+  "coherence_score": 0.6919264475230016,
+  "rules_count": 4,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "TypeScript",
+    "Angular",
+    "Spring"
+  ],
+  "generated_at": 1756819535.8059824
+}

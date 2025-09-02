@@ -1,0 +1,26 @@
+{
+  "cluster_id": "javascript_windsurf_cluster_0",
+  "name": "Javascript Windsurf - Cluster 1",
+  "technology": "javascript",
+  "framework": "webpack",
+  "coherence_score": 0.768416140815732,
+  "rules_count": 11,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Svelte",
+    "JavaScript Info",
+    "Parcel",
+    "Node.js",
+    "Webpack",
+    "Mongoose",
+    "ESLint",
+    "Prettier",
+    "Express.js",
+    "Babel",
+    "Socket.IO"
+  ],
+  "generated_at": 1756819535.800953
+}

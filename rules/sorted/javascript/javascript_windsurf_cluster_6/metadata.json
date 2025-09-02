@@ -1,0 +1,16 @@
+{
+  "cluster_id": "javascript_windsurf_cluster_6",
+  "name": "Javascript Windsurf - Cluster 7",
+  "technology": "javascript",
+  "framework": null,
+  "coherence_score": 0.65,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "MDN JavaScript"
+  ],
+  "generated_at": 1756819535.8061957
+}

@@ -1,0 +1,18 @@
+{
+  "cluster_id": "css_windsurf_cluster_0",
+  "name": "Css Windsurf - Cluster 1",
+  "technology": "css",
+  "framework": "sass",
+  "coherence_score": 0.7462179765994088,
+  "rules_count": 3,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Bulma",
+    "Sass",
+    "Tailwind CSS"
+  ],
+  "generated_at": 1756819535.8059342
+}

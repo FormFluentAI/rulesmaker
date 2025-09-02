@@ -1,0 +1,24 @@
+{
+  "cluster_id": "unknown_windsurf_cluster_3",
+  "name": "Unknown Windsurf - Cluster 4",
+  "technology": "unknown",
+  "framework": null,
+  "coherence_score": 0.8110901895113701,
+  "rules_count": 9,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Remix Run",
+    "Tanstack",
+    "Docusaurus",
+    "Chakra Ui",
+    "Mantine",
+    "Flutter",
+    "Framer",
+    "Headlessui",
+    "Mui"
+  ],
+  "generated_at": 1756819535.8003082
+}

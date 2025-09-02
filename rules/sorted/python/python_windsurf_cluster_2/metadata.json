@@ -1,0 +1,17 @@
+{
+  "cluster_id": "python_windsurf_cluster_2",
+  "name": "Python Windsurf - Cluster 3",
+  "technology": "python",
+  "framework": "transformers",
+  "coherence_score": 0.8600000000000002,
+  "rules_count": 2,
+  "semantic_keywords": [
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Hugging Face Transformers Docs",
+    "Hugging Face Transformers"
+  ],
+  "generated_at": 1756819535.800238
+}
