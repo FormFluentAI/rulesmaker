@@ -1,0 +1,12 @@
+{
+  "total_events": 10,
+  "categorization_accuracy": 0.8444444444444446,
+  "rule_quality_score": 0.0,
+  "user_satisfaction": 0.9,
+  "category_distribution": {
+    "routing": 9,
+    "deployment": 1
+  },
+  "improvement_trends": {},
+  "last_updated": "2025-09-03T04:42:08.278941"
+}

@@ -1,0 +1,17 @@
+{
+  "cluster_id": "nextjs_cursor_single",
+  "name": "Nextjs Cursor Rules",
+  "technology": "nextjs",
+  "framework": "authentication",
+  "coherence_score": 0.65,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "async",
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Authentication"
+  ],
+  "generated_at": 1756870806.261921
+}

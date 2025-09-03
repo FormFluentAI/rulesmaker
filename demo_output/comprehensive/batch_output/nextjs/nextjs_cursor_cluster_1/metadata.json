@@ -1,0 +1,17 @@
+{
+  "cluster_id": "nextjs_cursor_cluster_1",
+  "name": "Nextjs Cursor - Cluster 2",
+  "technology": "nextjs",
+  "framework": "deployment",
+  "coherence_score": 0.65,
+  "rules_count": 1,
+  "semantic_keywords": [
+    "async",
+    "test",
+    "error"
+  ],
+  "sources": [
+    "Vercel Next.js Guide"
+  ],
+  "generated_at": 1756870822.0473113
+}

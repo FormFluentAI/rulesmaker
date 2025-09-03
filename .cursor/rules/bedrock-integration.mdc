@@ -1,0 +1,299 @@
+---
+description: AWS Bedrock integration for LLM-powered rule generation and batch processing
+globs:
+  - '**/bedrock_*.py'
+  - '**/credentials.py'
+  - '**/aws/**'
+---
+# AWS Bedrock Integration
+
+## Overview
+
+The rules-maker project includes comprehensive AWS Bedrock integration for LLM-powered rule generation, cost tracking, and batch processing with multiple Claude models and Amazon Nova.
+
+## Core Components
+
+### 1. Bedrock Integration Interface
+**Location**: `src/rules_maker/bedrock_integration.py`
+
+```python
+from rules_maker.bedrock_integration import BedrockRulesMaker, quick_cursor_rules
+
+# Quick rule generation
+rules = quick_cursor_rules("FastAPI documentation content...")
+
+# Advanced usage with cost tracking
+bedrock = BedrockRulesMaker()
+rules = bedrock.generate_cursor_rules(content)
+print(f"Cost: ${bedrock.get_usage_stats()['estimated_cost_usd']:.4f}")
+```
+
+**Features**:
+- BedrockRulesMaker class with cost tracking
+- Support for multiple Claude models
+- Usage statistics and rate limit monitoring
+- Quick utility functions for rule generation
+
+### 2. Credential Management System
+**Location**: `src/rules_maker/utils/credentials.py`
+
+```python
+from rules_maker.utils.credentials import setup_bedrock_credentials
+
+# Setup and validate AWS credentials
+result = setup_bedrock_credentials()
+print(f"Validation: {result['validation']['success']}")
+```
+
+**Features**:
+- CSV credential parsing with multiple format support
+- AWS environment setup and validation
+- Session management with boto3 integration
+- Comprehensive error handling and logging
+
+### 3. LLM Extractor Extensions
+**Location**: `src/rules_maker/extractors/llm_extractor.py`
+
+```python
+from rules_maker.extractors.llm_extractor import LLMExtractor
+
+# Initialize with Bedrock provider
+extractor = LLMExtractor(provider="bedrock")
+result = extractor.extract(content, url)
+```
+
+**Features**:
+- Bedrock provider support in LLMConfig
+- AWS session handling with credential management
+- Cost tracking for Bedrock API calls
+- Error recovery and retry mechanisms
+
+## Supported Models
+
+### Working Models (Verified)
+- **Amazon Nova Lite** (`amazon.nova-lite-v1:0`) — Verified working via Bedrock (tested in `us-east-1`)
+- **Claude 3.5 Sonnet** (`anthropic.claude-3-5-sonnet-20240620-v1:0`) — Supported via Bedrock
+- **Claude 3 Haiku** (`anthropic.claude-3-haiku-20240307-v1:0`) — Supported via Bedrock
+
+### Model Access Notes
+- Cross-region access and inference profile requirements vary by tenant
+- If cross-inference is not enabled, use a region where the model is enabled
+- Use appropriate inference profile ARNs where available (e.g., `eu-central-1`)
+
+## Usage Examples
+
+### Basic Rule Generation
+```python
+from rules_maker.bedrock_integration import quick_cursor_rules
+
+# Generate rules from documentation content
+content = "FastAPI documentation content..."
+rules = quick_cursor_rules(content)
+print(f"Generated {len(rules)} characters of professional rules")
+```
+
+### Advanced Usage with Cost Tracking
+```python
+from rules_maker.bedrock_integration import BedrockRulesMaker
+
+# Initialize with cost tracking
+bedrock = BedrockRulesMaker(
+    model_id="amazon.nova-lite-v1:0",
+    region="us-east-1",
+    temperature=0.3
+)
+
+# Generate rules with usage tracking
+rules = bedrock.generate_cursor_rules(content)
+
+# Get cost statistics
+stats = bedrock.get_usage_stats()
+print(f"Estimated cost: ${stats['estimated_cost_usd']:.4f}")
+print(f"Tokens used: {stats['total_tokens']}")
+print(f"API calls: {stats['api_calls']}")
+```
+
+### Batch Processing with Bedrock
+```python
+from rules_maker.batch_processor import MLBatchProcessor
+
+# Initialize with Bedrock integration
+processor = MLBatchProcessor(
+    bedrock_config={
+        'model_id': 'amazon.nova-lite-v1:0',
+        'region': 'us-east-1',
+        'temperature': 0.3,
+        'max_daily_cost': 10.0  # Daily spending limit
+    }
+)
+
+# Process sources with Bedrock enhancement
+result = await processor.process_documentation_batch(sources)
+```
+
+## CLI Integration
+
+### Bedrock Commands
+```bash
+# Validate Bedrock setup
+rules-maker bedrock validate
+
+# Process batch sources with Bedrock
+rules-maker bedrock batch --sources sources.json --max-cost 10.0
+
+# Generate rules with specific model
+rules-maker bedrock generate --model amazon.nova-lite-v1:0 --content "documentation..."
+```
+
+### ML Batch with Bedrock
+```bash
+# Process frameworks with Bedrock integration
+rules-maker ml-batch frameworks --bedrock --model amazon.nova-lite-v1:0
+
+# Process cloud platforms with cost monitoring
+rules-maker ml-batch cloud --bedrock --max-daily-cost 5.0
+```
+
+## Configuration
+
+### Bedrock Configuration
+```yaml
+bedrock_integration:
+  model_id: "amazon.nova-lite-v1:0"
+  region: "us-east-1"
+  temperature: 0.3
+  max_daily_cost: 10.0
+  timeout: 30
+  retry_attempts: 3
+```
+
+### Credential Setup
+```bash
+# Setup AWS credentials from CSV
+python -c "
+from rules_maker.utils.credentials import setup_bedrock_credentials
+result = setup_bedrock_credentials()
+print('Bedrock integration ready!')
+print(f'Validation: {result[\"validation\"][\"success\"]}')
+"
+```
+
+## Cost Management
+
+### Cost Tracking Features
+- Real-time usage monitoring and billing estimation
+- Daily spending limits with automatic throttling
+- Token usage tracking across all API calls
+- Cost per rule generation metrics
+
+### Cost Optimization
+```python
+# Set daily spending limit
+bedrock = BedrockRulesMaker(max_daily_cost=5.0)
+
+# Monitor costs during batch processing
+stats = bedrock.get_usage_stats()
+if stats['estimated_cost_usd'] > 4.0:
+    print("Approaching daily limit, consider reducing batch size")
+```
+
+## Error Handling
+
+### Common Issues and Solutions
+
+1. **Model Access Errors**
+```python
+# Check model availability
+from rules_maker.bedrock_integration import BedrockRulesMaker
+
+try:
+    bedrock = BedrockRulesMaker(model_id="amazon.nova-lite-v1:0")
+    # Test with small content
+    result = bedrock.generate_cursor_rules("test content")
+except Exception as e:
+    print(f"Model access issue: {e}")
+    # Try different region or model
+```
+
+2. **Credential Issues**
+```python
+# Validate credentials
+from rules_maker.utils.credentials import setup_bedrock_credentials
+
+result = setup_bedrock_credentials()
+if not result['validation']['success']:
+    print("Credential validation failed")
+    print(f"Error: {result['validation']['error']}")
+```
+
+3. **Rate Limiting**
+```python
+# Handle rate limiting gracefully
+bedrock = BedrockRulesMaker(
+    retry_attempts=3,
+    retry_delay=1.0
+)
+```
+
+## Testing and Validation
+
+### Health Checks
+```python
+# Test Bedrock integration
+PYTHONPATH=src python -c "
+from rules_maker.utils.credentials import setup_bedrock_credentials
+result = setup_bedrock_credentials()
+print('Bedrock integration ready!')
+print(f'Validation: {result[\"validation\"][\"success\"]}')
+"
+
+# Test rule generation
+PYTHONPATH=src python -c "
+from rules_maker.bedrock_integration import quick_cursor_rules
+rules = quick_cursor_rules('FastAPI documentation content')
+print(f'Generated {len(rules)} characters of professional rules')
+"
+```
+
+### Integration Tests
+```bash
+# Run Bedrock integration tests
+PYTHONPATH=src pytest tests/test_bedrock_concurrency.py -v
+
+# Test credential management
+PYTHONPATH=src pytest tests/test_credentials.py -v
+```
+
+## Performance Characteristics
+
+### Processing Speed
+- **Rule Generation**: ~2-5 seconds per rule (depending on content length)
+- **Batch Processing**: ~10-20 minutes for 100 sources
+- **Cost Efficiency**: ~$0.01-0.05 per rule generation
+
+### Quality Results
+- **Rule Generation**: Successfully generates 2000+ character professional rules
+- **Technology Detection**: Accurate framework identification and customization  
+- **Error Handling**: Graceful degradation with comprehensive exception management
+
+## Best Practices
+
+### 1. Model Selection
+- Use **Amazon Nova Lite** for cost-effective rule generation
+- Use **Claude 3.5 Sonnet** for highest quality rules
+- Use **Claude 3 Haiku** for faster processing
+
+### 2. Cost Management
+- Set appropriate daily spending limits
+- Monitor usage statistics regularly
+- Use batch processing for efficiency
+
+### 3. Error Handling
+- Implement proper retry logic for rate limiting
+- Validate credentials before processing
+- Use graceful degradation for model access issues
+
+### 4. Performance Optimization
+- Use appropriate temperature settings (0.3 for consistency)
+- Implement proper timeout handling
+- Monitor and adjust batch sizes based on performance

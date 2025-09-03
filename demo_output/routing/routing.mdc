@@ -1,0 +1,79 @@
+---
+description: Next.js routing and navigation patterns for App Router and Pages Router
+globs:
+- '**/app/**/*'
+- '**/pages/**/*'
+- '**/middleware.ts'
+- '**/route.ts'
+alwaysApply: true
+tags:
+- docs
+- 'https:'
+- javascript
+- nextjs.org
+- app
+- react
+version: 1.0.0
+lastUpdated: '2025-09-03T04:36:34.850300'
+---
+# Routing Development Rules
+*Generated on 2025-09-03 04:36:34*
+## Overview
+Next.js routing and navigation patterns for App Router and Pages Router
+**Difficulty Level**: Intermediate
+**Category**: routing
+
+## 1. Next.js App Router Guide
+# Next.js App Router Guide
+    
+    The App Router is a new paradigm for building applications using React's latest features.
+    
+    ## Key Features
+    
+    - **Server Components**: Fetch data directly on the server
+    - **Client Components**: Interactive components with client-side JavaScript
+    - **Nested Layouts**: Share UI between multiple pages
+    - **Loading States**: Built-in loading UI with loading.tsx
+    - **Error Handling**: Error boundaries with error.tsx
+    
+    ## Example: S...
+
+### Guidelines
+- **Server Components**: Fetch data directly on the server
+- **Client Components**: Interactive components with client-side JavaScript
+- **Nested Layouts**: Share UI between multiple pages
+- **Loading States**: Built-in loading UI with loading.tsx
+- **Error Handling**: Error boundaries with error.tsx
+- Use Server Components by default
+- Only use Client Components when you need interactivity
+- Leverage nested layouts for shared UI
+- Use loading.tsx for loading states
+- Implement error.tsx for error boundaries
+
+### Examples
+```typescript
+typescript
+    // app/page.tsx
+    async function HomePage() {
+      const data = await fetch('https://api.example.com/data')
+      const posts = await data.json()
+      
+      return (
+        <div>
+          <h1>My Blog</h1>
+          {posts.map(post => (
+            <article key={post.id}>
+              <h2>{post.title}</h2>
+              <p>{post.excerpt}</p>
+            </article>
+          ))}
+        </div>
+      )
+    }
+    
+    export default HomePage
+    
+```
+
+---
+

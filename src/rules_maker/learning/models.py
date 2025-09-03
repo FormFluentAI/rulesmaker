@@ -5,7 +5,7 @@ Models for the Intelligent Learning Engine.
 from __future__ import annotations
 
 from typing import Dict, List, Optional, Any, Literal
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 
 from ..models import Rule
@@ -26,7 +26,7 @@ class UsageEvent(BaseModel):
     rule_id: str
     action: str = "applied"
     success: bool = True
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     context: Dict[str, Any] = Field(default_factory=dict)
     feedback_score: Optional[float] = None
 
@@ -107,7 +107,7 @@ class ABTest(BaseModel):
     experiment_key: str
     rule_id: str
     variants: List[ABVariant]
-    start_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    start_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     end_time: Optional[datetime] = None
 
 

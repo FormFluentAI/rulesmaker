@@ -1,0 +1,385 @@
+---
+description: Scraper architecture and integration patterns for rules-maker documentation processing
+globs:
+  - '**/scrapers/**'
+  - '**/async_*.py'
+  - '**/enhanced_*.py'
+  - '**/adaptive_*.py'
+---
+# Scraper Architecture
+
+## Overview
+
+The rules-maker project includes a comprehensive scraping architecture with multiple specialized scrapers, async processing capabilities, and ML-enhanced batch processing integration.
+
+## Core Scraper Components
+
+### 1. Enhanced Async Scraper
+**Location**: `src/rules_maker/scrapers/enhanced_async_scraper.py`
+
+```python
+from rules_maker.scrapers.enhanced_async_scraper import EnhancedAsyncScraper
+
+# Initialize enhanced async scraper
+scraper = EnhancedAsyncScraper(
+    max_concurrent=10,
+    timeout=30,
+    retry_attempts=3
+)
+
+# Scrape documentation site
+results = await scraper.scrape_documentation_site("https://docs.example.com")
+```
+
+**Features**:
+- High-performance async processing
+- Intelligent rate limiting and resource management
+- Comprehensive error handling and retry logic
+- Progress tracking and result reporting
+- Integration with ML batch processing
+
+### 2. Async Documentation Scraper
+**Location**: `src/rules_maker/scrapers/async_documentation_scraper.py`
+
+```python
+from rules_maker.scrapers.async_documentation_scraper import AsyncDocumentationScraper
+
+# Initialize async scraper
+scraper = AsyncDocumentationScraper()
+
+# Scrape with custom configuration
+results = await scraper.scrape_documentation_site(
+    base_url="https://docs.example.com",
+    max_pages=100,
+    include_patterns=["**/*.html", "**/*.md"]
+)
+```
+
+**Features**:
+- Async/await pattern for non-blocking operations
+- Configurable page limits and filtering
+- Content type detection and processing
+- Metadata extraction and organization
+
+### 3. Adaptive Documentation Scraper
+**Location**: `src/rules_maker/scrapers/adaptive_documentation_scraper.py`
+
+```python
+from rules_maker.scrapers.adaptive_documentation_scraper import AdaptiveDocumentationScraper
+
+# Initialize adaptive scraper
+scraper = AdaptiveDocumentationScraper()
+
+# Adaptive scraping with learning
+results = await scraper.scrape_with_adaptation(
+    url="https://docs.example.com",
+    learning_data=previous_results
+)
+```
+
+**Features**:
+- Adaptive scraping based on site structure
+- Learning from previous scraping attempts
+- Dynamic strategy adjustment
+- Site-specific optimization
+
+## ML Batch Processing Integration
+
+### MLBatchProcessor Integration
+**Location**: `src/rules_maker/batch_processor.py`
+
+```python
+from rules_maker.batch_processor import MLBatchProcessor, DocumentationSource
+from rules_maker.scrapers.enhanced_async_scraper import EnhancedAsyncScraper
+
+# Initialize batch processor with enhanced scraper
+processor = MLBatchProcessor(
+    base_scraper=EnhancedAsyncScraper(),  # Uses existing scraper
+    max_concurrent=15,
+    quality_threshold=0.7
+)
+
+# Process multiple sources
+sources = [
+    DocumentationSource("https://reactjs.org/docs/", "React", "javascript", "react", priority=5),
+    DocumentationSource("https://vuejs.org/guide/", "Vue", "javascript", "vue", priority=4),
+    # ... more sources
+]
+
+result = await processor.process_documentation_batch(sources)
+```
+
+**Integration Benefits**:
+- Wraps existing scrapers with batch intelligence
+- Adds intelligent rate limiting and resource management
+- Maintains all existing scraping capabilities
+- Adds batch coordination and progress tracking
+
+## Scraper Configuration
+
+### Basic Configuration
+```python
+# Standard scraper configuration
+scraper_config = {
+    'max_concurrent': 10,
+    'timeout': 30,
+    'retry_attempts': 3,
+    'delay_between_requests': 1.0,
+    'user_agent': 'Rules-Maker/1.0'
+}
+```
+
+### Advanced Configuration
+```python
+# Advanced scraper configuration
+advanced_config = {
+    'max_concurrent': 15,
+    'timeout': 60,
+    'retry_attempts': 5,
+    'delay_between_requests': 0.5,
+    'user_agent': 'Rules-Maker/1.0',
+    'include_patterns': ['**/*.html', '**/*.md', '**/*.rst'],
+    'exclude_patterns': ['**/api/**', '**/changelog/**'],
+    'max_pages': 1000,
+    'respect_robots_txt': True,
+    'follow_redirects': True
+}
+```
+
+## Processing Pipeline
+
+### 1. Content Discovery
+```python
+# Discover content structure
+discovery_result = await scraper.discover_content_structure(
+    base_url="https://docs.example.com",
+    max_depth=3
+)
+
+print(f"Found {len(discovery_result.pages)} pages")
+print(f"Content types: {discovery_result.content_types}")
+```
+
+### 2. Content Extraction
+```python
+# Extract content from discovered pages
+extraction_result = await scraper.extract_content(
+    pages=discovery_result.pages,
+    extract_metadata=True,
+    extract_links=True
+)
+
+print(f"Extracted {len(extraction_result.content)} content items")
+print(f"Metadata: {extraction_result.metadata}")
+```
+
+### 3. Content Processing
+```python
+# Process extracted content
+processing_result = await scraper.process_content(
+    content=extraction_result.content,
+    processors=['html_cleaner', 'markdown_converter', 'metadata_extractor']
+)
+
+print(f"Processed {len(processing_result.processed_content)} items")
+```
+
+## Error Handling and Resilience
+
+### Retry Logic
+```python
+# Configure retry behavior
+scraper = EnhancedAsyncScraper(
+    retry_attempts=3,
+    retry_delay=1.0,
+    retry_backoff_factor=2.0
+)
+
+# Automatic retry on failures
+try:
+    results = await scraper.scrape_documentation_site(url)
+except Exception as e:
+    print(f"Scraping failed after retries: {e}")
+```
+
+### Error Recovery
+```python
+# Graceful error handling
+async def scrape_with_recovery(url):
+    try:
+        return await scraper.scrape_documentation_site(url)
+    except NetworkError:
+        # Try with reduced concurrency
+        scraper.max_concurrent = 1
+        return await scraper.scrape_documentation_site(url)
+    except TimeoutError:
+        # Try with increased timeout
+        scraper.timeout = 60
+        return await scraper.scrape_documentation_site(url)
+```
+
+## Performance Optimization
+
+### Concurrent Processing
+```python
+# Optimize concurrency based on system resources
+import asyncio
+import psutil
+
+# Calculate optimal concurrency
+cpu_count = psutil.cpu_count()
+memory_gb = psutil.virtual_memory().total / (1024**3)
+optimal_concurrency = min(cpu_count * 2, int(memory_gb * 4))
+
+scraper = EnhancedAsyncScraper(max_concurrent=optimal_concurrency)
+```
+
+### Memory Management
+```python
+# Stream processing for large sites
+async def stream_scrape_large_site(url):
+    async for batch in scraper.scrape_in_batches(url, batch_size=50):
+        # Process batch immediately
+        processed_batch = await process_batch(batch)
+        yield processed_batch
+        
+        # Clear memory
+        del batch
+```
+
+## Integration with ML Components
+
+### ML-Enhanced Processing
+```python
+from rules_maker.processors.ml_documentation_processor import MLDocumentationProcessor
+
+# Use ML-enhanced processor with scraper
+scraper = EnhancedAsyncScraper()
+ml_processor = MLDocumentationProcessor()
+
+# Scrape and process with ML enhancement
+results = await scraper.scrape_documentation_site(url)
+ml_enhanced_results = ml_processor.process_batch(results)
+```
+
+### Quality Assessment Integration
+```python
+from rules_maker.learning.integrated_learning_system import IntegratedLearningSystem
+
+# Integrate with learning system
+scraper = EnhancedAsyncScraper()
+learning_system = IntegratedLearningSystem()
+
+# Scrape with quality assessment
+results = await scraper.scrape_documentation_site(url)
+quality_assessed_results = await learning_system.assess_content_quality(results)
+```
+
+## CLI Integration
+
+### Scraper Commands
+```bash
+# Basic scraping
+rules-maker scrape https://docs.example.com --output rules/
+
+# With ML enhancement
+rules-maker scrape https://docs.example.com --ml-enhanced --output rules/
+
+# With custom configuration
+rules-maker scrape https://docs.example.com --max-pages 100 --timeout 60
+```
+
+### Batch Processing Commands
+```bash
+# Process frameworks with enhanced scraper
+rules-maker ml-batch frameworks --output rules/frameworks
+
+# Process cloud platforms
+rules-maker ml-batch cloud --output rules/cloud
+
+# Custom source processing
+rules-maker ml-batch custom --sources sources.json --output rules/custom
+```
+
+## Monitoring and Observability
+
+### Progress Tracking
+```python
+# Monitor scraping progress
+async def scrape_with_progress(url):
+    progress_callback = lambda current, total: print(f"Progress: {current}/{total}")
+    
+    results = await scraper.scrape_documentation_site(
+        url,
+        progress_callback=progress_callback
+    )
+    
+    return results
+```
+
+### Performance Metrics
+```python
+# Collect performance metrics
+import time
+
+start_time = time.time()
+results = await scraper.scrape_documentation_site(url)
+end_time = time.time()
+
+metrics = {
+    'total_time': end_time - start_time,
+    'pages_scraped': len(results),
+    'pages_per_second': len(results) / (end_time - start_time),
+    'success_rate': results.success_rate
+}
+
+print(f"Scraping metrics: {metrics}")
+```
+
+## Best Practices
+
+### 1. Rate Limiting
+- Respect robots.txt files
+- Implement appropriate delays between requests
+- Monitor response times and adjust accordingly
+
+### 2. Error Handling
+- Implement comprehensive retry logic
+- Handle different types of errors appropriately
+- Provide meaningful error messages
+
+### 3. Resource Management
+- Use appropriate concurrency levels
+- Monitor memory usage during large operations
+- Implement streaming for very large sites
+
+### 4. Content Quality
+- Validate extracted content
+- Handle different content types appropriately
+- Preserve metadata and structure
+
+## Testing
+
+### Unit Tests
+```bash
+# Test individual scrapers
+PYTHONPATH=src pytest tests/test_scrapers.py -v
+
+# Test specific scraper functionality
+PYTHONPATH=src pytest tests/test_scrapers.py::test_enhanced_async_scraper -v
+```
+
+### Integration Tests
+```bash
+# Test scraper integration with ML components
+PYTHONPATH=src pytest tests/test_batch_processing.py -v
+
+# Test CLI integration
+PYTHONPATH=src pytest tests/test_cli_ml_integration.py -v
+```
+
+### Performance Tests
+```bash
+# Test scraper performance
+PYTHONPATH=src pytest tests/test_scraper_performance.py -v
+```

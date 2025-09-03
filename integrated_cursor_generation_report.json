@@ -1,0 +1,32 @@
+{
+  "generated_rules": [
+    {
+      "name": "nextjs-routing-comprehensive",
+      "file": "/home/ollie/dev/rules-maker/.cursor/rules/nextjs-routing-comprehensive.mdc",
+      "type": "comprehensive_routing"
+    },
+    {
+      "name": "nextjs-performance",
+      "file": "/home/ollie/dev/rules-maker/.cursor/rules/nextjs-performance.mdc",
+      "type": "performance"
+    },
+    {
+      "name": "nextjs-security",
+      "file": "/home/ollie/dev/rules-maker/.cursor/rules/nextjs-security.mdc",
+      "type": "security"
+    },
+    {
+      "name": "nextjs-testing",
+      "file": "/home/ollie/dev/rules-maker/.cursor/rules/nextjs-testing.mdc",
+      "type": "testing"
+    },
+    {
+      "name": "nextjs-deployment",
+      "file": "/home/ollie/dev/rules-maker/.cursor/rules/nextjs-deployment.mdc",
+      "type": "deployment"
+    }
+  ],
+  "processing_stats": {},
+  "errors": [],
+  "timestamp": "2025-09-03T06:05:40.620318"
+}

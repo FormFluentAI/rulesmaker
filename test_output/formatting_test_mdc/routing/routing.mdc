@@ -1,0 +1,35 @@
+---
+description: Next.js routing and navigation patterns for App Router and Pages Router
+globs:
+- '**/app/**/*'
+- '**/pages/**/*'
+- '**/middleware.ts'
+- '**/route.ts'
+alwaysApply: true
+tags:
+- docs
+- 'https:'
+- react
+- app
+- pages
+- nextjs.org
+version: 1.0.0
+lastUpdated: '2025-09-03T04:42:08.255136'
+---
+# Routing Development Rules
+*Generated on 2025-09-03 04:42:08*
+## Overview
+Next.js routing and navigation patterns for App Router and Pages Router
+**Difficulty Level**: Intermediate
+**Category**: routing
+
+## 1. App Router Documentation
+The App Router is a new paradigm for building applications using React's latest features.
+
+---
+
+## 2. Pages Router Documentation
+The Pages Router is the original Next.js routing system based on file system routing.
+
+---
+

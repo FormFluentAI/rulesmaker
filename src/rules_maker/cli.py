@@ -681,6 +681,341 @@ def batch(urls_file, output_dir, output_format, parallel, adaptive, use_ml):
 @click.option('--content-file', type=click.Path(exists=True), help='Optional path to documentation/content text to analyze.')
 @click.option('--events', type=click.Path(exists=True), help='Optional usage events JSON or JSONL file.')
 @click.option('--output', '-o', type=click.Path(), help='Output path for pipeline report JSON (stdout if omitted).')
+def analyze(rules, content_file, events, output):
+    """Analyze rules and generate insights."""
+    click.echo("🔍 Analyzing rules...")
+    
+    # Load rules
+    rules_path = Path(rules)
+    if rules_path.suffix.lower() in ['.json']:
+        with open(rules_path, 'r') as f:
+            rules_data = json.load(f)
+    elif rules_path.suffix.lower() in ['.yaml', '.yml']:
+        with open(rules_path, 'r') as f:
+            rules_data = yaml.safe_load(f)
+    else:
+        click.echo("❌ Unsupported rules file format. Use JSON or YAML.", err=True)
+        return
+    
+    # Load content if provided
+    content = None
+    if content_file:
+        with open(content_file, 'r') as f:
+            content = f.read()
+    
+    # Load events if provided
+    events_data = None
+    if events:
+        with open(events, 'r') as f:
+            if events.endswith('.jsonl'):
+                events_data = [json.loads(line) for line in f]
+            else:
+                events_data = json.load(f)
+    
+    # Generate analysis
+    analysis = {
+        'rules_count': len(rules_data.get('rules', [])),
+        'categories': list(set(rule.get('category', 'general') for rule in rules_data.get('rules', []))),
+        'content_analyzed': content is not None,
+        'events_analyzed': events_data is not None,
+        'timestamp': time.time()
+    }
+    
+    # Output results
+    if output:
+        with open(output, 'w') as f:
+            json.dump(analysis, f, indent=2)
+        click.echo(f"✅ Analysis saved to: {output}")
+    else:
+        click.echo(json.dumps(analysis, indent=2))
+
+
+@main.group()
+def nextjs():
+    """Next.js documentation processing commands."""
+    pass
+
+
+@nextjs.command()
+@click.option('--sources', 
+              type=click.Choice(['official', 'community', 'ecosystem', 'all']),
+              default='all',
+              help='Next.js documentation sources to process')
+@click.option('--output', '-o', 
+              default='.cursor/rules/nextjs',
+              help='Output directory for generated cursor rules')
+@click.option('--ml-enhanced', is_flag=True, help='Enable ML-enhanced processing')
+@click.option('--learning-enabled', is_flag=True, help='Enable learning system integration')
+@click.option('--quality-threshold', type=float, default=0.7, help='Minimum quality threshold')
+@click.option('--format', 'output_format', 
+              type=click.Choice(['mdc', 'json', 'yaml']),
+              default='mdc',
+              help='Output format for cursor rules')
+@click.option('--parallel', is_flag=True, help='Enable parallel processing')
+@click.option('--verbose', is_flag=True, help='Enable verbose logging')
+def process(sources, output, ml_enhanced, learning_enabled, quality_threshold, output_format, parallel, verbose):
+    """Process Next.js documentation and generate cursor rules."""
+    if verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+    
+    click.echo("🚀 Starting Next.js documentation processing...")
+    
+    # Import Next.js pipeline components
+    try:
+        from .intelligence.nextjs_categorizer import NextJSCategorizer
+        from .formatters.cursor_rules_formatter import CursorRulesFormatter
+        from .learning.nextjs_learning_integration import NextJSLearningIntegration
+        from .scrapers import AsyncDocumentationScraper, AdaptiveDocumentationScraper
+        from .models import ScrapingConfig
+        from .batch_processor import DocumentationSource
+    except ImportError as e:
+        click.echo(f"❌ Failed to import Next.js pipeline components: {e}", err=True)
+        return
+    
+    async def run_nextjs_pipeline():
+        """Run the Next.js documentation pipeline."""
+        # Initialize components
+        categorizer = NextJSCategorizer()
+        formatter = CursorRulesFormatter(categorizer)
+        learning_integration = NextJSLearningIntegration() if learning_enabled else None
+        
+        # Configure scraper
+        scraping_config = ScrapingConfig(
+            max_pages=50,
+            rate_limit=0.5,
+            max_depth=3
+        )
+        
+        if ml_enhanced:
+            scraper = AdaptiveDocumentationScraper(
+                config=scraping_config,
+                use_ml=True,
+                use_llm=False
+            )
+        else:
+            scraper = AsyncDocumentationScraper(config=scraping_config)
+        
+        # Define comprehensive Next.js sources
+        nextjs_sources = {
+            'official': [
+                # Core Documentation
+                DocumentationSource("https://nextjs.org/docs", "Next.js Official Docs", "nextjs", "overview", 10),
+                DocumentationSource("https://nextjs.org/docs/getting-started", "Getting Started", "nextjs", "getting-started", 10),
+                DocumentationSource("https://nextjs.org/docs/getting-started/installation", "Installation", "nextjs", "setup", 9),
+                
+                # Routing & Navigation
+                DocumentationSource("https://nextjs.org/docs/app", "App Router", "nextjs", "routing", 10),
+                DocumentationSource("https://nextjs.org/docs/pages", "Pages Router", "nextjs", "routing", 9),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/routing", "App Router Routing", "nextjs", "routing", 9),
+                DocumentationSource("https://nextjs.org/docs/pages/building-your-application/routing", "Pages Router Routing", "nextjs", "routing", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/routing/linking-and-navigating", "Linking and Navigating", "nextjs", "routing", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/routing/middleware", "Middleware", "nextjs", "routing", 8),
+                
+                # Components & Rendering
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/rendering", "Rendering", "nextjs", "rendering", 9),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/rendering/server-components", "Server Components", "nextjs", "components", 9),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/rendering/client-components", "Client Components", "nextjs", "components", 9),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns", "Composition Patterns", "nextjs", "components", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/rendering/partial-prerendering", "Partial Prerendering", "nextjs", "rendering", 8),
+                
+                # Data Fetching
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/data-fetching", "Data Fetching", "nextjs", "data-fetching", 9),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/data-fetching/fetching", "Fetching Data", "nextjs", "data-fetching", 9),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/data-fetching/caching", "Caching", "nextjs", "data-fetching", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/data-fetching/revalidating", "Revalidating", "nextjs", "data-fetching", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/data-fetching/forms-and-mutations", "Forms and Mutations", "nextjs", "data-fetching", 8),
+                
+                # Styling & UI
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/styling", "Styling", "nextjs", "styling", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/styling/css-modules", "CSS Modules", "nextjs", "styling", 7),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/styling/tailwind-css", "Tailwind CSS", "nextjs", "styling", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/styling/sass", "Sass", "nextjs", "styling", 7),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/styling/css-in-js", "CSS-in-JS", "nextjs", "styling", 7),
+                
+                # Optimization
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/optimizing", "Optimizing", "nextjs", "optimization", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/optimizing/images", "Image Optimization", "nextjs", "optimization", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/optimizing/fonts", "Font Optimization", "nextjs", "optimization", 7),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/optimizing/static-assets", "Static Assets", "nextjs", "optimization", 7),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading", "Lazy Loading", "nextjs", "optimization", 7),
+                
+                # Configuration
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/next-config-js", "Next.js Config", "nextjs", "configuration", 8),
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/next-config-js", "App Directory Config", "nextjs", "configuration", 7),
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/next-config-js", "Compiler Options", "nextjs", "configuration", 7),
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/next-config-js", "Experimental Features", "nextjs", "configuration", 6),
+                
+                # API Reference
+                DocumentationSource("https://nextjs.org/docs/app/api-reference", "API Reference", "nextjs", "api", 8),
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/functions", "Functions", "nextjs", "api", 7),
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/components", "Components", "nextjs", "api", 7),
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/file-conventions", "File Conventions", "nextjs", "api", 7),
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/next-config-js", "Config Reference", "nextjs", "api", 7),
+                
+                # Advanced Features
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/authentication", "Authentication", "nextjs", "authentication", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/internationalization", "Internationalization", "nextjs", "i18n", 7),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/analytics", "Analytics", "nextjs", "analytics", 6),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/upgrading", "Upgrading", "nextjs", "migration", 6),
+                
+                # Error Handling
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/routing/error-handling", "Error Handling", "nextjs", "error-handling", 7),
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/file-conventions/error", "Error Pages", "nextjs", "error-handling", 7),
+                DocumentationSource("https://nextjs.org/docs/app/api-reference/file-conventions/not-found", "Not Found Pages", "nextjs", "error-handling", 6),
+                
+                # Deployment
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/deploying", "Deploying", "nextjs", "deployment", 8),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/deploying/static-exports", "Static Exports", "nextjs", "deployment", 7),
+                DocumentationSource("https://nextjs.org/docs/app/building-your-application/deploying", "Docker", "nextjs", "deployment", 7),
+            ],
+            'community': [
+                DocumentationSource("https://nextjs.org/learn", "Next.js Learn", "nextjs", "tutorial", 9),
+                DocumentationSource("https://nextjs.org/learn/dashboard-app", "Dashboard App Tutorial", "nextjs", "tutorial", 8),
+                DocumentationSource("https://nextjs.org/learn/foundations/about-nextjs", "About Next.js", "nextjs", "tutorial", 8),
+                DocumentationSource("https://nextjs.org/learn/foundations/from-javascript-to-react", "From JavaScript to React", "nextjs", "tutorial", 7),
+                DocumentationSource("https://nextjs.org/learn/foundations/from-react-to-nextjs", "From React to Next.js", "nextjs", "tutorial", 8),
+                DocumentationSource("https://nextjs.org/learn/foundations/how-nextjs-works", "How Next.js Works", "nextjs", "tutorial", 8),
+                DocumentationSource("https://nextjs.org/docs/examples", "Examples", "nextjs", "examples", 7),
+                DocumentationSource("https://nextjs.org/docs/examples/authentication", "Authentication Examples", "nextjs", "examples", 7),
+                DocumentationSource("https://nextjs.org/docs/examples/with-typescript", "TypeScript Examples", "nextjs", "examples", 7),
+                DocumentationSource("https://nextjs.org/docs/examples/with-tailwindcss", "Tailwind Examples", "nextjs", "examples", 6),
+            ],
+            'ecosystem': [
+                DocumentationSource("https://vercel.com/docs/frameworks/nextjs", "Vercel Next.js Guide", "nextjs", "deployment", 8),
+                DocumentationSource("https://vercel.com/docs/frameworks/nextjs/nextjs-config", "Vercel Config", "nextjs", "deployment", 7),
+                DocumentationSource("https://tailwindcss.com/docs/guides/nextjs", "Tailwind with Next.js", "nextjs", "styling", 7),
+                DocumentationSource("https://www.typescriptlang.org/docs/handbook/react.html", "TypeScript with React", "nextjs", "typescript", 7),
+                DocumentationSource("https://www.prisma.io/docs/getting-started/setup-prisma/start-from-scratch/nextjs", "Prisma with Next.js", "nextjs", "database", 6),
+                DocumentationSource("https://supabase.com/docs/guides/getting-started/quickstarts/nextjs", "Supabase with Next.js", "nextjs", "database", 6),
+                DocumentationSource("https://next-auth.js.org/getting-started/example", "NextAuth.js", "nextjs", "authentication", 7),
+                DocumentationSource("https://www.framer.com/motion/", "Framer Motion", "nextjs", "animation", 6),
+                DocumentationSource("https://react-hook-form.com/get-started", "React Hook Form", "nextjs", "forms", 6),
+                DocumentationSource("https://zustand-demo.pmnd.rs/", "Zustand", "nextjs", "state-management", 6),
+            ]
+        }
+        
+        # Select sources to process
+        if sources == 'all':
+            selected_sources = []
+            for source_group in nextjs_sources.values():
+                selected_sources.extend(source_group)
+        else:
+            selected_sources = nextjs_sources.get(sources, [])
+        
+        if not selected_sources:
+            click.echo(f"❌ No sources found for: {sources}", err=True)
+            return
+        
+        click.echo(f"📚 Processing {len(selected_sources)} Next.js documentation sources...")
+        
+        # Process sources
+        results = []
+        async with scraper:
+            for i, source in enumerate(selected_sources, 1):
+                click.echo(f"Processing {i}/{len(selected_sources)}: {source.name}")
+                
+                try:
+                    result = await scraper.scrape_url(source.url)
+                    if result.content:
+                        results.append(result)
+                        
+                        # Categorize content
+                        categories = await categorizer.categorize_nextjs_content(result.content, str(result.url))
+                        
+                        # Record learning event
+                        if learning_integration:
+                            await learning_integration.record_categorization_event(
+                                result.content, str(result.url), categories,
+                                max(categories.values(), key=lambda x: x.confidence).confidence if categories else 0.0
+                            )
+                        
+                        click.echo(f"  ✅ Categorized as: {max(categories.items(), key=lambda x: x[1].confidence)[0] if categories else 'unknown'}")
+                    else:
+                        click.echo(f"  ❌ Failed to scrape content")
+                        
+                except Exception as e:
+                    click.echo(f"  ❌ Error: {e}")
+        
+        if not results:
+            click.echo("❌ No content was successfully scraped", err=True)
+            return
+        
+        # Format results into cursor rules
+        click.echo("📝 Formatting content into cursor rules...")
+        formatted_rules = await formatter.format_scraping_results(results, output_format=output_format)
+        
+        # Save formatted rules
+        output_path = Path(output)
+        output_path.mkdir(parents=True, exist_ok=True)
+        formatter.save_formatted_rules(formatted_rules, str(output_path))
+        
+        # Generate index
+        index_file = formatter.generate_rule_index(formatted_rules, str(output_path))
+        
+        # Generate learning report if enabled
+        if learning_integration:
+            click.echo("🧠 Generating learning report...")
+            learning_report = await learning_integration.generate_learning_report()
+            
+            report_file = output_path / "learning_report.json"
+            with open(report_file, 'w') as f:
+                json.dump(learning_report, f, indent=2)
+            
+            click.echo(f"📊 Learning report saved to: {report_file}")
+        
+        click.echo(f"✅ Next.js documentation processing completed!")
+        click.echo(f"📁 Output directory: {output_path}")
+        click.echo(f"📄 Rules generated: {len(formatted_rules)}")
+        click.echo(f"📋 Index file: {index_file}")
+    
+    # Run the pipeline
+    _run_async(run_nextjs_pipeline())
+
+
+@nextjs.command()
+@click.option('--output-dir', default='test_output', help='Output directory for test results')
+@click.option('--quick', is_flag=True, help='Run quick tests only')
+@click.option('--verbose', is_flag=True, help='Enable verbose logging')
+def test(output_dir, quick, verbose):
+    """Test the Next.js documentation pipeline."""
+    if verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+    
+    click.echo("🧪 Running Next.js pipeline tests...")
+    
+    # Import test components
+    try:
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).parent.parent.parent / "scripts"))
+        from test_nextjs_pipeline import NextJSPipelineTester
+    except ImportError as e:
+        click.echo(f"❌ Failed to import test components: {e}", err=True)
+        return
+    
+    async def run_tests():
+        """Run the test suite."""
+        tester = NextJSPipelineTester(test_output_dir=output_dir)
+        
+        if quick:
+            await tester.test_scraping_components()
+            await tester.test_categorization_system()
+            await tester.test_formatting_system()
+            await tester.test_learning_integration()
+        else:
+            report = await tester.run_all_tests()
+            tester.print_test_summary(report)
+    
+    # Run tests
+    _run_async(run_tests())
+    click.echo("✅ Tests completed!")
+
+
+@main.command()
+@click.option('--rules', required=True, type=click.Path(exists=True), help='Path to rules file (RuleSet JSON/YAML or list of Rule JSON).')
+@click.option('--content-file', type=click.Path(exists=True), help='Optional path to documentation/content text to analyze.')
+@click.option('--events', type=click.Path(exists=True), help='Optional usage events JSON or JSONL file.')
+@click.option('--output', '-o', type=click.Path(), help='Output path for pipeline report JSON (stdout if omitted).')
 def pipeline(rules, content_file, events, output):
     """Run the Learning Pipeline and emit a JSON report."""
     try:

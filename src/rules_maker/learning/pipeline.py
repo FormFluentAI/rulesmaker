@@ -23,16 +23,28 @@ from .models import (
 )
 from ..models import Rule
 
+# Conditional import to avoid circular dependencies
+try:
+    from ..formatters.cursor_rules_formatter import CursorRulesFormatter
+    FORMATTER_AVAILABLE = True
+except ImportError:
+    FORMATTER_AVAILABLE = False
+    CursorRulesFormatter = None
+
 
 @dataclass
 class LearningPipeline:
     usage_tracker: UsageTracker
     learning_engine: LearningEngine
     semantic_analyzer: SemanticAnalyzer
+    formatter: Optional[CursorRulesFormatter] = None
 
     @classmethod
     def default(cls) -> "LearningPipeline":
-        return cls(UsageTracker(), LearningEngine(), SemanticAnalyzer())
+        formatter = None
+        if FORMATTER_AVAILABLE:
+            formatter = CursorRulesFormatter()
+        return cls(UsageTracker(), LearningEngine(), SemanticAnalyzer(), formatter)
 
     # ---- Orchestration ----
     def run(
@@ -90,4 +102,38 @@ class LearningPipeline:
             content_analysis=content_analysis,
             recommendations=recs,
         )
+    
+    async def format_rules_with_formatter(self, results: List, category_hint: Optional[str] = None) -> Dict[str, str]:
+        """Format rules using the integrated cursor rules formatter."""
+        if not self.formatter or not FORMATTER_AVAILABLE:
+            return {}
+        
+        try:
+            # Convert results to ScrapingResult format if needed
+            scraping_results = []
+            for result in results:
+                if hasattr(result, 'content') and hasattr(result, 'url'):
+                    scraping_results.append(result)
+                else:
+                    # Create a basic ScrapingResult from the data
+                    from ..models import ScrapingResult
+                    scraping_results.append(ScrapingResult(
+                        url=str(getattr(result, 'url', 'unknown')),
+                        content=str(getattr(result, 'content', '')),
+                        title=getattr(result, 'title', ''),
+                        status='completed'
+                    ))
+            
+            # Use the formatter to create properly formatted cursor rules
+            formatted_rules = await self.formatter.format_scraping_results(
+                results=scraping_results,
+                category_hint=category_hint,
+                output_format="mdc"
+            )
+            
+            return formatted_rules
+            
+        except Exception as e:
+            print(f"Formatter integration failed: {e}")
+            return {}
 

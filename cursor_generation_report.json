@@ -1,0 +1,19 @@
+{
+  "generated_rules": [],
+  "processing_stats": {
+    "comprehensive": {
+      "processed": 0,
+      "errors": 0
+    },
+    "routing": {
+      "processed": 0,
+      "errors": 1
+    },
+    "specialized": {
+      "processed": 0,
+      "errors": 4
+    }
+  },
+  "errors": [],
+  "timestamp": "2025-09-03T05:49:06.027544"
+}

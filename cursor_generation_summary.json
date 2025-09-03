@@ -1,0 +1,11 @@
+{
+  "generated_rules": [
+    "nextjs-routing-comprehensive.mdc",
+    "nextjs-performance.mdc",
+    "nextjs-security.mdc",
+    "nextjs-testing.mdc",
+    "nextjs-deployment.mdc"
+  ],
+  "timestamp": "2025-09-03T05:56:45.162800",
+  "total_rules": 5
+}

@@ -1,5 +1,5 @@
 import pytest
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 
 from rules_maker.models import Rule, RuleType
 from rules_maker.learning import LearningEngine
@@ -25,7 +25,7 @@ def test_analyze_usage_patterns_basic():
     r1 = make_rule(1)
     r2 = make_rule(2)
 
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     events_r1 = [
         UsageEvent(rule_id=r1.id, success=True, timestamp=now - timedelta(minutes=10), context={"section": "naming"}),
         UsageEvent(rule_id=r1.id, success=True, timestamp=now - timedelta(minutes=5), context={"section": "naming"}, feedback_score=0.5),
@@ -53,7 +53,7 @@ def test_optimize_rules_updates_priority_and_confidence():
     r1 = make_rule(1, priority=2, confidence=0.4)
     r2 = make_rule(2, priority=3, confidence=0.6)
 
-    now = datetime.now(UTC)
+    now = datetime.now(timezone.utc)
     events_r1 = [UsageEvent(rule_id=r1.id, success=True) for _ in range(5)]
     events_r2 = [UsageEvent(rule_id=r2.id, success=False) for _ in range(5)]
 

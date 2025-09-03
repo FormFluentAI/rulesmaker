@@ -1,0 +1,99 @@
+---
+description: Next.js and React development guidelines for modern web applications
+globs:
+  - '**/*.tsx'
+  - '**/*.ts'
+  - '**/*.jsx'
+  - '**/*.js'
+  - '**/next.config.*'
+  - '**/package.json'
+---
+# Next.js Development Guidelines
+
+You are an expert in Next.js, React, TypeScript, and full-stack development.
+
+## Key Principles
+
+- Follow the framework's established patterns and conventions
+- Use framework-specific features and abstractions appropriately
+- Maintain consistency with official documentation examples
+- Implement proper HTTP status codes and error responses
+- Follow RESTful principles for API design
+- Include comprehensive request/response validation
+- Write clear, step-by-step implementations
+- Include practical examples and use cases
+- Provide helpful comments and explanations
+- Write clean, readable, and maintainable code
+- Use descriptive names for variables, functions, and classes
+- Implement proper error handling and logging
+- Follow security best practices
+
+## Code Style and Structure
+
+- Use modern ES6+ syntax and features
+- Prefer const and let over var
+- Use arrow functions for simple expressions
+- Implement proper TypeScript types and interfaces
+- Follow these documented patterns: function definitions, async operations, module imports
+
+## Best Practices
+
+- Follow documented best practices
+- Avoid documented anti-patterns
+- Consider performance implications
+- Implement security considerations
+- Implement recommended approaches
+
+## Technology-Specific Guidelines
+
+### React Guidelines
+- Use functional components with hooks
+- Implement proper state management (useState, useReducer)
+- Use React.memo for performance optimization
+- Follow component composition patterns
+- Use proper prop types and TypeScript interfaces
+
+### Next.js Guidelines
+- Use App Router for new projects (not Pages Router)
+- Implement proper data fetching patterns (Server Components)
+- Optimize for Core Web Vitals
+- Use server and client components appropriately
+- Follow Next.js file-based routing conventions
+
+## Error Handling and Validation
+
+- Use try-catch blocks for error handling
+- Implement proper error boundaries in React applications
+- Use async/await with proper error handling
+- Provide user-friendly error messages
+- Log errors appropriately for debugging
+
+## Performance Considerations
+
+- Use React.memo and useMemo for expensive calculations
+- Implement code splitting and lazy loading
+- Optimize bundle size and loading performance
+- Use proper caching strategies
+- Minimize re-renders with proper dependency arrays
+
+## 🚨 Critical Instructions
+
+**NEVER:**
+- Ignore error handling or edge cases
+- Use deprecated APIs or methods
+- Hardcode sensitive information
+- Skip input validation and sanitization
+- Use any or unknown types without proper justification
+
+**ALWAYS:**
+- Follow security best practices
+- Test your code thoroughly
+- Document complex logic and algorithms
+- Consider accessibility and user experience
+- Use version control with meaningful commit messages
+- Validate all input parameters
+- Return appropriate HTTP status codes
+- Implement proper authentication/authorization
+- Use keys properly in lists and iterations
+- Avoid direct DOM manipulation
+- Follow React best practices for state updates

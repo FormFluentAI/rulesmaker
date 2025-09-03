@@ -1,0 +1,41 @@
+{
+  "report_generated": "2025-09-03T04:36:34.851304",
+  "learning_summary": {
+    "total_events": 1,
+    "recent_events": 1,
+    "learning_active": false
+  },
+  "patterns_analysis": {
+    "total_events": 1,
+    "event_types": {
+      "categorization": 1
+    },
+    "category_distribution": {
+      "routing": 1
+    },
+    "confidence_trends": {
+      "2025-09-03": {
+        "average": 0.8,
+        "count": 1,
+        "std": 0.0
+      }
+    },
+    "feedback_analysis": {
+      "status": "no_feedback"
+    },
+    "usage_patterns": {
+      "status": "no_usage_data"
+    },
+    "quality_improvements": {
+      "status": "insufficient_data"
+    }
+  },
+  "learned_patterns_summary": {
+    "total_categories": 0,
+    "total_patterns": 0,
+    "categories": []
+  },
+  "recommendations": [
+    "Learning system is performing well - continue current approach"
+  ]
+}
