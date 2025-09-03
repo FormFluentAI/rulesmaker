@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-09-03T07:06:52.427775",
+  "sources_processed": 43,
+  "pages_scraped": 41,
+  "cursor_rules_generated": 3,
+  "categories": [
+    "routing.mdc",
+    "testing.mdc",
+    "deployment.mdc"
+  ],
+  "processing_config": {
+    "use_ml": true,
+    "use_learning": false,
+    "quality_threshold": 0.8,
+    "max_pages": 20,
+    "rate_limit": 0.5
+  }
+}

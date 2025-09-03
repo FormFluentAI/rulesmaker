@@ -43,11 +43,13 @@ class AsyncDocumentationScraper(BaseScraper):
         
     async def __aenter__(self):
         """Async context manager entry."""
+        logger.debug("AsyncDocumentationScraper: entering context manager")
         await self._ensure_session()
         return self
         
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
+        logger.debug("AsyncDocumentationScraper: exiting context manager")
         await self.close()
         
     async def _ensure_session(self):
@@ -87,13 +89,21 @@ class AsyncDocumentationScraper(BaseScraper):
     async def close(self):
         """Close the session and cleanup resources."""
         if self.session and not self.session.closed:
-            await self.session.close()
+            logger.debug(f"Closing aiohttp session: {self.session}")
+            try:
+                await self.session.close()
+                # Wait a bit for the session to fully close
+                await asyncio.sleep(0.2)
+            except Exception as e:
+                logger.warning(f"Error closing session: {e}")
         self.session = None
         self.semaphore = None
         
     async def scrape_url(self, url: str, **kwargs) -> ScrapingResult:
         """Scrape a single URL asynchronously."""
-        await self._ensure_session()
+        # Ensure session exists
+        if self.session is None or self.session.closed:
+            await self._ensure_session()
         
         try:
             async with self.semaphore:

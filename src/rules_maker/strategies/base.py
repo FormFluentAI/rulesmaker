@@ -128,7 +128,9 @@ class BaseScrapingStrategy(ScrapingStrategy):
         from ..models import ScrapingStatus
         
         try:
-            async with aiohttp.ClientSession() as session:
+            # Use proper session management with timeout
+            timeout = aiohttp.ClientTimeout(total=30)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.get(url) as response:
                     content = await response.text()
                     

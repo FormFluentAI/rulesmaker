@@ -1,0 +1,276 @@
+---
+description: Next.js routing and navigation patterns for App Router and Pages Router
+globs:
+- '**/app/**/*'
+- '**/pages/**/*'
+- '**/middleware.ts'
+- '**/route.ts'
+alwaysApply: true
+tags:
+- images
+- building-your-application
+- styling
+- upgrading
+- docs
+- installation
+- not-found
+- css
+- node.js
+- tailwind-css
+version: 1.0.0
+lastUpdated: '2025-09-03T07:06:52.399291'
+---
+# Routing Development Rules
+*Generated on 2025-09-03 07:06:52*
+## Overview
+Next.js routing and navigation patterns for App Router and Pages Router
+**Difficulty Level**: Beginner
+**Category**: routing
+
+## 1. Next.js Docs | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 2. App Router: Getting Started | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+create-next-app
+```
+
+---
+
+## 3. Getting Started: Installation | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 4. Next.js Docs: App Router | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+create-next-app
+```
+
+---
+
+## 5. Next.js Docs: Pages Router | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 6. Getting Started: Layouts and Pages | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+/blog/ ${ post .slug } 
+```
+
+---
+
+## 7. Building Your Application: Routing | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 8. Getting Started: Linking and Navigating | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+link-hint ${ pending ? 'is-pending' : '' } 
+```
+
+```typescript
+? ${ params .toString () } 
+```
+
+```typescript
+/ ${ locale }${ pathname } 
+```
+
+### Anti-Patterns
+- ❌ unnecessary usage of resources when rendering large lists of links (e.g. an infinite scroll table). < Link prefetch = { false } href = "/blog" > Blog </ Link > However, disabling prefetching comes with trade-offs: Static routes will only be fetched when the user clicks the link. Dynamic routes will need to be rendered on the server first before the client can navigate to it. To reduce resource usage without fully disabling prefetch, you can prefetch only on hover. This limits prefetching to routes the user is more likely to visit, rather than all links in the viewport. app/ui/hover-prefetch-link.tsx TypeScript JavaScript TypeScript 'use client' import Link from 'next/link' import { useState } from 'react' function HoverPrefetchLink ({ href , children , } : { href : string children : React . ReactNode }) { const [ active , setActive ] = useState ( false ) return ( < Link href = {href} prefetch = {active ? null : false } onMouseEnter = {() => setActive ( true )} > {children} </ Link > ) } Hydration not completed <Link> is a Client Component and must be hydrated before it can prefetch routes. On the initial visit, large JavaScript bundles can delay hydration, preventing prefetching from starting right away. React mitigates this with Selective Hydration and you can further improve this by: Using the @next/bundle-analyzer plugin to identify and reduce bundle size by removing large dependencies. Moving logic from the client to the server where possible. See the Server and Client Components docs for guidance. Examples Native History API Next.js allows you to use the native window.history.pushState and window.history.replaceState methods to update the browser's history stack without reloading the page. pushState and replaceState calls integrate into the Next.js Router, allowing you to sync with usePathname and useSearchParams . window.history.pushState Use it to add a new entry to the browser's history stack. The user can navigate back to the previous state. For example, to sort a list of products: 'use client' import { useSearchParams } from 'next/navigation' export default function SortProducts () { const searchParams = useSearchParams () function updateSorting (sortOrder : string ) { const params = new URLSearchParams ( searchParams .toString ()) params .set ( 'sort' , sortOrder) window . history .pushState ( null , '' , `? ${ params .toString () } ` ) } return ( <> < button onClick = {() => updateSorting ( 'asc' )}>Sort Ascending</ button > < button onClick = {() => updateSorting ( 'desc' )}>Sort Descending</ button > </> ) } window.history.replaceState Use it to replace the current entry on the browser's history stack. The user is not able to navigate back to the previous state. For example, to switch the application's locale: 'use client' import { usePathname } from 'next/navigation' export function LocaleSwitcher () { const pathname = usePathname () function switchLocale (locale : string ) { // e.g. '/en/about' or '/fr/contact' const newPath = `/ ${ locale }${ pathname } ` window . history .replaceState ( null , '' , newPath) } return ( <> < button onClick = {() => switchLocale ( 'en' )}>English</ button > < button onClick = {() => switchLocale ( 'fr' )}>French</ button > </> ) } Next Steps Link Component Enable fast client-side navigation with the built-in `next/link` component. loading.js API reference for the loading.js file. Prefetching Learn how to configure prefetching in Next.js Previous Layouts and Pages Next Server and Client Components Was this helpful? supported. Send
+- ❌ visit. However, waiting for a server response before navigation can give the users the impression that the app is not responding. To improve the navigation experience to dynamic routes, you can use streaming . Streaming Streaming allows the server to send parts of a dynamic route to the client as soon as they're ready, rather than waiting for the entire route to be rendered. This means users see something sooner, even if parts of the page are still loading. For dynamic routes, it means they can be partially prefetched . That is, shared layouts and loading skeletons can be requested ahead of time. To use streaming, create a loading.tsx in your route folder: app/dashboard/loading.tsx TypeScript JavaScript TypeScript export default function Loading () { // Add fallback UI that will be shown while the route is loading. return < LoadingSkeleton /> } Behind the scenes, Next.js will automatically wrap the page.tsx contents in a <Suspense> boundary. The prefetched fallback UI will be shown while the route is loading, and swapped for the actual content once ready. Good to know : You can also use <Suspense> to create loading UI for nested components. Benefits of loading.tsx : Immediate navigation and visual feedback for the user. Shared layouts remain interactive and navigation is interruptible. Improved Core Web Vitals: TTFB , FCP , and TTI . To further improve the navigation experience, Next.js performs a client-side transition with the <Link> component. Client-side transitions Traditionally, navigation to a server-rendered page triggers a full page load. This clears state, resets scroll position, and blocks interactivity. Next.js avoids this with client-side transitions using the <Link> component. Instead of reloading the page, it updates the content dynamically by: Keeping any shared layouts and UI. Replacing the current page with the prefetched loading state or a new page if available. Client-side transitions are what makes a server-rendered apps feel like client-rendered apps. And when paired with prefetching and streaming , it enables fast transitions, even for dynamic routes. What can make transitions slow? These Next.js optimizations make navigation fast and responsive. However, under certain conditions, transitions can still feel slow. Here are some common causes and how to improve the user experience: Dynamic routes without loading.tsx When navigating to a dynamic route, the client must wait for the server response before showing the result. This can give the users the impression that the app is not responding. We recommend adding loading.tsx to dynamic routes to enable partial prefetching, trigger immediate navigation, and display a loading UI while the route renders. app/blog/[slug]/loading.tsx TypeScript JavaScript TypeScript export default function Loading () { return < LoadingSkeleton /> } Good to know : In development mode, you can use the Next.js Devtools to identify if the route is static or dynamic. See devIndicators for more information. Dynamic segments without generateStaticParams If a dynamic segment could be prerendered but isn't because it's missing generateStaticParams , the route will fallback to dynamic rendering at request time. Ensure the route is statically generated at build time by adding generateStaticParams : app/blog/[slug]/page.tsx TypeScript JavaScript TypeScript export async function generateStaticParams () { const posts = await fetch ( 'https://.../posts' ) .then ((res) => res .json ()) return posts .map ((post) => ({ slug : post .slug , })) } export default async function Page ({ params , } : { params : Promise <{ slug : string }> }) { const { slug } = await params // ... } Slow networks On slow or unstable networks, prefetching may not finish before the user clicks a link. This can affect both static and dynamic routes. In these cases, the loading.js fallback may not appear immediately because it hasn't been prefetched yet. To improve perceived performance, you can use the useLinkStatus hook to show immediate feedback while the transition is in progress. app/ui/loading-indicator.tsx TypeScript JavaScript TypeScript 'use client' import { useLinkStatus } from 'next/link' export default function LoadingIndicator () { const { pending } = useLinkStatus () return ( < span aria-hidden className = { `link-hint ${ pending ? 'is-pending' : '' } ` } /> ) } You can "debounce" the hint by adding an initial animation delay (e.g. 100ms) and starting as invisible (e.g. opacity: 0 ). This means the loading indicator will only be shown if the navigation takes longer than the specified delay. See the useLinkStatus reference for a CSS example. Good to know : You can use other visual feedback patterns like a progress bar. View an example here . Disabling prefetching You can opt out of prefetching by setting the prefetch prop to false on the <Link> component. This is useful to avoid unnecessary usage of resources when rendering large lists of links (e.g. an infinite scroll table). < Link prefetch = { false } href = "/blog" > Blog </ Link > However, disabling prefetching comes with trade-offs: Static routes will only be fetched when the user clicks the link. Dynamic routes will need to be rendered on the server first before the client can navigate to it. To reduce resource usage without fully disabling prefetch, you can prefetch only on hover. This limits prefetching to routes the user is more likely to visit, rather than all links in the viewport. app/ui/hover-prefetch-link.tsx TypeScript JavaScript TypeScript 'use client' import Link from 'next/link' import { useState } from 'react' function HoverPrefetchLink ({ href , children , } : { href : string children : React . ReactNode }) { const [ active , setActive ] = useState ( false ) return ( < Link href = {href} prefetch = {active ? null : false } onMouseEnter = {() => setActive ( true )} > {children} </ Link > ) } Hydration not completed <Link> is a Client Component and must be hydrated before it can prefetch routes. On the initial visit, large JavaScript bundles can delay hydration, preventing prefetching from starting right away. React mitigates this with Selective Hydration and you can further improve this by: Using the @next/bundle-analyzer plugin to identify and reduce bundle size by removing large dependencies. Moving logic from the client to the server where possible. See the Server and Client Components docs for guidance. Examples Native History API Next.js allows you to use the native window.history.pushState and window.history.replaceState methods to update the browser's history stack without reloading the page. pushState and replaceState calls integrate into the Next.js Router, allowing you to sync with usePathname and useSearchParams . window.history.pushState Use it to add a new entry to the browser's history stack. The user can navigate back to the previous state. For example, to sort a list of products: 'use client' import { useSearchParams } from 'next/navigation' export default function SortProducts () { const searchParams = useSearchParams () function updateSorting (sortOrder : string ) { const params = new URLSearchParams ( searchParams .toString ()) params .set ( 'sort' , sortOrder) window . history .pushState ( null , '' , `? ${ params .toString () } ` ) } return ( <> < button onClick = {() => updateSorting ( 'asc' )}>Sort Ascending</ button > < button onClick = {() => updateSorting ( 'desc' )}>Sort Descending</ button > </> ) } window.history.replaceState Use it to replace the current entry on the browser's history stack. The user is not able to navigate back to the previous state. For example, to switch the application's locale: 'use client' import { usePathname } from 'next/navigation' export function LocaleSwitcher () { const pathname = usePathname () function switchLocale (locale : string ) { // e.g. '/en/about' or '/fr/contact' const newPath = `/ ${ locale }${ pathname } ` window . history .replaceState ( null , '' , newPath) } return ( <> < button onClick = {() => switchLocale ( 'en' )}>English</ button > < button onClick = {() => switchLocale ( 'fr' )}>French</ button > </> ) } Next Steps Link Component Enable fast client-side navigation with the built-in `next/link` component. loading.js API reference for the loading.js file. Prefetching Learn how to configure prefetching in Next.js Previous Layouts and Pages Next Server and Client Components Was this helpful? supported. Send
+
+---
+
+## 9. File-system conventions: middleware.js | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+ ${ req . nextUrl .pathname } /
+```
+
+```typescript
+RequestCookies
+```
+
+```typescript
+ResponseCookies
+```
+
+```typescript
+Set-Cookie:vercel=fast;path=/
+```
+
+```typescript
+x-hello-from-middleware1
+```
+
+### Anti-Patterns
+- ❌ setting large headers as it might cause 431 Request Header Fields Too Large error depending on your backend web server configuration. CORS You can set CORS headers in Middleware to allow cross-origin requests, including simple and preflighted requests. middleware.ts TypeScript JavaScript TypeScript import { NextRequest , NextResponse } from 'next/server' const allowedOrigins = [ 'https://acme.com' , 'https://my-app.org' ] const corsOptions = { 'Access-Control-Allow-Methods' : 'GET, POST, PUT, DELETE, OPTIONS' , 'Access-Control-Allow-Headers' : 'Content-Type, Authorization' , } export function middleware (request : NextRequest ) { // Check the origin from the request const origin = request . headers .get ( 'origin' ) ?? '' const isAllowedOrigin = allowedOrigins .includes (origin) // Handle preflighted requests const isPreflight = request .method === 'OPTIONS' if (isPreflight) { const preflightHeaders = { ... (isAllowedOrigin && { 'Access-Control-Allow-Origin' : origin }) , ... corsOptions , } return NextResponse .json ({} , { headers : preflightHeaders }) } // Handle simple requests const response = NextResponse .next () if (isAllowedOrigin) { response . headers .set ( 'Access-Control-Allow-Origin' , origin) } Object .entries (corsOptions) .forEach (([key , value]) => { response . headers .set (key , value) }) return response } export const config = { matcher : '/api/:path*' , } Good to know: You can configure CORS headers for individual routes in Route Handlers . Producing a response You can respond from Middleware directly by returning a Response or NextResponse instance. (This is available since Next.js v13.1.0 ) middleware.ts TypeScript JavaScript TypeScript import type { NextRequest } from 'next/server' import { isAuthenticated } from '@lib/auth' // Limit the middleware to paths starting with `/api/` export const config = { matcher : '/api/:function*' , } export function middleware (request : NextRequest ) { // Call our authentication function to check the request if ( ! isAuthenticated (request)) { // Respond with JSON indicating an error message return Response .json ( { success : false , message : 'authentication failed' } , { status : 401 } ) } } Negative matching The matcher config allows full regex so matching like negative lookaheads or character matching is supported. An example of a negative lookahead to match all except specific paths can be seen here: middleware.js export const config = { matcher : [ /* * Match all request paths except for the ones starting with: * - api (API routes) * - _next/static (static files) * - _next/image (image optimization files) * - favicon.ico, sitemap.xml, robots.txt (metadata files) */ '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)' , ] , } You can also bypass Middleware for certain requests by using the missing or has arrays, or a combination of both: middleware.js export const config = { matcher : [ /* * Match all request paths except for the ones starting with: * - api (API routes) * - _next/static (static files) * - _next/image (image optimization files) * - favicon.ico, sitemap.xml, robots.txt (metadata files) */ { source : '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)' , missing : [ { type : 'header' , key : 'next-router-prefetch' } , { type : 'header' , key : 'purpose' , value : 'prefetch' } , ] , } , { source : '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)' , has : [ { type : 'header' , key : 'next-router-prefetch' } , { type : 'header' , key : 'purpose' , value : 'prefetch' } , ] , } , { source : '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)' , has : [{ type : 'header' , key : 'x-present' }] , missing : [{ type : 'header' , key : 'x-missing' , value : 'prefetch' }] , } , ] , } waitUntil and NextFetchEvent The NextFetchEvent object extends the native FetchEvent object, and includes the waitUntil() method. The waitUntil() method takes a promise as an argument, and extends the lifetime of the Middleware until the promise settles. This is useful for performing work in the background. middleware.ts import { NextResponse } from 'next/server' import type { NextFetchEvent , NextRequest } from 'next/server' export function middleware (req : NextRequest , event : NextFetchEvent ) { event .waitUntil ( fetch ( 'https://my-analytics-platform.com' , { method : 'POST' , body : JSON .stringify ({ pathname : req . nextUrl .pathname }) , }) ) return NextResponse .next () } Unit testing (experimental) Starting in Next.js 15.1, the next/experimental/testing/server package contains utilities to help unit test middleware files. Unit testing middleware can help ensure that it's only run on desired paths and that custom routing logic works as intended before code reaches production. The unstable_doesMiddlewareMatch function can be used to assert whether middleware will run for the provided URL, headers, and cookies. import { unstable_doesMiddlewareMatch } from 'next/experimental/testing/server' expect ( unstable_doesMiddlewareMatch ({ config , nextConfig , url : '/test' , }) ) .toEqual ( false ) The entire middleware function can also be tested. import { isRewrite , getRewrittenUrl } from 'next/experimental/testing/server' const request = new NextRequest ( 'https://nextjs.org/docs' ) const response = await middleware (request) expect ( isRewrite (response)) .toEqual ( true ) expect ( getRewrittenUrl (response)) .toEqual ( 'https://other-domain.com/docs' ) // getRedirectUrl could also be used if the response were a redirect Platform support Deployment Option Supported Node.js server Yes Docker container Yes Static export No Adapters Platform-specific Learn how to configure Middleware when self-hosting Next.js. Version history Version Changes v15.5.0 Middleware can now use the Node.js runtime (stable) v15.2.0 Middleware can now use the Node.js runtime (experimental) v13.1.0 Advanced Middleware flags added v13.0.0 Middleware can modify request headers, response headers, and send responses v12.2.0 Middleware is stable, please see the upgrade guide v12.0.9 Enforce absolute URLs in Edge Runtime ( PR ) v12.0.0 Middleware (Beta) added Learn more about Middleware NextRequest API Reference for NextRequest. NextResponse API Reference for NextResponse. Previous mdx-components.js Next not-found.js Was this helpful? supported. Send
+
+---
+
+## 10. Getting Started: Caching and Revalidating | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+https://...
+```
+
+---
+
+## 11. Getting Started: Caching and Revalidating | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+https://...
+```
+
+---
+
+## 12. Getting Started: CSS | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Anti-Patterns
+- ❌ duplicate imports. Turn off linters or formatters that auto-sort imports like ESLint’s sort-imports . You can use the cssChunking option in next.config.js to control how CSS is chunked. Development vs Production In development ( next dev ), CSS updates apply instantly with Fast Refresh . In production ( next build ), all CSS files are automatically concatenated into many minified and code-split .css files, ensuring the minimal amount of CSS is loaded for a route. CSS still loads with JavaScript disabled in production, but JavaScript is required in development for Fast Refresh. CSS ordering can behave differently in development, always ensure to check the build ( next build ) to verify the final CSS order. Next Steps Learn more about the alternatives ways you can use CSS in your application. Tailwind CSS v3 Style your Next.js Application using Tailwind CSS v3 for broader browser support. Sass Style your Next.js application using Sass. CSS-in-JS Use CSS-in-JS libraries with Next.js Previous Error Handling Next Image Optimization Was this helpful? supported. Send
+
+---
+
+## 13. Getting Started: CSS | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Anti-Patterns
+- ❌ duplicate imports. Turn off linters or formatters that auto-sort imports like ESLint’s sort-imports . You can use the cssChunking option in next.config.js to control how CSS is chunked. Development vs Production In development ( next dev ), CSS updates apply instantly with Fast Refresh . In production ( next build ), all CSS files are automatically concatenated into many minified and code-split .css files, ensuring the minimal amount of CSS is loaded for a route. CSS still loads with JavaScript disabled in production, but JavaScript is required in development for Fast Refresh. CSS ordering can behave differently in development, always ensure to check the build ( next build ) to verify the final CSS order. Next Steps Learn more about the alternatives ways you can use CSS in your application. Tailwind CSS v3 Style your Next.js Application using Tailwind CSS v3 for broader browser support. Sass Style your Next.js application using Sass. CSS-in-JS Use CSS-in-JS libraries with Next.js Previous Error Handling Next Image Optimization Was this helpful? supported. Send
+
+---
+
+## 14. Getting Started: CSS | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Anti-Patterns
+- ❌ duplicate imports. Turn off linters or formatters that auto-sort imports like ESLint’s sort-imports . You can use the cssChunking option in next.config.js to control how CSS is chunked. Development vs Production In development ( next dev ), CSS updates apply instantly with Fast Refresh . In production ( next build ), all CSS files are automatically concatenated into many minified and code-split .css files, ensuring the minimal amount of CSS is loaded for a route. CSS still loads with JavaScript disabled in production, but JavaScript is required in development for Fast Refresh. CSS ordering can behave differently in development, always ensure to check the build ( next build ) to verify the final CSS order. Next Steps Learn more about the alternatives ways you can use CSS in your application. Tailwind CSS v3 Style your Next.js Application using Tailwind CSS v3 for broader browser support. Sass Style your Next.js application using Sass. CSS-in-JS Use CSS-in-JS libraries with Next.js Previous Error Handling Next Image Optimization Was this helpful? supported. Send
+
+---
+
+## 15. Guides: Sass | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 16. App Router: Getting Started | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+create-next-app
+```
+
+---
+
+## 17. Getting Started: Image Optimization | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Anti-Patterns
+- ❌ layout shift from the image loading in. Alternatively, you can use the fill property to make the image fill the size of the parent element. To safely allow images from remote servers, you need to define a list of supported URL patterns in next.config.js . Be as specific as possible to prevent malicious usage. For example, the following configuration will only allow images from a specific AWS S3 bucket: next.config.ts TypeScript JavaScript TypeScript import type { NextConfig } from 'next' const config : NextConfig = { images : { remotePatterns : [ { protocol : 'https' , hostname : 's3.amazonaws.com' , port : '' , pathname : '/my-bucket/**' , search : '' , } , ] , } , } export default config API Reference See the API Reference for the full feature set of Next.js Image. Image Component Optimize Images in your Next.js Application using the built-in `next/image` Component. Previous CSS Next Font Optimization Was this helpful? supported. Send
+
+---
+
+## 18. Getting Started: Font Optimization | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 19. File-system conventions: public | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+/avatars/ ${ id } .png
+```
+
+---
+
+## 20. Configuration: next.config.js | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+allowedDevOrigins
+```
+
+```typescript
+authInterrupts
+```
+
+```typescript
+unauthorized
+```
+
+```typescript
+crossOrigin
+```
+
+```typescript
+next/script
+```
+
+### Anti-Patterns
+- ❌ using new JavaScript features not available in your target Node.js version. next.config.js will not be parsed by Webpack or Babel. This page documents all the available configuration options: Unit Testing (experimental) Starting in Next.js 15.1, the next/experimental/testing/server package contains utilities to help unit test next.config.js files. The unstable_getResponseFromNextConfig function runs the headers , redirects , and rewrites functions from next.config.js with the provided request information and returns NextResponse with the results of the routing. The response from unstable_getResponseFromNextConfig only considers next.config.js fields and does not consider middleware or filesystem routes, so the result in production may be different than the unit test. import { getRedirectUrl , unstable_getResponseFromNextConfig , } from 'next/experimental/testing/server' const response = await unstable_getResponseFromNextConfig ({ url : 'https://nextjs.org/test' , nextConfig : { async redirects () { return [{ source : '/test' , destination : '/test2' , permanent : false }] } , } , }) expect ( response .status) .toEqual ( 307 ) expect ( getRedirectUrl (response)) .toEqual ( 'https://nextjs.org/test2' ) allowedDevOrigins Use `allowedDevOrigins` to configure additional origins that can request the dev server. appDir Enable the App Router to use layouts, streaming, and more. assetPrefix Learn how to use the assetPrefix config option to configure your CDN. authInterrupts Learn how to enable the experimental `authInterrupts` configuration option to use `forbidden` and `unauthorized`. basePath Use `basePath` to deploy a Next.js application under a sub-path of a domain. browserDebugInfoInTerminal Forward browser console logs and errors to your terminal during development. cacheComponents Learn how to enable the cacheComponents flag in Next.js. cacheLife Learn how to set up cacheLife configurations in Next.js. compress Next.js provides gzip compression to compress rendered content and static files, it only works with the server target. Learn more about it here. crossOrigin Use the `crossOrigin` option to add a crossOrigin tag on the `script` tags generated by `next/script`. cssChunking Use the `cssChunking` option to control how CSS files are chunked in your Next.js application. devIndicators Configuration options for the on-screen indicator that gives context about the current route you're viewing during development. distDir Set a custom build directory to use instead of the default .next directory. env Learn to add and access environment variables in your Next.js application at build time. eslint Next.js reports ESLint errors and warnings during builds by default. Learn how to opt-out of this behavior here. expireTime Customize stale-while-revalidate expire time for ISR enabled pages. exportPathMap Customize the pages that will be exported as HTML files when using `next export`. generateBuildId Configure the build id, which is used to identify the current build in which your application is being served. generateEtags Next.js will generate etags for every page by default. Learn more about how to disable etag generation here. headers Add custom HTTP headers to your Next.js app. htmlLimitedBots Specify a list of user agents that should receive blocking metadata. httpAgentOptions Next.js will automatically use HTTP Keep-Alive by default. Learn more about how to disable HTTP Keep-Alive here. images Custom configuration for the next/image loader cacheHandler Configure the Next.js cache used for storing and revalidating data to use any external service like Redis, Memcached, or others. inlineCss Enable inline CSS support. logging Configure how data fetches are logged to the console when running Next.js in development mode. mdxRs Use the new Rust compiler to compile MDX files in the App Router. onDemandEntries Configure how Next.js will dispose and keep in memory pages created in development. optimizePackageImports API Reference for optimizePackageImports Next.js Config Option output Next.js automatically traces which files are needed by each page to allow for easy deployment of your application. Learn how it works here. pageExtensions Extend the default page extensions used by Next.js when resolving pages in the Pages Router. poweredByHeader Next.js will add the `x-powered-by` header by default. Learn to opt-out of it here. ppr Learn how to enable Partial Prerendering in Next.js. productionBrowserSourceMaps Enables browser source map generation during the production build. reactCompiler Enable the React Compiler to automatically optimize component rendering. reactMaxHeadersLength The maximum length of the headers that are emitted by React and added to the response. reactStrictMode The complete Next.js runtime is now Strict Mode-compliant, learn how to opt-in redirects Add redirects to your Next.js app. rewrites Add rewrites to your Next.js app. sassOptions Configure Sass options. serverActions Configure Server Actions behavior in your Next.js application. serverComponentsHmrCache Configure whether fetch responses in Server Components are cached across HMR refresh requests. serverExternalPackages Opt-out specific dependencies from the Server Components bundling and use native Node.js `require`. staleTimes Learn how to override the invalidation time of the Client Router Cache. staticGeneration* Learn how to configure static generation in your Next.js application. taint Enable tainting Objects and Values. trailingSlash Configure Next.js pages to resolve with or without a trailing slash. transpilePackages Automatically transpile and bundle dependencies from local packages (like monorepos) or from external dependencies (`node_modules`). turbopack Configure Next.js with Turbopack-specific options turbopackPersistentCaching Learn how to enable Persistent Caching for Turbopack builds typedRoutes Enable support for statically typed links. typescript Next.js reports TypeScript errors by default. Learn to opt-out of this behavior here. urlImports Configure Next.js to allow importing modules from external URLs. useCache Learn how to enable the useCache flag in Next.js. useLightningcss Enable experimental support for Lightning CSS. viewTransition Enable ViewTransition API from React in App Router webpack Learn how to customize the webpack config used by Next.js webVitalsAttribution Learn how to use the webVitalsAttribution option to pinpoint the source of Web Vitals issues. Previous Configuration Next allowedDevOrigins Was this helpful? supported. Send
+
+---
+
+## 21. App Router: API Reference | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 22. API Reference: Functions | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 23. API Reference: Components | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+### Examples
+```typescript
+next/script
+```
+
+---
+
+## 24. API Reference: File-system conventions | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 25. Guides: Upgrading | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
+## 26. File-system conventions: not-found.js | Next.js
+Menu Using App Router Features available in /app Using Latest Version 15.5.2 Getting Started Installation Project Structure Layouts and Pages Linking and Navigating Server and Client Components Partial Prerendering Fetching Data Updating Data Caching and Revalidating Error Handling CSS Image Optimization Font Optimization Metadata and OG images Route Handlers and Middleware Deploying Upgrading Guides Analytics Authentication Backend for Frontend Caching CI Build Caching Content Security Policy C...
+
+---
+
